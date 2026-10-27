@@ -8,7 +8,7 @@ import { useStrings } from '@/hooks/useStrings';
 import type { Strings } from '@/i18n/strings';
 import { useApp, type SavedWorkout } from '@/store/useApp';
 import { hex, UI } from '@/theme/palette';
-import { FONT } from '@/theme/type';
+import { FONT, teko } from '@/theme/type';
 
 /** Resumo curto de um treino, ex.: "00:30 / 00:15 × 4 · 3 ciclos". */
 export function describe(mode: Mode, c: AnyConfig, t: Strings, fmt: Engine.TimeFormat): string {
@@ -114,12 +114,12 @@ const styles = StyleSheet.create({
   chip: { color: UI.muted, fontSize: 10.5, fontWeight: '700', letterSpacing: 1, backgroundColor: '#2C2C2C', paddingHorizontal: 7, paddingVertical: 2, borderRadius: 999, overflow: 'hidden' },
   chipEx: { backgroundColor: 'transparent', borderWidth: 1, borderColor: UI.line, borderStyle: 'dashed' },
   desc: { color: UI.muted, fontSize: 13, marginTop: 6 },
-  tot: { fontFamily: FONT.display, fontSize: 30, lineHeight: 32, fontVariant: ['tabular-nums'] },
+  tot: { fontFamily: FONT.display, fontVariant: ['tabular-nums'], ...teko(30, 'digits') },
   acts: { flexDirection: 'row', gap: 8 },
   histHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   hrow: { flexDirection: 'row', gap: 12, paddingVertical: 12, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: UI.line },
   hname: { color: UI.text, fontWeight: '700', fontSize: 15 },
   hwhen: { color: UI.muted, fontSize: 12.5, marginTop: 2 },
-  hdur: { color: UI.text, fontFamily: FONT.display, fontSize: 22, lineHeight: 24, fontVariant: ['tabular-nums'] },
+  hdur: { color: UI.text, fontFamily: FONT.display, fontVariant: ['tabular-nums'], ...teko(22, 'digits') },
   pill: { fontSize: 11, fontWeight: '700', borderWidth: 1, borderRadius: 999, paddingHorizontal: 8, paddingVertical: 1, overflow: 'hidden' },
 });

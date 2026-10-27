@@ -5,21 +5,21 @@ import { Button, Section, SheetHeader } from '@/components/ui';
 import { useStrings } from '@/hooks/useStrings';
 import { useApp } from '@/store/useApp';
 import { DEFAULT_COLORS, glow, hex, LED_KEYS, LED_NAMES, PRESETS, UI, type ColorRole, type ColorScheme } from '@/theme/palette';
-import { FONT } from '@/theme/type';
+import { FONT, teko } from '@/theme/type';
 
 const ROLES: ColorRole[] = ['prepare', 'work', 'rest', 'restBC', 'cooldown', 'run', 'lap', 'rounds', 'cycles'];
 
 /** Mini placar: mostra como as cores ficam na tela do timer. */
 function Preview({ c, t }: { c: ColorScheme; t: ReturnType<typeof useStrings>['t'] }) {
-  const led = (role: ColorRole, size: number) => ({ color: hex(c[role]), textShadowColor: glow(c[role], 0.55), textShadowRadius: 10, fontSize: size, lineHeight: size * 0.95 });
+  const led = (role: ColorRole, size: number, kind: 'digits' | 'label' = 'digits') => ({ color: hex(c[role]), textShadowColor: glow(c[role], 0.55), textShadowRadius: 10, ...teko(size, kind) });
   return (
     <View style={styles.preview} accessible accessibilityLabel={t.colors.preview}>
       <View style={styles.pvCur}>
-        <Text style={[styles.pvText, led('work', 18)]}>{t.phases.work.toUpperCase()}</Text>
+        <Text style={[styles.pvText, led('work', 18, 'label')]}>{t.phases.work.toUpperCase()}</Text>
         <Text style={[styles.pvText, led('work', 56)]}>00:24</Text>
       </View>
       <View style={styles.pvNext}>
-        <Text style={[styles.pvText, led('rest', 13)]}>{t.phases.rest.toUpperCase()}</Text>
+        <Text style={[styles.pvText, led('rest', 13, 'label')]}>{t.phases.rest.toUpperCase()}</Text>
         <Text style={[styles.pvText, led('rest', 30)]}>00:15</Text>
       </View>
       <View style={styles.pvDeck}>
@@ -99,10 +99,10 @@ const styles = StyleSheet.create({
   preset: { flexGrow: 1, flexBasis: 100, padding: 12, borderRadius: 14, backgroundColor: '#202020', borderWidth: 2, borderColor: 'transparent', gap: 8 },
   presetSel: { borderColor: '#F2F2F2' },
   presetDots: { flexDirection: 'row', gap: 5 },
-  presetName: { color: UI.text, fontFamily: FONT.label, fontSize: 18, lineHeight: 20 },
+  presetName: { color: UI.text, fontFamily: FONT.label, ...teko(18) },
   dot: { width: 14, height: 14, borderRadius: 7 },
   role: { paddingVertical: 12, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: UI.line, gap: 10 },
-  roleName: { fontFamily: FONT.label, fontSize: 20, lineHeight: 22, letterSpacing: 0.5 },
+  roleName: { fontFamily: FONT.label, letterSpacing: 0.5, ...teko(20) },
   swRow: { gap: 10, paddingRight: 8 },
   sw: { width: 34, height: 34, borderRadius: 17 },
   swSel: { borderWidth: 3, borderColor: '#FFFFFF' },

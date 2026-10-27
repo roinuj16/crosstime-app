@@ -2,7 +2,7 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useRef, type ReactNode } from 'react';
 import { Pressable, StyleSheet, Switch, Text, View, type ViewStyle } from 'react-native';
-import { FONT } from '@/theme/type';
+import { FONT, teko } from '@/theme/type';
 import { LED, UI } from '@/theme/palette';
 
 const ACCENT = LED.verde;
@@ -105,7 +105,7 @@ export function Stepper({ display, onStep, disabled, label }: { display: string;
 export const s = StyleSheet.create({
   header: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 16, paddingVertical: 12 },
   back: { marginLeft: -6 },
-  title: { flex: 1, fontFamily: FONT.display, fontSize: 30, lineHeight: 32, color: UI.text, letterSpacing: 1 },
+  title: { flex: 1, fontFamily: FONT.display, color: UI.text, letterSpacing: 1, ...teko(30) },
   headerRight: { flexDirection: 'row', gap: 8, alignItems: 'center' },
   btn: { paddingHorizontal: 14, paddingVertical: 9, borderRadius: 10, backgroundColor: '#262626' },
   btnPrimary: { backgroundColor: ACCENT },
@@ -113,7 +113,7 @@ export const s = StyleSheet.create({
   btnText: { color: UI.text, fontWeight: '600', fontSize: 14 },
   section: { color: UI.muted, fontSize: 12, fontWeight: '700', letterSpacing: 1.6, marginTop: 22, marginBottom: 2 },
   row: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 13, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: UI.line },
-  rowLabel: { fontFamily: FONT.label, fontSize: 21, lineHeight: 23, color: UI.text, letterSpacing: 0.5 },
+  rowLabel: { fontFamily: FONT.label, color: UI.text, letterSpacing: 0.5, ...teko(21) },
   rowHint: { color: UI.muted, fontSize: 12.5, marginTop: 1 },
   seg: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
   segItem: { paddingHorizontal: 12, paddingVertical: 7, borderRadius: 999, backgroundColor: '#262626' },
@@ -121,5 +121,5 @@ export const s = StyleSheet.create({
   segText: { color: UI.text, fontSize: 13.5, fontWeight: '600' },
   stepper: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   stepBtn: { width: 40, height: 40, borderRadius: 10, backgroundColor: '#262626', alignItems: 'center', justifyContent: 'center' },
-  stepVal: { minWidth: 70, textAlign: 'center', fontFamily: FONT.display, fontSize: 30, lineHeight: 32, color: UI.text, fontVariant: ['tabular-nums'] },
+  stepVal: { minWidth: 70, textAlign: 'center', fontFamily: FONT.display, color: UI.text, fontVariant: ['tabular-nums'], ...teko(30, 'digits') },
 });

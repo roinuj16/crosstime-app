@@ -13,7 +13,7 @@ import { useStrings } from '@/hooks/useStrings';
 import { useTimerLoop } from '@/hooks/useTimerLoop';
 import { useApp } from '@/store/useApp';
 import { glow, hex, UI, type ColorRole } from '@/theme/palette';
-import { FONT } from '@/theme/type';
+import { FONT, teko } from '@/theme/type';
 
 export default function TimerScreen() {
   const { width, height } = useWindowDimensions();
@@ -76,7 +76,7 @@ export default function TimerScreen() {
       <View style={styles.cur} accessibilityLiveRegion="polite">
         <Text style={[styles.curLabel, { color: accent, textShadowColor: glowOf(v.cur.role), fontSize: curSize * 0.3 }]} numberOfLines={1}>{v.cur.label.toUpperCase()}</Text>
         <Text
-          style={[styles.curTime, { color: accent, textShadowColor: glowOf(v.cur.role, 0.6), fontSize: curSize, lineHeight: curSize * 0.95 }, status === 'paused' && { opacity: 0.45 }]}
+          style={[styles.curTime, { color: accent, textShadowColor: glowOf(v.cur.role, 0.6), ...teko(curSize, 'digits') }, status === 'paused' && { opacity: 0.45 }]}
           adjustsFontSizeToFit numberOfLines={1}
         >{v.cur.time}</Text>
       </View>
@@ -91,7 +91,7 @@ export default function TimerScreen() {
       >
         <Text style={[styles.nextLabel, { color: color(v.next.role), textShadowColor: glowOf(v.next.role, 0.45), fontSize: nextSize * 0.36 }]} numberOfLines={1}>{v.next.label.toUpperCase()}</Text>
         {!!v.next.time && (
-          <Text style={[styles.nextTime, { color: color(v.next.role), textShadowColor: glowOf(v.next.role, 0.5), fontSize: counting ? nextSize * 1.15 : nextSize, lineHeight: (counting ? nextSize * 1.15 : nextSize) * 0.95 }]}>{v.next.time}</Text>
+          <Text style={[styles.nextTime, { color: color(v.next.role), textShadowColor: glowOf(v.next.role, 0.5), ...teko(counting ? nextSize * 1.15 : nextSize, 'digits') }]}>{v.next.time}</Text>
         )}
         {v.nextAction === 'skip' && <Text style={styles.hint}>{t.skip.toUpperCase()} ›</Text>}
         {v.nextAction === 'count' && <Text style={styles.hint}>+1</Text>}
@@ -151,8 +151,8 @@ const styles = StyleSheet.create({
   hside: { flexDirection: 'row', width: 96 },
   hbtn: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
   hcenter: { flex: 1, alignItems: 'center' },
-  hmode: { fontFamily: FONT.label, fontSize: 18, letterSpacing: 1.5, lineHeight: 20 },
-  htime: { fontFamily: FONT.display, fontSize: 26, lineHeight: 26, fontVariant: ['tabular-nums'] },
+  hmode: { fontFamily: FONT.label, letterSpacing: 1.5, ...teko(18) },
+  htime: { fontFamily: FONT.display, fontVariant: ['tabular-nums'], ...teko(26, 'digits') },
   cur: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: UI.bg, paddingHorizontal: 12 },
   curLabel: { fontFamily: FONT.label, letterSpacing: 2, textShadowRadius: 18 },
   curTime: { fontFamily: FONT.display, fontVariant: ['tabular-nums'], textShadowRadius: 24, includeFontPadding: false },
@@ -162,7 +162,7 @@ const styles = StyleSheet.create({
   hint: { position: 'absolute', right: 16, bottom: 10, fontFamily: FONT.label, fontSize: 18, color: UI.muted, letterSpacing: 1 },
   deck: { height: 190, backgroundColor: UI.deck, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-around', paddingHorizontal: 12 },
   stat: { alignItems: 'center', width: 100 },
-  statNum: { fontFamily: FONT.display, fontSize: 64, lineHeight: 60, fontVariant: ['tabular-nums'] },
+  statNum: { fontFamily: FONT.display, fontVariant: ['tabular-nums'], ...teko(64, 'digits'), marginBottom: 4 },
   statLabel: { fontFamily: FONT.label, fontSize: 15, color: UI.text, letterSpacing: 1, textAlign: 'center' },
   finish: { alignItems: 'center', width: 100, gap: 6 },
   finishIcon: { width: 64, height: 64, borderRadius: 32, borderWidth: 3, alignItems: 'center', justifyContent: 'center' },

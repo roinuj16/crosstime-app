@@ -10,7 +10,7 @@ import { speak } from '@/services/feedback';
 import { forgetVoices, listVoices, voiceScore, type VoiceInfo } from '@/services/voices';
 import { useApp } from '@/store/useApp';
 import { LED, UI } from '@/theme/palette';
-import { FONT } from '@/theme/type';
+import { FONT, teko } from '@/theme/type';
 
 export default function VoicesScreen() {
   const { t } = useStrings();
@@ -63,7 +63,7 @@ const styles = StyleSheet.create({
   body: { paddingHorizontal: 16, paddingBottom: 48 },
   hint: { color: UI.muted, fontSize: 14, marginBottom: 6 },
   row: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 13, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: UI.line },
-  name: { color: UI.text, fontFamily: FONT.label, fontSize: 21, lineHeight: 23 },
+  name: { color: UI.text, fontFamily: FONT.label, ...teko(21) },
   sub: { color: UI.muted, fontSize: 12.5 },
   badge: { color: LED.verde, fontSize: 10.5, fontWeight: '700', letterSpacing: 1, borderWidth: 1, borderColor: LED.verde, borderRadius: 999, paddingHorizontal: 7, paddingVertical: 1 },
   empty: { color: UI.muted, paddingVertical: 12 },
