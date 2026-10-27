@@ -24,7 +24,7 @@ npx eas-cli@latest build --profile development --platform android
 1. O build roda na nuvem da Expo (~10–20 min). No fim aparece um link e um QR code.
 2. Abra o link no celular Android e instale o APK. O Android pede para permitir
    "instalar apps desta fonte": permita só para essa instalação.
-3. No Mac: `npx expo start --dev-client` e abra o CrossTimer no celular. Ele encontra o servidor
+3. No Mac: `npm run dev` e abra o CrossTimer no celular. Ele encontra o servidor
    na mesma rede Wi-Fi.
 
 ## iPhone: duas opções
@@ -49,7 +49,7 @@ npx eas-cli@latest build --profile development --platform ios
 ```
 
 Abra no iPhone o link que aparece no fim do build e instale. Depois,
-`npx expo start --dev-client`. Essa conta também é a necessária para o TestFlight e a App Store (fase 5).
+`npm run dev`. Essa conta também é a necessária para o TestFlight e a App Store (fase 5).
 
 ## Como testar a fase 4
 

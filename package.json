@@ -43,7 +43,9 @@
     "web": "expo start --web",
     "test": "jest",
     "test:watch": "jest --watchAll",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "go": "expo start --go",
+    "dev": "expo start --dev-client"
   },
   "private": true,
   "jest": {

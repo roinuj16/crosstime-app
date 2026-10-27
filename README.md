@@ -13,10 +13,18 @@ Timer de intervalos para cross training — **Tabata, Rounds, EMOM, AMRAP, For T
    git clone https://github.com/roinuj16/crosstime-app.git
    cd crosstime-app
    npm install
-   npx expo start
+   npm run go
    ```
 3. Aponte a câmera do iPhone (ou o Expo Go no Android) para o QR code que aparece no terminal.
    O celular e o Mac precisam estar na mesma rede Wi-Fi.
+
+> **Use `npm run go`, não `npx expo start`.** Como o projeto já tem o cliente de desenvolvimento
+> (fase 4), o `expo start` puro gera um QR code para o build de desenvolvimento, e a câmera do
+> iPhone responde "nenhum dado usável encontrado". Se acontecer, aperte `s` no terminal para trocar
+> para o Expo Go. Com o build de desenvolvimento instalado, use `npm run dev`.
+>
+> Se o celular não conectar mesmo na mesma rede (Wi-Fi de empresa, roteador com isolamento):
+> `npx expo start --go --tunnel`.
 
 ## Modos
 
@@ -35,7 +43,8 @@ Timer de intervalos para cross training — **Tabata, Rounds, EMOM, AMRAP, For T
 |---|---|
 | `npm test` | Roda os testes (motor do timer e estado do app) |
 | `npm run typecheck` | Checa os tipos do TypeScript |
-| `npx expo start` | Abre o servidor de desenvolvimento |
+| `npm run go` | Abre o servidor para o **Expo Go** |
+| `npm run dev` | Abre o servidor para o **build de desenvolvimento** (fase 4) |
 
 ## Estrutura
 
