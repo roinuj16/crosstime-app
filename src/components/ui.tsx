@@ -36,9 +36,9 @@ export function Button({ label, onPress, kind = 'plain', disabled, style }: {
 
 export const Section = ({ title }: { title: string }) => <Text style={s.section}>{title.toUpperCase()}</Text>;
 
-export function Row({ label, hint, right, onPress, disabled }: { label: string; hint?: string; right?: ReactNode; onPress?: () => void; disabled?: boolean }) {
+export function Row({ label, hint, right, onPress, disabled, flat }: { label: string; hint?: string; right?: ReactNode; onPress?: () => void; disabled?: boolean; flat?: boolean }) {
   const body = (
-    <View style={[s.row, disabled && { opacity: 0.45 }]}>
+    <View style={[s.row, flat && { borderBottomWidth: 0, paddingBottom: 8 }, disabled && { opacity: 0.45 }]}>
       <View style={{ flex: 1, minWidth: 0 }}>
         <Text style={s.rowLabel}>{label}</Text>
         {!!hint && <Text style={s.rowHint}>{hint}</Text>}

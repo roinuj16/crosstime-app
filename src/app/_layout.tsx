@@ -16,6 +16,7 @@ export default function RootLayout() {
         <Stack.Screen name="edit" options={{ presentation: 'modal' }} />
         <Stack.Screen name="settings" options={{ presentation: 'modal' }} />
         <Stack.Screen name="colors" />
+        <Stack.Screen name="voices" />
         <Stack.Screen name="workouts" options={{ presentation: 'modal' }} />
       </Stack>
     </SafeAreaProvider>

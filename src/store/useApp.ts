@@ -43,7 +43,7 @@ interface Persisted {
 }
 
 export const DEFAULT_SETTINGS: Settings = {
-  language: 'auto', sound: true, soundScheme: 'beep', volume: 0.8, countdown: true, tick: false,
+  language: 'auto', sound: true, soundScheme: 'beep', volume: 0.75, countdown: true, tick: false,
   voice: true, voiceLang: 'en', voiceId: '', voiceRate: 1, sayRound: true,
   vibrate: true, keepAwake: true, flash: false, duckOthers: false, timeFormat: '00:00',
 };

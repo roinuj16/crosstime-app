@@ -6,6 +6,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { MODES, type Mode } from '@/core/engine';
 import { timerView } from '@/core/view';
 import { PlayButton } from '@/components/PlayButton';
+import { Torch } from '@/components/Torch';
+import { useFeedback } from '@/hooks/useFeedback';
 import { useStrings } from '@/hooks/useStrings';
 import { useTimerLoop } from '@/hooks/useTimerLoop';
 import { useApp } from '@/store/useApp';
@@ -16,9 +18,10 @@ export default function TimerScreen() {
   const { width, height } = useWindowDimensions();
   const app = useApp();
   const { t } = useStrings();
-  const el = useTimerLoop(); // sons/voz/vibração entram na fase 3
-
   const mode = app.currentMode();
+  const onEvents = useFeedback(mode); // sons, voz, vibração, lanterna e tela acesa
+  const el = useTimerLoop(onEvents);
+
   const status = app.session?.state.status ?? 'idle';
   const v = timerView({
     mode, config: app.currentConfig(), status, elapsed: el,
@@ -52,6 +55,7 @@ export default function TimerScreen() {
 
   return (
     <SafeAreaView style={styles.root} edges={['top', 'bottom']}>
+      <Torch />
       <View style={styles.header}>
         <View style={styles.hside}>
           <IconBtn name="settings-outline" color={accent} label={t.settings.title} onPress={() => router.push('/settings')} />
@@ -95,7 +99,7 @@ export default function TimerScreen() {
         <Stat stat={v.left} color={v.left ? color(v.left.role) : UI.muted} />
         <PlayButton color={accent} glow={glowOf(v.accent, 0.6)} progress={v.progress} running={status === 'running'} label={v.playLabel} onPress={() => app.toggle()} size={Math.min(124, width * 0.32)} />
         {v.right === 'finish' ? (
-          <Pressable style={styles.finish} onPress={() => app.finish(Date.now(), true)} accessibilityRole="button" accessibilityLabel={t.finish}>
+          <Pressable style={styles.finish} onPress={() => { app.finish(Date.now(), true); onEvents([{ type: 'done' }]); }} accessibilityRole="button" accessibilityLabel={t.finish}>
             <View style={[styles.finishIcon, { borderColor: color('run') }]}><Ionicons name="flag" size={26} color={color('run')} /></View>
             <Text style={[styles.statLabel, { color: color('run') }]}>{t.finish.toUpperCase()}</Text>
           </Pressable>

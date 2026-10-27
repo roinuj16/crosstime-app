@@ -18,8 +18,11 @@ export function useTimerLoop(onEvents?: EventHandler): number {
   handler.current = onEvents;
 
   useEffect(() => {
-    // ao (re)abrir com um treino em andamento, parte do ponto atual sem "rajada" de sons
-    lastEl.current = useApp.getState().elapsed();
+    // Treino que acabou de começar: parte do zero, para anunciar a primeira fase.
+    // Ao retomar (pausa ou app reaberto): parte do ponto atual, sem "rajada" de sons.
+    const st0 = useApp.getState();
+    const el0 = st0.elapsed();
+    lastEl.current = st0.session?.state.elapsedBase === 0 && el0 < 0.5 ? 0 : el0;
     if (status !== 'running') { force((n) => n + 1); return; }
     const tick = () => {
       const st = useApp.getState();

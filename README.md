@@ -65,6 +65,20 @@ Cada fase tem uma cor de LED configurável em **Ajustes → Cores** (10 cores, p
 combinações prontas). Padrão "Placar do box": trabalho verde, descanso vermelho, preparar âmbar,
 desaquecimento ciano.
 
+## Sons e voz
+
+- Os sons ficam em `assets/sounds/` e são **gerados por código** (`python3 scripts/make-sounds.py`), sem arquivos de terceiros.
+- `src/core/cues.ts` decide o que tocar/falar/vibrar em cada evento (testado); `src/services/feedback.ts` executa no aparelho.
+- O áudio toca mesmo com o iPhone no modo silencioso. "Abaixar música de outros apps" liga o *ducking* só durante os avisos.
+- A voz usa as vozes do sistema; em **Ajustes → Voz** dá para ouvir e escolher. Vozes "Premium/Aprimoradas" soam bem melhor.
+- A lanterna precisa da câmera ativa, então só pisca com o app aberto (limitação do sistema).
+
+### O que conferir no celular
+1. **Ajustes → Testar som e voz** (com e sem o modo silencioso).
+2. Um Tabata curto: bipe e voz na troca de fase, 3-2-1 no fim de cada fase, vibração.
+3. Com música tocando em outro app: com "Abaixar música" desligado ela deve continuar no mesmo volume; ligado, baixar só nos avisos.
+4. Lanterna: ligar em Ajustes (pede permissão da câmera) e iniciar um treino.
+
 ## Pré-visualizar no navegador
 
 `npx expo start --web` abre o app no navegador (o armazenamento usa o `localStorage`).
@@ -74,6 +88,6 @@ No web, as caixas de confirmação nativas (zerar treino, trocar de modo) não a
 
 - [x] **Fase 1 — Fundação:** projeto, motor + testes, estado salvo, idiomas, cores, tela do timer
 - [x] **Fase 2 — Telas e modos de box:** EMOM, AMRAP (contador de rounds), For Time (time cap e Terminei); edição, ajustes, página de cores, treinos salvos e histórico
-- [ ] **Fase 3 — Recursos do celular:** sons, voz guia, vibração, tela acesa, lanterna, ducking opcional
+- [x] **Fase 3 — Recursos do celular:** sons próprios (5 estilos + 3-2-1, tique-taque, volta, fim), voz guia em inglês ou português com escolha de voz, vibração, tela acesa, lanterna e ducking opcional
 - [ ] **Fase 4 — Segundo plano:** timer com a tela bloqueada + notificação da fase atual (build de desenvolvimento)
 - [ ] **Fase 5 — Publicação:** ícone final, capturas, política de privacidade, TestFlight / teste interno

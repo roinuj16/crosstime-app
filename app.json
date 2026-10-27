@@ -27,7 +27,17 @@
       "expo-router",
       "expo-sqlite",
       "expo-localization",
-      "expo-font"
+      "expo-font",
+      "expo-audio",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "O CrossTimer usa a lanterna da câmera para piscar a cada troca de fase. A câmera não grava nada.",
+          "microphonePermission": false,
+          "recordAudioAndroid": false,
+          "barcodeScannerEnabled": false
+        }
+      ]
     ],
     "scheme": "crosstimer",
     "backgroundColor": "#0B0B0B",

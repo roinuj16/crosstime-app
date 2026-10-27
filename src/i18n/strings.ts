@@ -55,8 +55,10 @@ export interface Strings {
     styles: Record<'beep' | 'bell' | 'gong' | 'horn' | 'whistle', string>;
     voice: string; voiceOn: string; voiceOnHint: string; voiceLang: string; voiceLangHint: string; sayRound: string; voiceRate: string; slow: string; normal: string; fast: string;
     device: string; vibrate: string; keepAwake: string; keepAwakeHint: string; flash: string; flashHint: string; duck: string; duckHint: string;
-    colors: string; colorsHint: string; phase3: string;
+    colors: string; colorsHint: string;
+    test: string; voicePick: string; voiceAuto: string; flashDenied: string;
   };
+  voices: { title: string; auto: string; enhanced: string; empty: string; help: string; listen: string };
   colors: {
     title: string; presets: string; perPhase: string; restore: string; preview: string;
     roles: Record<'prepare' | 'work' | 'rest' | 'restBC' | 'cooldown' | 'run' | 'lap' | 'rounds' | 'cycles', string>;
@@ -189,7 +191,18 @@ const pt: Strings = {
     duckHint: 'A música baixa só durante os avisos',
     colors: 'Cores',
     colorsHint: 'Cor de cada fase e combinações prontas',
-    phase3: 'Sons, voz, vibração e lanterna passam a funcionar na próxima versão.',
+    test: 'Testar som e voz',
+    voicePick: 'Voz',
+    voiceAuto: 'Automática',
+    flashDenied: 'Sem acesso à câmera, a lanterna não pode piscar. Libere em Ajustes do sistema → CrossTimer → Câmera.',
+  },
+  voices: {
+    title: 'Vozes',
+    auto: 'Automática (a melhor instalada)',
+    enhanced: 'Alta qualidade',
+    empty: 'Nenhuma voz nesse idioma foi encontrada no aparelho.',
+    help: 'Vozes "Premium" ou "Aprimorada" soam bem mais naturais e são gratuitas. iPhone: Ajustes → Acessibilidade → Conteúdo Falado → Vozes. Android: Configurações → Sistema → Idiomas → Conversão de texto em voz. Depois, volte aqui.',
+    listen: 'Toque numa voz para ouvir e escolher.',
   },
   colors: {
     title: 'Cores',
@@ -329,7 +342,18 @@ const en: Strings = {
     duckHint: 'Music gets quieter only during announcements',
     colors: 'Colors',
     colorsHint: 'Color of each phase and ready-made sets',
-    phase3: 'Sounds, voice, vibration and flashlight start working in the next version.',
+    test: 'Test sound and voice',
+    voicePick: 'Voice',
+    voiceAuto: 'Automatic',
+    flashDenied: 'Without camera access the flashlight can’t blink. Allow it in system Settings → CrossTimer → Camera.',
+  },
+  voices: {
+    title: 'Voices',
+    auto: 'Automatic (best installed)',
+    enhanced: 'High quality',
+    empty: 'No voices in this language were found on the device.',
+    help: '"Premium" or "Enhanced" voices sound much more natural and are free. iPhone: Settings → Accessibility → Spoken Content → Voices. Android: Settings → System → Languages → Text-to-speech output. Then come back here.',
+    listen: 'Tap a voice to hear it and choose it.',
   },
   colors: {
     title: 'Colors',
