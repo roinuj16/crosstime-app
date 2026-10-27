@@ -5,6 +5,8 @@ Timer de intervalos para cross training — **Tabata, Rounds, EMOM, AMRAP, For T
 
 ## Rodar no celular (Expo Go)
 
+> Para testar o timer com a **tela bloqueada**, use o build de desenvolvimento: [docs/BUILD.md](docs/BUILD.md).
+
 1. Instale o app **Expo Go** no celular (App Store / Play Store).
 2. No Mac:
    ```bash
@@ -89,5 +91,5 @@ No web, as caixas de confirmação nativas (zerar treino, trocar de modo) não a
 - [x] **Fase 1 — Fundação:** projeto, motor + testes, estado salvo, idiomas, cores, tela do timer
 - [x] **Fase 2 — Telas e modos de box:** EMOM, AMRAP (contador de rounds), For Time (time cap e Terminei); edição, ajustes, página de cores, treinos salvos e histórico
 - [x] **Fase 3 — Recursos do celular:** sons próprios (5 estilos + 3-2-1, tique-taque, volta, fim), voz guia em inglês ou português com escolha de voz, vibração, tela acesa, lanterna e ducking opcional
-- [ ] **Fase 4 — Segundo plano:** timer com a tela bloqueada + notificação da fase atual (build de desenvolvimento)
+- [x] **Fase 4 — Segundo plano:** timer com a tela bloqueada (áudio silencioso mantém o app vivo) + notificação agendada a cada troca de fase; build de desenvolvimento via EAS — veja [docs/BUILD.md](docs/BUILD.md)
 - [ ] **Fase 5 — Publicação:** ícone final, capturas, política de privacidade, TestFlight / teste interno

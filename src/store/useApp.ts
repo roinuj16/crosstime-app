@@ -22,6 +22,8 @@ export interface Settings {
   flash: boolean;
   /** abaixar a música de outros apps durante os avisos (desligado por padrão) */
   duckOthers: boolean;
+  /** notificação a cada troca de fase com o app fora da tela */
+  backgroundAlerts: boolean;
   timeFormat: TimeFormat;
 }
 
@@ -45,7 +47,7 @@ interface Persisted {
 export const DEFAULT_SETTINGS: Settings = {
   language: 'auto', sound: true, soundScheme: 'beep', volume: 0.75, countdown: true, tick: false,
   voice: true, voiceLang: 'en', voiceId: '', voiceRate: 1, sayRound: true,
-  vibrate: true, keepAwake: true, flash: false, duckOthers: false, timeFormat: '00:00',
+  vibrate: true, keepAwake: true, flash: false, duckOthers: false, backgroundAlerts: true, timeFormat: '00:00',
 };
 
 const EXAMPLES: SavedWorkout[] = [

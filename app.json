@@ -18,7 +18,13 @@
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.roinuj16.crosstimer"
+      "package": "com.roinuj16.crosstimer",
+      "permissions": [
+        "android.permission.SCHEDULE_EXACT_ALARM"
+      ],
+      "blockedPermissions": [
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -28,7 +34,6 @@
       "expo-sqlite",
       "expo-localization",
       "expo-font",
-      "expo-audio",
       [
         "expo-camera",
         {
@@ -36,6 +41,24 @@
           "microphonePermission": false,
           "recordAudioAndroid": false,
           "barcodeScannerEnabled": false
+        }
+      ],
+      [
+        "expo-audio",
+        {
+          "enableBackgroundPlayback": true,
+          "microphonePermission": false,
+          "recordAudioAndroid": false
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "sounds": [
+            "./assets/sounds/phase-beep.wav",
+            "./assets/sounds/done.wav"
+          ],
+          "color": "#31F26B"
         }
       ]
     ],

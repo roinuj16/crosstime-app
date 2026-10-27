@@ -36,9 +36,9 @@ def render(dur, voices):
     return buf
 
 def save(name, buf, fade=0.01):
-    peak = max(1e-9, max(abs(x) for x in buf))
-    k = 0.85 / peak
-    nf = int(fade * RATE)
+    peak = max(abs(x) for x in buf)
+    k = 0.85 / peak if peak > 0 else 0
+    nf = max(1, int(fade * RATE))
     with wave.open(os.path.join(OUT, name + '.wav'), 'wb') as w:
         w.setnchannels(1); w.setsampwidth(2); w.setframerate(RATE)
         frames = bytearray()
@@ -65,4 +65,6 @@ save('tick', tick, fade=0.005)
 save('lap', render(0.9, [(0, 'sine', 1046, 0.6, 0.004, 0.25, 0, 0), (0.12, 'sine', 1568, 0.5, 0.004, 0.3, 0, 0)]))
 # fim do treino: três notas subindo
 save('done', render(1.2, [(i * 0.18, 'square', f, 0.35, 0.005, 0.12 if i < 2 else 0.35, 0, 0) for i, f in enumerate([660, 880, 1320])]))
+# silêncio de 1 s: tocado em loop durante o treino para o iPhone manter o app ativo em segundo plano
+save('silence', [0.0] * RATE, fade=0)
 print('ok:', sorted(os.listdir(OUT)))

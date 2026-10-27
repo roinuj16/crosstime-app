@@ -56,7 +56,7 @@ export interface Strings {
     voice: string; voiceOn: string; voiceOnHint: string; voiceLang: string; voiceLangHint: string; sayRound: string; voiceRate: string; slow: string; normal: string; fast: string;
     device: string; vibrate: string; keepAwake: string; keepAwakeHint: string; flash: string; flashHint: string; duck: string; duckHint: string;
     colors: string; colorsHint: string;
-    test: string; voicePick: string; voiceAuto: string; flashDenied: string;
+    test: string; voicePick: string; voiceAuto: string; flashDenied: string; bgAlerts: string; bgAlertsHint: string;
   };
   voices: { title: string; auto: string; enhanced: string; empty: string; help: string; listen: string };
   colors: {
@@ -194,6 +194,8 @@ const pt: Strings = {
     test: 'Testar som e voz',
     voicePick: 'Voz',
     voiceAuto: 'Automática',
+    bgAlerts: 'Avisos com a tela bloqueada',
+    bgAlertsHint: 'Notificação a cada troca de fase, mesmo se o sistema pausar o app',
     flashDenied: 'Sem acesso à câmera, a lanterna não pode piscar. Libere em Ajustes do sistema → CrossTimer → Câmera.',
   },
   voices: {
@@ -345,6 +347,8 @@ const en: Strings = {
     test: 'Test sound and voice',
     voicePick: 'Voice',
     voiceAuto: 'Automatic',
+    bgAlerts: 'Alerts on the lock screen',
+    bgAlertsHint: 'A notification at every phase change, even if the system pauses the app',
     flashDenied: 'Without camera access the flashlight can’t blink. Allow it in system Settings → CrossTimer → Camera.',
   },
   voices: {

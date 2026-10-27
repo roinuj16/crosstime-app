@@ -7,6 +7,7 @@ import { MODES, type Mode } from '@/core/engine';
 import { timerView } from '@/core/view';
 import { PlayButton } from '@/components/PlayButton';
 import { Torch } from '@/components/Torch';
+import { useBackground } from '@/hooks/useBackground';
 import { useFeedback } from '@/hooks/useFeedback';
 import { useStrings } from '@/hooks/useStrings';
 import { useTimerLoop } from '@/hooks/useTimerLoop';
@@ -21,6 +22,7 @@ export default function TimerScreen() {
   const mode = app.currentMode();
   const onEvents = useFeedback(mode); // sons, voz, vibração, lanterna e tela acesa
   const el = useTimerLoop(onEvents);
+  useBackground(); // tela bloqueada: mantém vivo e agenda avisos
 
   const status = app.session?.state.status ?? 'idle';
   const v = timerView({

@@ -94,6 +94,7 @@ export default function SettingsScreen() {
         <Section title={S.device} />
         {tog('vibrate', S.vibrate)}
         {tog('keepAwake', S.keepAwake, S.keepAwakeHint)}
+        {Platform.OS !== 'web' && tog('backgroundAlerts', S.bgAlerts, S.bgAlertsHint)}
         {Platform.OS !== 'web' && <Toggle label={S.flash} hint={S.flashHint} value={st.flash} onChange={toggleFlash} />}
         {tog('duckOthers', S.duck, S.duckHint)}
       </ScrollView>

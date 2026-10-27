@@ -1,5 +1,6 @@
 import * as KeepAwake from 'expo-keep-awake';
 import { useCallback, useEffect } from 'react';
+import { AppState, Platform } from 'react-native';
 import { cuesFor, type SoundKey } from '@/core/cues';
 import type { Mode, TimerEvent } from '@/core/engine';
 import { STRINGS } from '@/i18n/strings';
@@ -34,7 +35,11 @@ export function useFeedback(mode: Mode) {
 
   return useCallback((events: TimerEvent[]) => {
     const st = useApp.getState().settings;
-    const cues = cuesFor(events, st, STRINGS[st.voiceLang].say, mode);
+    let cues = cuesFor(events, st, STRINGS[st.voiceLang].say, mode);
+    // Android em segundo plano: a notificação agendada já toca o bipe; evita som duplicado
+    if (Platform.OS === 'android' && st.backgroundAlerts && AppState.currentState !== 'active') {
+      cues = cues.filter((c) => c.kind !== 'sound');
+    }
     perform(cues, { lang: st.voiceLang, voiceId: st.voiceId, rate: st.voiceRate, volume: st.volume });
   }, [mode]);
 }
