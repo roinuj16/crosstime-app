@@ -5,7 +5,7 @@ O **Expo Go** serve para testar telas, sons e voz. Mas o **timer com a tela bloq
 Ele funciona como o Expo Go, só que com as configurações do CrossTimer
 (áudio em segundo plano, notificações, lanterna).
 
-Você faz isso **uma vez**. Depois, as mudanças de código chegam pelo `npx expo start`,
+Você faz isso **uma vez**. Depois, as mudanças de código chegam pelo `npm run dev`,
 igual ao Expo Go. Só é preciso gerar outro build quando entrar um módulo nativo novo.
 
 ## Antes de tudo (uma vez)
