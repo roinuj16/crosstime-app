@@ -26,8 +26,9 @@ export interface Settings {
 }
 
 export interface SavedWorkout { id: string; name: string; mode: Mode; config: AnyConfig; example?: boolean }
-export interface HistoryEntry { at: number; mode: Mode; name: string | null; planned: number | null; done: number; completed: boolean }
-export interface ActiveSession { mode: Mode; name: string | null; config: AnyConfig; startedAt: number; state: SessionState }
+export interface HistoryEntry { at: number; mode: Mode; name: string | null; planned: number | null; done: number; completed: boolean; rounds?: number }
+/** rounds = contador manual do AMRAP / For Time */
+export interface ActiveSession { mode: Mode; name: string | null; config: AnyConfig; startedAt: number; state: SessionState; rounds: number }
 
 interface Persisted {
   v: 1;
@@ -48,9 +49,10 @@ export const DEFAULT_SETTINGS: Settings = {
 };
 
 const EXAMPLES: SavedWorkout[] = [
-  { id: 'ex1', example: true, name: 'Tabata 20/10', mode: 'tabata', config: { prepare: 10, work: 20, rest: 10, rounds: 8, cycles: 1, restBC: 0, cooldown: 0 } },
-  { id: 'ex2', example: true, name: 'EMOM 10 min', mode: 'rounds', config: { prepare: 10, work: 60, rest: 0, rounds: 10, cooldown: 0 } },
-  { id: 'ex3', example: true, name: 'Run 400 m', mode: 'stopwatch', config: { prepare: 5, lap: 120 } },
+  { id: 'ex1', example: true, name: 'Tabata 20/10 × 8', mode: 'tabata', config: { prepare: 10, work: 20, rest: 10, rounds: 8, cycles: 1, restBC: 0, cooldown: 0 } },
+  { id: 'ex2', example: true, name: 'EMOM 10 min', mode: 'emom', config: { prepare: 10, interval: 60, rounds: 10 } },
+  { id: 'ex3', example: true, name: 'AMRAP 12 min', mode: 'amrap', config: { prepare: 10, time: 12 * 60 } },
+  { id: 'ex4', example: true, name: 'For Time · cap 15 min', mode: 'fortime', config: { prepare: 10, cap: 15 * 60 } },
 ];
 
 const clone = <T,>(o: T): T => JSON.parse(JSON.stringify(o));
@@ -92,21 +94,34 @@ interface Actions {
   back(now?: number): void;
   /** zera e registra no histórico como parcial (se passou de 10 s) */
   reset(now?: number): void;
-  /** marca como concluído e registra no histórico */
-  finish(now?: number): void;
+  /**
+   * Marca como concluído e registra no histórico.
+   * early = o atleta tocou em "Terminei" (For Time): vale o tempo de chegada.
+   */
+  finish(now?: number, early?: boolean): void;
+  /** contador manual de rounds (AMRAP / For Time) */
+  addRound(delta: number): void;
 }
 
 export type AppState = Persisted & Actions;
 
 export const useApp = create<AppState>()((set, get) => {
+  /** tempo que vale para o histórico, limitado ao total quando há um */
+  const effectiveElapsed = (s: ActiveSession, now: number) => {
+    const total = Engine.totalDuration(Engine.buildSegments(s.mode, s.config));
+    const el = Engine.elapsedOf(s.state, now);
+    return total > 0 && s.mode !== 'stopwatch' ? Math.min(el, total) : el;
+  };
   const record = (completed: boolean, now: number) => {
     const s = get().session;
     if (!s) return;
-    const segs = Engine.buildSegments(s.mode, s.config);
-    const total = Engine.totalDuration(segs);
-    const el = s.mode === 'stopwatch' ? Engine.elapsedOf(s.state, now) : Math.min(Engine.elapsedOf(s.state, now), total);
+    const el = effectiveElapsed(s, now);
     if (!completed && el < 10) return;
-    const entry: HistoryEntry = { at: s.startedAt, mode: s.mode, name: s.name, planned: s.mode === 'stopwatch' ? null : total, done: Math.round(el), completed };
+    const total = Engine.totalDuration(Engine.buildSegments(s.mode, s.config));
+    const entry: HistoryEntry = {
+      at: s.startedAt, mode: s.mode, name: s.name, planned: total > 0 && s.mode !== 'stopwatch' ? total : null,
+      done: Math.round(el), completed, ...(Engine.tapsRounds(s.mode) ? { rounds: s.rounds } : {}),
+    };
     set({ history: [entry, ...get().history].slice(0, 100) });
   };
 
@@ -138,7 +153,7 @@ export const useApp = create<AppState>()((set, get) => {
       const s = st.session;
       if (s?.state.status === 'running') { set({ session: { ...s, state: Engine.pause(s.state, now) } }); return; }
       if (!s || s.state.status === 'done') {
-        const fresh: ActiveSession = { mode: st.mode, name: st.activeName, config: clone(st.configs[st.mode]), startedAt: now, state: Engine.createSession() };
+        const fresh: ActiveSession = { mode: st.mode, name: st.activeName, config: clone(st.configs[st.mode]), startedAt: now, state: Engine.createSession(), rounds: 0 };
         set({ session: { ...fresh, state: Engine.start(fresh.state, now) } });
         return;
       }
@@ -151,12 +166,18 @@ export const useApp = create<AppState>()((set, get) => {
       if (s && s.state.status !== 'done') record(false, now);
       set({ session: null });
     },
-    finish: (now = Date.now()) => {
+    finish: (now = Date.now(), early = false) => {
       const s = get().session;
-      if (!s) return;
+      if (!s || s.state.status === 'done') return;
       record(true, now);
       const total = Engine.totalDuration(Engine.buildSegments(s.mode, s.config));
-      set({ session: { ...s, state: { status: 'done', elapsedBase: total, runningSince: null } } });
+      const at = early ? effectiveElapsed(s, now) : total;
+      set({ session: { ...s, state: { status: 'done', elapsedBase: at, runningSince: null } } });
+    },
+    addRound: (delta) => {
+      const s = get().session;
+      if (!s || (s.state.status !== 'running' && s.state.status !== 'paused')) return;
+      set({ session: { ...s, rounds: Math.max(0, (s.rounds ?? 0) + delta) } });
     },
   };
 });

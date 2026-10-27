@@ -11,14 +11,33 @@
  *   - permite pular/voltar fases mudando apenas o tempo decorrido.
  */
 
-export type Mode = 'tabata' | 'rounds' | 'stopwatch';
-export type Phase = 'prepare' | 'work' | 'rest' | 'restBC' | 'cooldown' | 'run';
+export type Mode = 'tabata' | 'rounds' | 'emom' | 'amrap' | 'fortime' | 'stopwatch';
+export const MODES: Mode[] = ['tabata', 'rounds', 'emom', 'amrap', 'fortime', 'stopwatch'];
+/**
+ * Fases da linha do tempo.
+ * - amrap: contagem regressiva única ("o máximo de rounds em X minutos")
+ * - emom: um intervalo por minuto (ou a cada N s); o descanso é o que sobra do intervalo
+ * - fortime: conta para cima até o atleta terminar ou bater o time cap
+ * - run: cronômetro livre, com sinal a cada volta
+ */
+export type Phase = 'prepare' | 'work' | 'rest' | 'restBC' | 'cooldown' | 'emom' | 'amrap' | 'fortime' | 'run';
 
 export interface TabataConfig { prepare: number; work: number; rest: number; rounds: number; cycles: number; restBC: number; cooldown: number }
 export interface RoundsConfig { prepare: number; work: number; rest: number; rounds: number; cooldown: number }
+export interface EmomConfig { prepare: number; interval: number; rounds: number }
+export interface AmrapConfig { prepare: number; time: number }
+/** cap = 0 significa sem limite de tempo */
+export interface ForTimeConfig { prepare: number; cap: number }
 export interface StopwatchConfig { prepare: number; lap: number }
-export interface ModeConfigs { tabata: TabataConfig; rounds: RoundsConfig; stopwatch: StopwatchConfig }
-export type AnyConfig = TabataConfig | RoundsConfig | StopwatchConfig;
+export interface ModeConfigs {
+  tabata: TabataConfig; rounds: RoundsConfig; emom: EmomConfig; amrap: AmrapConfig; fortime: ForTimeConfig; stopwatch: StopwatchConfig;
+}
+export type AnyConfig = ModeConfigs[Mode];
+
+/** Fases que contam para cima na tela (cronômetro e For Time). */
+export const countsUp = (phase: Phase): boolean => phase === 'run' || phase === 'fortime';
+/** Modos em que o atleta conta os rounds tocando na tela. */
+export const tapsRounds = (mode: Mode): boolean => mode === 'amrap' || mode === 'fortime';
 
 export interface Segment {
   phase: Phase;
@@ -59,6 +78,9 @@ export type TimerEvent =
 export const DEFAULTS: ModeConfigs = {
   tabata: { prepare: 5, work: 30, rest: 15, rounds: 4, cycles: 3, restBC: 30, cooldown: 30 },
   rounds: { prepare: 5, work: 30, rest: 15, rounds: 4, cooldown: 30 },
+  emom: { prepare: 10, interval: 60, rounds: 10 },
+  amrap: { prepare: 10, time: 12 * 60 },
+  fortime: { prepare: 10, cap: 20 * 60 },
   stopwatch: { prepare: 5, lap: 10 },
 };
 
@@ -81,6 +103,25 @@ export function buildSegments(mode: Mode, c: AnyConfig): Segment[] {
     const s = c as StopwatchConfig;
     add('prepare', s.prepare);
     segs.push({ phase: 'run', duration: Infinity, lap: Math.max(1, s.lap) });
+    return withStarts(segs);
+  }
+  if (mode === 'amrap') {
+    const a = c as AmrapConfig;
+    add('prepare', a.prepare);
+    segs.push({ phase: 'amrap', duration: Math.max(1, a.time) });
+    return withStarts(segs);
+  }
+  if (mode === 'fortime') {
+    const f = c as ForTimeConfig;
+    add('prepare', f.prepare);
+    segs.push({ phase: 'fortime', duration: f.cap > 0 ? f.cap : Infinity });
+    return withStarts(segs);
+  }
+  if (mode === 'emom') {
+    const e = c as EmomConfig;
+    const R = Math.max(1, e.rounds | 0);
+    add('prepare', e.prepare);
+    for (let rd = 1; rd <= R; rd++) segs.push({ phase: 'emom', duration: Math.max(1, e.interval), round: rd, rounds: R });
     return withStarts(segs);
   }
   const r = c as TabataConfig;
@@ -158,9 +199,11 @@ export function back(s: SessionState, segs: Segment[], now: number): SessionStat
   return seek({ ...s, status: s.status === 'done' ? 'paused' : s.status }, target, now);
 }
 
+const isWorkLike = (p?: Phase) => p === 'work' || p === 'emom';
+
 export function isLastWork(segs: Segment[], i: number): boolean {
-  if (segs[i]?.phase !== 'work') return false;
-  for (let j = i + 1; j < segs.length; j++) if (segs[j].phase === 'work') return false;
+  if (!isWorkLike(segs[i]?.phase)) return false;
+  for (let j = i + 1; j < segs.length; j++) if (isWorkLike(segs[j].phase)) return false;
   return true;
 }
 
@@ -186,7 +229,8 @@ export function eventsBetween(segs: Segment[], prevEl: number, el: number): Time
       if (prevEl < at && el >= at && seg.duration > n) ev.push({ type: 'count', n });
     }
     const half = seg.start + seg.duration / 2;
-    if (seg.phase === 'work' && seg.duration >= 20 && prevEl < half && el >= half) ev.push({ type: 'half' });
+    const halfable = seg.phase === 'work' || seg.phase === 'amrap' || seg.phase === 'fortime';
+    if (halfable && seg.duration >= 20 && prevEl < half && el >= half) ev.push({ type: 'half' });
   } else if (seg.phase === 'run' && seg.lap) {
     const lapsA = Math.floor(Math.max(0, prevEl - seg.start) / seg.lap);
     const lapsB = Math.floor((el - seg.start) / seg.lap);
@@ -198,7 +242,12 @@ export function eventsBetween(segs: Segment[], prevEl: number, el: number): Time
 
 /** "Rounds restantes" e "ciclos restantes": contam o round/ciclo atual. */
 export function remaining(mode: Mode, c: AnyConfig, loc: Location): { rounds: number; cycles: number } {
-  if (mode === 'stopwatch' || loc.done || !loc.seg) return { rounds: 0, cycles: 0 };
+  if (loc.done || !loc.seg) return { rounds: 0, cycles: 0 };
+  if (mode === 'emom') {
+    const R = Math.max(1, (c as EmomConfig).rounds | 0);
+    return { rounds: loc.seg.phase === 'prepare' ? R : R - (loc.seg.round ?? 1) + 1, cycles: 0 };
+  }
+  if (mode !== 'tabata' && mode !== 'rounds') return { rounds: 0, cycles: 0 };
   const r = c as TabataConfig;
   const R = Math.max(1, r.rounds | 0), C = mode === 'tabata' ? Math.max(1, r.cycles | 0) : 1;
   const s = loc.seg;
