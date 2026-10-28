@@ -28,7 +28,10 @@
         "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"
       ],
       "blockedPermissions": [
-        "android.permission.RECORD_AUDIO"
+        "android.permission.RECORD_AUDIO",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.SYSTEM_ALERT_WINDOW"
       ]
     },
     "web": {
@@ -60,7 +63,7 @@
         "expo-notifications",
         {
           "sounds": [
-            "./assets/sounds/phase-beep.wav",
+            "./assets/sounds/phase_beep.wav",
             "./assets/sounds/done.wav"
           ],
           "color": "#31F26B"

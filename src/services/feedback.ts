@@ -8,13 +8,13 @@ import type { Cue, HapticKind, SoundKey } from '@/core/cues';
 import { pickVoice } from './voices';
 
 const SOURCES: Record<SoundKey, number> = {
-  'phase-beep': require('../../assets/sounds/phase-beep.wav'),
-  'phase-bell': require('../../assets/sounds/phase-bell.wav'),
-  'phase-gong': require('../../assets/sounds/phase-gong.wav'),
-  'phase-horn': require('../../assets/sounds/phase-horn.wav'),
-  'phase-whistle': require('../../assets/sounds/phase-whistle.wav'),
+  'phase-beep': require('../../assets/sounds/phase_beep.wav'),
+  'phase-bell': require('../../assets/sounds/phase_bell.wav'),
+  'phase-gong': require('../../assets/sounds/phase_gong.wav'),
+  'phase-horn': require('../../assets/sounds/phase_horn.wav'),
+  'phase-whistle': require('../../assets/sounds/phase_whistle.wav'),
   count: require('../../assets/sounds/count.wav'),
-  'count-last': require('../../assets/sounds/count-last.wav'),
+  'count-last': require('../../assets/sounds/count_last.wav'),
   tick: require('../../assets/sounds/tick.wav'),
   lap: require('../../assets/sounds/lap.wav'),
   done: require('../../assets/sounds/done.wav'),

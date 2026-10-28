@@ -29,7 +29,7 @@ async function setup() {
       name: 'Treino',
       description: 'Avisos de troca de fase com o app em segundo plano',
       importance: Notifications.AndroidImportance.HIGH,
-      sound: 'phase-beep.wav',
+      sound: 'phase_beep.wav',
       vibrationPattern: [0, 250, 120, 250],
       lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC,
     }).catch(() => {});
@@ -64,7 +64,7 @@ export async function scheduleAlerts(alerts: Alert[]) {
         content: {
           title: a.title,
           body: a.body,
-          sound: withSound ? (a.kind === 'done' ? 'done.wav' : 'phase-beep.wav') : false,
+          sound: withSound ? (a.kind === 'done' ? 'done.wav' : 'phase_beep.wav') : false,
           data: { crosstimer: true },
         },
         trigger: { type: Notifications.SchedulableTriggerInputTypes.DATE, date: a.at, channelId: CHANNEL },

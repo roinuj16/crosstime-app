@@ -48,14 +48,14 @@ def save(name, buf, fade=0.01):
         w.writeframes(bytes(frames))
 
 # sons de troca de fase (um por estilo)
-save('phase-beep', render(0.45, [(0, 'square', 880, 0.5, 0.004, 0.09, 0, 0), (0.22, 'square', 880, 0.5, 0.004, 0.09, 0, 0)]))
-save('phase-bell', render(1.8, [(0, 'sine', 660 * r, 0.6 / (i + 1), 0.003, 0.9 / (i + 1), 0, 0) for i, r in enumerate([1, 2.76, 5.4, 8.93])]))
-save('phase-gong', render(2.6, [(0, 'sine', 150 * r, 0.7 / (i + 1), 0.01, 1.4 / (i * 0.6 + 1), 0.6 if i == 0 else 0, 1.5) for i, r in enumerate([1, 1.48, 2.1, 2.9, 3.7])]))
-save('phase-horn', render(0.75, [(0, 'saw', 233, 0.45, 0.02, 0.5, 0, 0), (0, 'saw', 311, 0.35, 0.02, 0.5, 0, 0), (0, 'saw', 466, 0.15, 0.02, 0.4, 0, 0)]))
-save('phase-whistle', render(0.6, [(0, 'sine', 2600, 0.6, 0.01, 0.35, 28, 140), (0, 'sine', 5200, 0.08, 0.01, 0.2, 28, 280)]))
+save('phase_beep', render(0.45, [(0, 'square', 880, 0.5, 0.004, 0.09, 0, 0), (0.22, 'square', 880, 0.5, 0.004, 0.09, 0, 0)]))
+save('phase_bell', render(1.8, [(0, 'sine', 660 * r, 0.6 / (i + 1), 0.003, 0.9 / (i + 1), 0, 0) for i, r in enumerate([1, 2.76, 5.4, 8.93])]))
+save('phase_gong', render(2.6, [(0, 'sine', 150 * r, 0.7 / (i + 1), 0.01, 1.4 / (i * 0.6 + 1), 0.6 if i == 0 else 0, 1.5) for i, r in enumerate([1, 1.48, 2.1, 2.9, 3.7])]))
+save('phase_horn', render(0.75, [(0, 'saw', 233, 0.45, 0.02, 0.5, 0, 0), (0, 'saw', 311, 0.35, 0.02, 0.5, 0, 0), (0, 'saw', 466, 0.15, 0.02, 0.4, 0, 0)]))
+save('phase_whistle', render(0.6, [(0, 'sine', 2600, 0.6, 0.01, 0.35, 28, 140), (0, 'sine', 5200, 0.08, 0.01, 0.2, 28, 280)]))
 # contagem 3-2-1 e o "1" mais agudo
 save('count', render(0.18, [(0, 'sine', 880, 0.8, 0.003, 0.05, 0, 0)]))
-save('count-last', render(0.3, [(0, 'sine', 1320, 0.8, 0.003, 0.09, 0, 0), (0, 'sine', 2640, 0.12, 0.003, 0.05, 0, 0)]))
+save('count_last', render(0.3, [(0, 'sine', 1320, 0.8, 0.003, 0.09, 0, 0), (0, 'sine', 2640, 0.12, 0.003, 0.05, 0, 0)]))
 # tique-taque: clique curto
 random.seed(7)
 tick = render(0.05, [(0, 'tri', 1800, 0.5, 0.001, 0.008, 0, 0)])
