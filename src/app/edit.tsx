@@ -28,7 +28,12 @@ function nextValue(v: number, dir: 1 | -1, kind: Kind, key: FieldKey): number {
   const ref = dir > 0 ? v : v - 1;
   const inc = kind === 'count' ? 1 : ref < 10 ? 1 : ref < 120 ? 5 : ref < 600 ? 15 : 60;
   const nv = dir > 0 ? Math.floor((v + inc) / inc) * inc : Math.ceil((v - inc) / inc) * inc;
-  return Math.min(kind === 'count' ? MAX_COUNT : MAX_TIME, Math.max(MIN[key] ?? 0, nv));
+  return clamp(nv, kind, key);
+}
+
+/** Mantém o valor entre o mínimo do campo e o máximo (2 h ou 99). */
+function clamp(v: number, kind: Kind, key: FieldKey): number {
+  return Math.min(kind === 'count' ? MAX_COUNT : MAX_TIME, Math.max(MIN[key] ?? 0, Math.round(v)));
 }
 
 export default function EditScreen() {
@@ -49,6 +54,13 @@ export default function EditScreen() {
     if (st.session?.state.status === 'done') st.reset();
     const cur = (st.configs[st.mode] as unknown as Record<string, number>)[key];
     st.setConfig(st.mode, { [key]: nextValue(cur, dir, kind, key) } as never);
+  };
+
+  /** Valor digitado no teclado numérico. */
+  const enter = (key: FieldKey, kind: Kind) => (value: number) => {
+    const st = useApp.getState();
+    if (st.session?.state.status === 'done') st.reset();
+    st.setConfig(st.mode, { [key]: clamp(value, kind, key) } as never);
   };
 
   const save = () => {
@@ -72,6 +84,7 @@ export default function EditScreen() {
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ScrollView contentContainerStyle={styles.body} keyboardShouldPersistTaps="handled">
           <Text style={styles.modeHint}>{t.modeHints[mode]}</Text>
+          {!locked && <Text style={styles.typeHint}>{t.edit.tapToType}</Text>}
           {locked && <Text style={styles.note}>{t.edit.locked}</Text>}
           {FIELDS[mode].map(([key, kind]) => (
             <Row
@@ -79,7 +92,10 @@ export default function EditScreen() {
               label={t.edit.fields[key].label}
               hint={t.edit.fields[key].hint}
               disabled={locked}
-              right={<Stepper label={t.edit.fields[key].label} display={show(key, kind, config[key] ?? 0)} onStep={step(key, kind)} disabled={locked} />}
+              right={<Stepper label={t.edit.fields[key].label} display={show(key, kind, config[key] ?? 0)} onStep={step(key, kind)} disabled={locked}
+                  entry={{ kind, onEnter: enter(key, kind), okLabel: t.edit.ok, typeLabel: t.edit.typeValue(t.edit.fields[key].label) }}
+                />
+              }
             />
           ))}
           <View style={styles.saveRow}>
@@ -103,6 +119,7 @@ const styles = StyleSheet.create({
   body: { paddingHorizontal: 16, paddingBottom: 40 },
   total: { ...ui.stepVal, minWidth: 0, color: UI.muted, fontSize: 26 },
   modeHint: { color: UI.muted, fontSize: 14, marginBottom: 4 },
+  typeHint: { color: UI.muted, fontSize: 12.5, marginBottom: 4, opacity: 0.8 },
   note: { color: UI.text, backgroundColor: '#262626', borderRadius: 10, padding: 10, marginVertical: 8, fontSize: 13.5 },
   saveRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 20, alignItems: 'center' },
   input: { flexGrow: 1, flexBasis: 180, minWidth: 0, backgroundColor: UI.bg, borderWidth: 1, borderColor: UI.line, borderRadius: 10, paddingHorizontal: 12, paddingVertical: 10, color: UI.text, fontSize: 15 },

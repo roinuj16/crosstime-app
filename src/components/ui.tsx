@@ -1,7 +1,8 @@
 /** Peças de interface compartilhadas pelas telas de edição, ajustes, cores e treinos. */
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { useRef, type ReactNode } from 'react';
-import { Pressable, StyleSheet, Switch, Text, View, type ViewStyle } from 'react-native';
+import { useId, useRef, useState, type ReactNode } from 'react';
+import { InputAccessoryView, Platform, Pressable, StyleSheet, Switch, Text, TextInput, View, type TextInputInstance, type ViewStyle } from 'react-native';
+import { entryDigits, entryPreview, entryValue, type EntryKind } from '@/core/entry';
 import { FONT, teko } from '@/theme/type';
 import { LED, UI } from '@/theme/palette';
 
@@ -73,8 +74,11 @@ export function Segmented<T extends string | number>({ options, value, onChange 
   );
 }
 
-/** − valor + com repetição ao segurar. */
-export function Stepper({ display, onStep, disabled, label }: { display: string; onStep: (dir: 1 | -1) => void; disabled?: boolean; label: string }) {
+/** O que o Stepper precisa para deixar a pessoa digitar o valor. */
+export type StepperEntry = { kind: EntryKind; onEnter: (value: number) => void; okLabel: string; typeLabel: string };
+
+/** − valor + com repetição ao segurar. Com `entry`, tocar no valor abre o teclado numérico. */
+export function Stepper({ display, onStep, disabled, label, entry }: { display: string; onStep: (dir: 1 | -1) => void; disabled?: boolean; label: string; entry?: StepperEntry }) {
   const timer = useRef<ReturnType<typeof setInterval> | null>(null);
   const latest = useRef(onStep);
   latest.current = onStep; // a repetição sempre usa o valor mais recente
@@ -96,9 +100,71 @@ export function Stepper({ display, onStep, disabled, label }: { display: string;
   return (
     <View style={s.stepper}>
       {btn(-1)}
-      <Text style={s.stepVal}>{display}</Text>
+      {entry && !disabled ? <ValueEntry display={display} entry={entry} /> : <Text style={s.stepVal}>{display}</Text>}
       {btn(1)}
     </View>
+  );
+}
+
+/**
+ * O valor do Stepper, que vira uma caixa de digitação ao ser tocado.
+ * A caixa sempre mostra o valor formatado ("01:30") e os dígitos entram pela
+ * direita (veja core/entry.ts). Confirma ao tocar em OK, no Enter ou fora da caixa.
+ */
+function ValueEntry({ display, entry }: { display: string; entry: StepperEntry }) {
+  const [editing, setEditing] = useState(false);
+  const [digits, setDigits] = useState('');
+  const typed = useRef(false);
+  const input = useRef<TextInputInstance>(null);
+  const accessoryId = `entry-${useId().replace(/[^a-zA-Z0-9_-]/g, '')}`;
+
+  if (!editing) {
+    return (
+      <Pressable
+        onPress={() => { typed.current = false; setDigits(''); setEditing(true); }}
+        accessibilityRole="button" accessibilityLabel={`${entry.typeLabel}: ${display}`}
+        style={({ pressed }) => [s.stepTap, pressed && { backgroundColor: '#262626' }]}
+        hitSlop={4}
+      >
+        <Text style={s.stepVal}>{display}</Text>
+      </Pressable>
+    );
+  }
+
+  const shown = entryPreview(digits, entry.kind);
+  const finish = () => {
+    if (typed.current) entry.onEnter(entryValue(digits, entry.kind));
+    setEditing(false);
+  };
+  return (
+    <>
+      <TextInput
+        ref={input}
+        autoFocus
+        value={shown}
+        onChangeText={(text) => { typed.current = true; setDigits(entryDigits(text, entry.kind)); }}
+        selection={{ start: shown.length, end: shown.length }}
+        keyboardType="number-pad"
+        returnKeyType="done"
+        onSubmitEditing={() => input.current?.blur()}
+        onBlur={finish}
+        caretHidden={false}
+        contextMenuHidden
+        maxLength={10}
+        inputAccessoryViewID={Platform.OS === 'ios' ? accessoryId : undefined}
+        accessibilityLabel={entry.typeLabel}
+        selectionColor={ACCENT}
+        style={[s.stepInput, !typed.current && { color: UI.muted }]}
+      />
+      {Platform.OS === 'ios' && (
+        <InputAccessoryView nativeID={accessoryId}>
+          <View style={s.accessory}>
+            <Text style={s.accessoryLabel} numberOfLines={1}>{entry.typeLabel}</Text>
+            <Button label={entry.okLabel} kind="primary" onPress={() => input.current?.blur()} />
+          </View>
+        </InputAccessoryView>
+      )}
+    </>
   );
 }
 
@@ -122,4 +188,14 @@ export const s = StyleSheet.create({
   stepper: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   stepBtn: { width: 40, height: 40, borderRadius: 10, backgroundColor: '#262626', alignItems: 'center', justifyContent: 'center' },
   stepVal: { minWidth: 70, textAlign: 'center', fontFamily: FONT.display, color: UI.text, fontVariant: ['tabular-nums'], ...teko(30, 'digits') },
+  /** valor tocável: um sublinhado discreto mostra que dá para digitar */
+  stepTap: { width: 96, alignItems: 'center', borderRadius: 8, borderBottomWidth: 2, borderBottomColor: '#3A3A3A' },
+  /** caixa de digitação: sem lineHeight (no iOS ele cortaria a Teko), altura cobre a linha inteira */
+  stepInput: {
+    width: 96, flexGrow: 0, flexShrink: 0, height: 46, paddingVertical: 0, paddingHorizontal: 6, textAlign: 'center',
+    fontFamily: FONT.display, fontSize: 30, color: UI.text, fontVariant: ['tabular-nums'],
+    backgroundColor: '#0E0E0E', borderRadius: 8, borderWidth: 2, borderColor: ACCENT,
+  },
+  accessory: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 16, paddingVertical: 8, backgroundColor: '#1E1E1E', borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: UI.line },
+  accessoryLabel: { flex: 1, color: UI.muted, fontSize: 14 },
 });

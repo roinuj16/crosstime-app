@@ -41,6 +41,7 @@ export interface Strings {
 
   edit: {
     title: string; total: string; locked: string; savePlaceholder: string; save: string; saved: string; restore: string;
+    tapToType: string; ok: string; typeValue: (label: string) => string;
     fields: Record<FieldKey, { label: string; hint: string }>;
   };
   workouts: {
@@ -124,6 +125,9 @@ const pt: Strings = {
     save: 'Salvar em Meus treinos',
     saved: 'Salvo em Meus treinos',
     restore: 'Restaurar padrão',
+    tapToType: 'Toque em um valor para digitar. Ex.: 1 3 0 = 01:30.',
+    ok: 'OK',
+    typeValue: (label) => `Digite: ${label}`,
     fields: {
       prepare: { label: 'Preparar', hint: 'Contagem antes de começar' },
       work: { label: 'Trabalho', hint: 'Tempo de exercício' },
@@ -277,6 +281,9 @@ const en: Strings = {
     save: 'Save to My workouts',
     saved: 'Saved to My workouts',
     restore: 'Restore defaults',
+    tapToType: 'Tap a value to type it. E.g. 1 3 0 = 01:30.',
+    ok: 'OK',
+    typeValue: (label) => `Type: ${label}`,
     fields: {
       prepare: { label: 'Prepare', hint: 'Countdown before you start' },
       work: { label: 'Work', hint: 'Exercise time' },
