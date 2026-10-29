@@ -87,7 +87,7 @@ desaquecimento ciano.
 ### Gerar a voz gravada (ElevenLabs)
 
 A voz guia é só em inglês (a de português soava mal; a interface continua em português e inglês).
-As frases ficam em `src/voice/lines.json` (146, ~1.700 caracteres). Com uma conta paga
+As frases ficam em `src/voice/lines.json` (146, ~1.200 caracteres). Com uma conta paga
 (o áudio gerado no plano pago pode ser usado comercialmente mesmo depois de cancelar):
 
 ```bash
