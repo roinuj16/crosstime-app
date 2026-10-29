@@ -92,7 +92,7 @@ As frases ficam em `src/voice/lines.json` (146, ~1.200 caracteres). Com uma cont
 
 ```bash
 ELEVENLABS_API_KEY=sua_chave npm run voices -- --list                 # vozes da conta e seus IDs
-ELEVENLABS_API_KEY=sua_chave npm run voices -- --voice ID --sample    # 6 frases para ouvir
+ELEVENLABS_API_KEY=sua_chave npm run voices -- --voice ID --sample    # 3 frases de teste em voice-samples/
 ELEVENLABS_API_KEY=sua_chave npm run voices -- --voice ID             # todas (inglês)
 ```
 
