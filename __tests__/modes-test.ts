@@ -82,3 +82,15 @@ describe('modos antigos continuam iguais na tela', () => {
     expect(v.next).toMatchObject({ label: 'Tempo de volta · Volta 3', time: '00:08' });
   });
 });
+
+describe('treino que passou do fim sem ser fechado', () => {
+  // ex.: o app ficou fechado com o timer rodando e foi reaberto horas depois
+  it('a tela mostra o treino como terminado, sem quebrar', () => {
+    for (const mode of ['tabata', 'rounds', 'emom', 'amrap'] as const) {
+      const total = Engine.totalDuration(Engine.buildSegments(mode, D[mode]));
+      const v = view(mode, 'running', total + 3 * 3600);
+      expect([mode, v.status, v.cur.label, v.progress]).toEqual([mode, 'done', t.done, 1]);
+      expect(v.playLabel).toBe(t.repeat);
+    }
+  });
+});

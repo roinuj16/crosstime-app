@@ -46,16 +46,20 @@ export function timerView({ mode, config, status, elapsed, doneAt, rounds, name,
   const segs = Engine.buildSegments(mode, config);
   const total = Engine.totalDuration(segs);
   const title = name ?? t.modes[mode];
-  const playLabel = { idle: t.start, running: t.pause, paused: t.resume, done: t.repeat }[status];
+  const playLabel = () => ({ idle: t.start, running: t.pause, paused: t.resume, done: t.repeat }[status]);
   const counter = (role: ColorRole = 'lap'): Band => ({ role, label: t.roundsCounter, time: String(rounds) });
 
-  if (status === 'done') {
+  // Treino que passou do fim sem ser fechado (ex.: o app ficou fechado com o timer rodando
+  // e foi reaberto depois): mostra como terminado em vez de procurar uma fase que não existe.
+  const overrun = status !== 'idle' && status !== 'done' && Engine.locate(segs, elapsed).done;
+  if (status === 'done' || overrun) {
+    if (overrun) { status = 'done'; doneAt = total; }
     const fortime = mode === 'fortime';
     const cap = (config as ForTimeConfig).cap;
     const hitCap = fortime && cap > 0 && doneAt >= cap;
     const role: ColorRole = fortime || mode === 'stopwatch' ? 'run' : 'work';
     return {
-      status, accent: role, title, playLabel,
+      status, accent: role, title, playLabel: playLabel(),
       headerTime: fortime ? Engine.formatUp(doneAt) : fmt(total),
       cur: { role, label: hitCap ? t.timeCap : t.done, time: fortime ? Engine.formatUp(doneAt) : fmt(total) },
       next: Engine.tapsRounds(mode) ? counter() : { role: null, label: t.greatJob, time: '' },
@@ -75,7 +79,7 @@ export function timerView({ mode, config, status, elapsed, doneAt, rounds, name,
   if (seg.phase === 'run') {
     const L = Engine.lapInfo(seg, status === 'idle' ? seg.start : el);
     return {
-      status, accent: 'run', title, playLabel,
+      status, accent: 'run', title, playLabel: playLabel(),
       headerTime: Engine.formatUp(el),
       cur: { role: 'run', label: t.phases.run, time: Engine.formatUp(L.elapsed) },
       next: { role: 'lap', label: status === 'idle' ? t.phases.lap : `${t.phases.lap} · ${t.lapN(L.n)}`, time: fmt(status === 'idle' ? seg.lap ?? 0 : L.toNext) },
@@ -92,7 +96,7 @@ export function timerView({ mode, config, status, elapsed, doneAt, rounds, name,
     const t0 = el - seg.start;
     const capped = Number.isFinite(seg.duration);
     return {
-      status, accent: phaseRole(seg.phase), title, playLabel,
+      status, accent: phaseRole(seg.phase), title, playLabel: playLabel(),
       headerTime: up ? (capped ? `${t.cap} ${fmt(seg.duration - t0)}` : Engine.formatUp(el)) : fmt(loc.totalRemaining),
       cur: { role: phaseRole(seg.phase), label: t.phases[seg.phase], time: up ? Engine.formatUp(t0) : fmt(loc.segRemaining) },
       next: counter(),
@@ -125,7 +129,7 @@ export function timerView({ mode, config, status, elapsed, doneAt, rounds, name,
     : fmt(status === 'idle' ? total : loc.totalRemaining);
 
   return {
-    status, accent: phaseRole(seg.phase), title, playLabel, headerTime,
+    status, accent: phaseRole(seg.phase), title, playLabel: playLabel(), headerTime,
     cur: { role: phaseRole(seg.phase), label, time: fmt(status === 'idle' ? seg.duration : loc.segRemaining) },
     next,
     nextAction: active && !!n ? 'skip' : null,
