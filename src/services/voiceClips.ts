@@ -1,6 +1,6 @@
 /**
  * Voz gravada: toca os áudios de assets/voice/<idioma>/ em sequência
- * (ex.: "Work!" + "Round five."). A lista vem de src/voice/clips.ts, gerada
+ * (ex.: "Go!" + "Round five."). A lista vem de src/voice/clips.ts, gerada
  * pelo `npm run voices`; sem áudios, o app usa a voz do sistema.
  */
 import { createAudioPlayer, type AudioPlayer } from 'expo-audio';

@@ -11,8 +11,8 @@ const phaseEv = (segs: Engine.Segment[], i: number) => ({ type: 'phase' as const
 const en = STRINGS.en.say, pt = STRINGS.pt.say;
 
 describe('frases da voz', () => {
-  it('trabalho com número do round', () => expect(phrase(phaseEv(tabata, 1), en, true)).toBe('Work, round 1'));
-  it('sem número quando desligado', () => expect(phrase(phaseEv(tabata, 1), en, false)).toBe('Work'));
+  it('trabalho começa com "Go" e o número do round', () => expect(phrase(phaseEv(tabata, 1), en, true)).toBe('Go, round 1'));
+  it('sem número quando desligado', () => expect(phrase(phaseEv(tabata, 1), en, false)).toBe('Go'));
   it('início de um novo ciclo', () => {
     const i = tabata.findIndex((s) => s.phase === 'work' && s.cycle === 2 && s.round === 1);
     expect(phrase(phaseEv(tabata, i), pt, true)).toBe('Ciclo 2');
@@ -34,7 +34,7 @@ describe('deixas por evento', () => {
     expect(c).toEqual([
       { kind: 'sound', key: 'phase-beep', volume: 0.8 },
       { kind: 'haptic', style: 'phase' },
-      { kind: 'speak', text: 'Work, round 1', clips: [['work', 'round_1'], ['work']] },
+      { kind: 'speak', text: 'Go, round 1', clips: [['run', 'round_1'], ['run']] },
     ]);
   });
   it('lanterna só quando ligada', () => {
@@ -90,9 +90,9 @@ describe('voz gravada', () => {
     for (const id of Object.keys(lines.en)) expect(id).toMatch(/^[a-z][a-z0-9_]*$/);
   });
 
-  it('round além da lista cai para "Work"; volta além da lista cai para "Lap"', () => {
+  it('round além da lista cai para "Go"; volta além da lista cai para "Lap"', () => {
     const r = lines.limits.round + 1;
-    expect(chooseClips([['work', `round_${r}`], ['work']], has('en'))).toEqual(['work']);
+    expect(chooseClips([['run', `round_${r}`], ['run']], has('en'))).toEqual(['run']);
     expect(chooseClips([[`lap_${lines.limits.lap + 1}`], ['lap']], has('pt'))).toEqual(['lap']);
   });
 

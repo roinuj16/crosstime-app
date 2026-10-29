@@ -393,7 +393,7 @@ const en: Strings = {
     },
   },
   say: {
-    prepare: 'Get ready', work: 'Work', workRound: (r) => `Work, round ${r}`, last: 'Last round', cycle: (c) => `Cycle ${c}`,
+    prepare: 'Get ready', work: 'Go', workRound: (r) => `Go, round ${r}`, last: 'Last round', cycle: (c) => `Cycle ${c}`,
     rest: 'Rest', restBC: 'Rest between cycles', cooldown: 'Cool down', run: 'Go', lap: (n) => `Lap ${n}`, done: 'Workout complete',
     emom: (r) => `Round ${r}`, amrap: 'AMRAP, go', fortime: 'For time, go', half: 'Halfway', timeCap: 'Time cap',
     count: (n) => ['', 'One', 'Two', 'Three'][n] ?? String(n),

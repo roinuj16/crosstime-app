@@ -11,7 +11,7 @@ export type HapticKind = 'phase' | 'count' | 'lap' | 'done';
 /**
  * Voz: `text` para a voz do sistema e `clips` para a voz gravada.
  * `clips` é uma lista de alternativas, da melhor para a pior; cada uma é uma
- * sequência de áudios (ex.: ["work", "round_5"] → "Work! Round five.").
+ * sequência de áudios (ex.: ["run", "round_5"] → "Go! Round five.").
  */
 export type Cue =
   | { kind: 'sound'; key: SoundKey; volume: number }
@@ -61,8 +61,9 @@ export function phraseClips(ev: Extract<TimerEvent, { type: 'phase' }>, sayRound
     case 'prepare': return [['prepare']];
     case 'work':
       if (ev.isLastWork && (s.rounds ?? 1) > 1) return [['last']];
-      if ((s.cycles ?? 1) > 1 && s.round === 1 && (s.cycle ?? 1) > 1) return [[`cycle_${s.cycle}`], ['work']];
-      return sayRound && (s.rounds ?? 1) > 1 ? [['work', `round_${s.round ?? 1}`], ['work']] : [['work']];
+      // início do trabalho: "Go!" (mais curto e com mais energia que "Work!")
+      if ((s.cycles ?? 1) > 1 && s.round === 1 && (s.cycle ?? 1) > 1) return [[`cycle_${s.cycle}`], ['run']];
+      return sayRound && (s.rounds ?? 1) > 1 ? [['run', `round_${s.round ?? 1}`], ['run']] : [['run']];
     case 'emom': return ev.isLastWork && (s.rounds ?? 1) > 1 ? [['last']] : [[`round_${s.round ?? 1}`]];
     case 'amrap': return [['amrap']];
     case 'fortime': return [['fortime']];

@@ -94,7 +94,7 @@ export default function SettingsScreen() {
             onPress={() => router.push('/voices')} right={<Ionicons name="chevron-forward" size={20} color={UI.muted} />}
           />
         )}
-        {tog('sayRound', S.sayRound, '"Work, round 2"')}
+        {tog('sayRound', S.sayRound, '"Go! Round 2"')}
         {tog('voiceCount', S.voiceCount, S.voiceCountHint)}
         {systemVoice && stack(S.voiceRate, <Segmented value={st.voiceRate} onChange={(v) => set('voiceRate', v)} options={[{ value: 0.85, label: S.slow }, { value: 1, label: S.normal }, { value: 1.15, label: S.fast }]} />)}
 
