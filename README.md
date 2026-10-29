@@ -86,13 +86,14 @@ desaquecimento ciano.
 
 ### Gerar a voz gravada (ElevenLabs)
 
-As frases ficam em `src/voice/lines.json` (146 por idioma, ~3.600 caracteres no total). Com uma conta paga
+A voz guia é só em inglês (a de português soava mal; a interface continua em português e inglês).
+As frases ficam em `src/voice/lines.json` (146, ~1.700 caracteres). Com uma conta paga
 (o áudio gerado no plano pago pode ser usado comercialmente mesmo depois de cancelar):
 
 ```bash
 ELEVENLABS_API_KEY=sua_chave npm run voices -- --list                 # vozes da conta e seus IDs
 ELEVENLABS_API_KEY=sua_chave npm run voices -- --voice ID --sample    # 6 frases para ouvir
-ELEVENLABS_API_KEY=sua_chave npm run voices -- --voice ID             # todas, pt e en
+ELEVENLABS_API_KEY=sua_chave npm run voices -- --voice ID             # todas (inglês)
 ```
 
 A chave fica só no seu computador. Arquivos que já existem são pulados (use `--force` para refazer).

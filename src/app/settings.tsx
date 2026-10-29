@@ -87,7 +87,6 @@ export default function SettingsScreen() {
 
         <Section title={S.voice} />
         {tog('voice', S.voiceOn, S.voiceOnHint)}
-        {stack(S.voiceLang, <Segmented value={st.voiceLang} onChange={(v) => { set('voiceLang', v); set('voiceId', ''); }} options={[{ value: 'en', label: 'English' }, { value: 'pt', label: 'Português' }]} />, S.voiceLangHint)}
         {recorded && stack(S.voiceSource, <Segmented value={st.voiceSource} onChange={(v) => set('voiceSource', v)} options={[{ value: 'recorded', label: S.voiceRecorded }, { value: 'system', label: S.voiceSystem }]} />, S.voiceSourceHint)}
         {systemVoice && (
           <Row
@@ -95,7 +94,7 @@ export default function SettingsScreen() {
             onPress={() => router.push('/voices')} right={<Ionicons name="chevron-forward" size={20} color={UI.muted} />}
           />
         )}
-        {tog('sayRound', S.sayRound, `"${(st.voiceLang === 'pt' ? 'Trabalho, round 2' : 'Work, round 2')}"`)}
+        {tog('sayRound', S.sayRound, '"Work, round 2"')}
         {tog('voiceCount', S.voiceCount, S.voiceCountHint)}
         {systemVoice && stack(S.voiceRate, <Segmented value={st.voiceRate} onChange={(v) => set('voiceRate', v)} options={[{ value: 0.85, label: S.slow }, { value: 1, label: S.normal }, { value: 1.15, label: S.fast }]} />)}
 

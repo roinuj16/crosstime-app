@@ -4,7 +4,7 @@
  *
  *   ELEVENLABS_API_KEY=sua_chave npm run voices -- --list            # lista as vozes da sua conta
  *   ELEVENLABS_API_KEY=sua_chave npm run voices -- --voice ID --sample   # 6 frases para ouvir antes
- *   ELEVENLABS_API_KEY=sua_chave npm run voices -- --voice ID         # tudo (pt + en)
+ *   ELEVENLABS_API_KEY=sua_chave npm run voices -- --voice ID         # tudo (inglês)
  *
  * Opções:
  *   --voice ID        voz para os dois idiomas (ou ELEVENLABS_VOICE_ID)
@@ -29,7 +29,10 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const LINES = JSON.parse(readFileSync(join(ROOT, 'src/voice/lines.json'), 'utf8'));
 const OUT = join(ROOT, 'assets/voice');
 const MANIFEST = join(ROOT, 'src/voice/clips.ts');
-const LANGS = ['en', 'pt'];
+// Só inglês por enquanto: a voz em português soava mal. As frases em pt continuam em lines.json
+// e podem ser geradas de propósito com --lang pt (não entram no app enquanto LANGS não tiver 'pt').
+const LANGS = ['en'];
+const ALL_LANGS = ['en', 'pt'];
 const SAMPLE = ['prepare', 'work', 'round_5', 'last', 'count_3', 'done'];
 const API = process.env.ELEVENLABS_API_BASE ?? 'https://api.elevenlabs.io/v1'; // trocar só para testes
 
@@ -119,7 +122,7 @@ if (flag('list')) {
 }
 
 for (const lang of langs) {
-  if (!LANGS.includes(lang)) fail(`Idioma desconhecido: ${lang} (use en ou pt)`);
+  if (!ALL_LANGS.includes(lang)) fail(`Idioma desconhecido: ${lang} (use en ou pt)`);
   if (!voiceFor[lang]) fail(`Falta escolher a voz. Rode --list para ver os IDs e depois --voice ID.`);
 }
 
