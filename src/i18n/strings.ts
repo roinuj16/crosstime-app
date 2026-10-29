@@ -58,6 +58,7 @@ export interface Strings {
     device: string; vibrate: string; keepAwake: string; keepAwakeHint: string; flash: string; flashHint: string; duck: string; duckHint: string;
     colors: string; colorsHint: string;
     test: string; voicePick: string; voiceAuto: string; flashDenied: string; bgAlerts: string; bgAlertsHint: string;
+    voiceSource: string; voiceRecorded: string; voiceSystem: string; voiceSourceHint: string; voiceCount: string; voiceCountHint: string;
   };
   voices: { title: string; auto: string; enhanced: string; empty: string; help: string; listen: string };
   colors: {
@@ -69,6 +70,7 @@ export interface Strings {
     prepare: string; work: string; workRound: (r: number) => string; last: string; cycle: (c: number) => string;
     rest: string; restBC: string; cooldown: string; run: string; lap: (n: number) => string; done: string;
     emom: (r: number) => string; amrap: string; fortime: string; half: string; timeCap: string;
+    count: (n: number) => string;
   };
 }
 
@@ -200,6 +202,12 @@ const pt: Strings = {
     voiceAuto: 'Automática',
     bgAlerts: 'Avisos com a tela bloqueada',
     bgAlertsHint: 'Notificação a cada troca de fase, mesmo se o sistema pausar o app',
+    voiceSource: 'Tipo de voz',
+    voiceRecorded: 'Coach (gravada)',
+    voiceSystem: 'Do sistema',
+    voiceSourceHint: 'A gravada soa igual em qualquer celular',
+    voiceCount: 'Falar a contagem 3-2-1',
+    voiceCountHint: 'No lugar dos bipes do fim de cada fase',
     flashDenied: 'Sem acesso à câmera, a lanterna não pode piscar. Libere em Ajustes do sistema → CrossTimer → Câmera.',
   },
   voices: {
@@ -225,6 +233,7 @@ const pt: Strings = {
     prepare: 'Prepare-se', work: 'Trabalho', workRound: (r) => `Trabalho, round ${r}`, last: 'Último round', cycle: (c) => `Ciclo ${c}`,
     rest: 'Descanso', restBC: 'Descanso entre ciclos', cooldown: 'Desaquecimento', run: 'Valendo', lap: (n) => `Volta ${n}`, done: 'Treino concluído',
     emom: (r) => `Round ${r}`, amrap: 'AMRAP, valendo', fortime: 'For time, valendo', half: 'Metade', timeCap: 'Time cap',
+    count: (n) => ['', 'Um', 'Dois', 'Três'][n] ?? String(n),
   },
 };
 
@@ -356,6 +365,12 @@ const en: Strings = {
     voiceAuto: 'Automatic',
     bgAlerts: 'Alerts on the lock screen',
     bgAlertsHint: 'A notification at every phase change, even if the system pauses the app',
+    voiceSource: 'Voice type',
+    voiceRecorded: 'Coach (recorded)',
+    voiceSystem: 'System',
+    voiceSourceHint: 'The recorded voice sounds the same on every phone',
+    voiceCount: 'Say the 3-2-1 countdown',
+    voiceCountHint: 'Instead of the beeps at the end of each phase',
     flashDenied: 'Without camera access the flashlight can’t blink. Allow it in system Settings → CrossTimer → Camera.',
   },
   voices: {
@@ -381,6 +396,7 @@ const en: Strings = {
     prepare: 'Get ready', work: 'Work', workRound: (r) => `Work, round ${r}`, last: 'Last round', cycle: (c) => `Cycle ${c}`,
     rest: 'Rest', restBC: 'Rest between cycles', cooldown: 'Cool down', run: 'Go', lap: (n) => `Lap ${n}`, done: 'Workout complete',
     emom: (r) => `Round ${r}`, amrap: 'AMRAP, go', fortime: 'For time, go', half: 'Halfway', timeCap: 'Time cap',
+    count: (n) => ['', 'One', 'Two', 'Three'][n] ?? String(n),
   },
 };
 

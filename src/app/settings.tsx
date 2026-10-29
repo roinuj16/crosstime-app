@@ -10,6 +10,7 @@ import { Button, Row, Section, Segmented, SheetHeader, Toggle } from '@/componen
 import { useStrings } from '@/hooks/useStrings';
 import { STRINGS } from '@/i18n/strings';
 import { configureAudio, perform } from '@/services/feedback';
+import { hasRecordedVoice } from '@/services/voiceClips';
 import { pickVoice } from '@/services/voices';
 import { useApp, type Settings } from '@/store/useApp';
 import { hex, UI, type ColorRole } from '@/theme/palette';
@@ -25,6 +26,9 @@ export default function SettingsScreen() {
   const [, requestCamera] = useCameraPermissions();
   const [voiceName, setVoiceName] = useState('');
   useEffect(() => { pickVoice(st.voiceLang, st.voiceId).then((v) => setVoiceName(v?.name ?? '')); }, [st.voiceLang, st.voiceId]);
+
+  const recorded = hasRecordedVoice(st.voiceLang);
+  const systemVoice = !recorded || st.voiceSource === 'system';
 
   const tog = (key: keyof Settings, label: string, hint?: string, disabled?: boolean) => (
     <Toggle label={label} hint={hint} value={st[key] as boolean} onChange={(v) => set(key, v as never)} disabled={disabled} />
@@ -43,7 +47,7 @@ export default function SettingsScreen() {
     await configureAudio({ duckOthers: st.duckOthers });
     const seg = buildSegments('tabata', DEFAULTS.tabata)[1];
     const cues = cuesFor([{ type: 'phase', seg, next: null, isLastWork: false }], { ...st, flash: false }, STRINGS[st.voiceLang].say, 'tabata');
-    perform(cues, { lang: st.voiceLang, voiceId: st.voiceId, rate: st.voiceRate, volume: st.volume });
+    perform(cues, { lang: st.voiceLang, voiceId: st.voiceId, rate: st.voiceRate, volume: st.volume, source: st.voiceSource });
   };
   const stack = (label: string, control: React.ReactNode, hint?: string) => (
     <View style={styles.stacked}>
@@ -84,12 +88,16 @@ export default function SettingsScreen() {
         <Section title={S.voice} />
         {tog('voice', S.voiceOn, S.voiceOnHint)}
         {stack(S.voiceLang, <Segmented value={st.voiceLang} onChange={(v) => { set('voiceLang', v); set('voiceId', ''); }} options={[{ value: 'en', label: 'English' }, { value: 'pt', label: 'Português' }]} />, S.voiceLangHint)}
-        <Row
-          label={S.voicePick} hint={st.voiceId ? voiceName : `${S.voiceAuto}${voiceName ? ` · ${voiceName}` : ''}`}
-          onPress={() => router.push('/voices')} right={<Ionicons name="chevron-forward" size={20} color={UI.muted} />}
-        />
+        {recorded && stack(S.voiceSource, <Segmented value={st.voiceSource} onChange={(v) => set('voiceSource', v)} options={[{ value: 'recorded', label: S.voiceRecorded }, { value: 'system', label: S.voiceSystem }]} />, S.voiceSourceHint)}
+        {systemVoice && (
+          <Row
+            label={S.voicePick} hint={st.voiceId ? voiceName : `${S.voiceAuto}${voiceName ? ` · ${voiceName}` : ''}`}
+            onPress={() => router.push('/voices')} right={<Ionicons name="chevron-forward" size={20} color={UI.muted} />}
+          />
+        )}
         {tog('sayRound', S.sayRound, `"${(st.voiceLang === 'pt' ? 'Trabalho, round 2' : 'Work, round 2')}"`)}
-        {stack(S.voiceRate, <Segmented value={st.voiceRate} onChange={(v) => set('voiceRate', v)} options={[{ value: 0.85, label: S.slow }, { value: 1, label: S.normal }, { value: 1.15, label: S.fast }]} />)}
+        {tog('voiceCount', S.voiceCount, S.voiceCountHint)}
+        {systemVoice && stack(S.voiceRate, <Segmented value={st.voiceRate} onChange={(v) => set('voiceRate', v)} options={[{ value: 0.85, label: S.slow }, { value: 1, label: S.normal }, { value: 1.15, label: S.fast }]} />)}
 
         <Section title={S.device} />
         {tog('vibrate', S.vibrate)}

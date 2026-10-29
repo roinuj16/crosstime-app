@@ -46,7 +46,8 @@
     "test:watch": "jest --watchAll",
     "typecheck": "tsc --noEmit",
     "go": "expo start --go",
-    "dev": "expo start --dev-client"
+    "dev": "expo start --dev-client",
+    "voices": "node scripts/generate-voices.mjs"
   },
   "private": true,
   "jest": {

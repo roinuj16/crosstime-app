@@ -27,7 +27,7 @@ export default function VoicesScreen() {
   const sample = STRINGS[st.voiceLang].say;
   const choose = (id: string) => {
     set('voiceId', id);
-    speak(`${sample.prepare}. ${sample.workRound(1)}. ${sample.rest}`, { lang: st.voiceLang, voiceId: id, rate: st.voiceRate, volume: st.volume });
+    speak(`${sample.prepare}. ${sample.workRound(1)}. ${sample.rest}`, { lang: st.voiceLang, voiceId: id, rate: st.voiceRate, volume: st.volume, source: 'system' });
   };
 
   const row = (id: string, title: string, sub: string, good: boolean) => {

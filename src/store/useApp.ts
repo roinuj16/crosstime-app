@@ -16,6 +16,10 @@ export interface Settings {
   voiceLang: 'en' | 'pt';
   voiceId: string;
   voiceRate: number;
+  /** voz gravada (assets/voice) ou a voz do sistema; sem áudios gravados, usa a do sistema */
+  voiceSource: 'recorded' | 'system';
+  /** fala "três, dois, um" no lugar dos bipes da contagem */
+  voiceCount: boolean;
   sayRound: boolean;
   vibrate: boolean;
   keepAwake: boolean;
@@ -46,7 +50,7 @@ interface Persisted {
 
 export const DEFAULT_SETTINGS: Settings = {
   language: 'auto', sound: true, soundScheme: 'beep', volume: 0.75, countdown: true, tick: false,
-  voice: true, voiceLang: 'en', voiceId: '', voiceRate: 1, sayRound: true,
+  voice: true, voiceLang: 'en', voiceId: '', voiceRate: 1, voiceSource: 'recorded', voiceCount: false, sayRound: true,
   vibrate: true, keepAwake: true, flash: false, duckOthers: false, backgroundAlerts: true, timeFormat: '00:00',
 };
 

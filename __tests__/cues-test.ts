@@ -1,9 +1,10 @@
 /// <reference types="jest" />
-import { cuesFor, phrase, type CueSettings } from '../src/core/cues';
+import { chooseClips, cuesFor, phrase, phraseClips, type CueSettings } from '../src/core/cues';
+import LINES from '../src/voice/lines.json';
 import * as Engine from '../src/core/engine';
 import { STRINGS } from '../src/i18n/strings';
 
-const ON: CueSettings = { sound: true, soundScheme: 'beep', volume: 0.8, countdown: true, tick: false, voice: true, sayRound: true, vibrate: true, flash: false };
+const ON: CueSettings = { sound: true, soundScheme: 'beep', volume: 0.8, countdown: true, tick: false, voice: true, voiceCount: false, sayRound: true, vibrate: true, flash: false };
 const tabata = Engine.buildSegments('tabata', Engine.DEFAULTS.tabata);
 const emom = Engine.buildSegments('emom', Engine.DEFAULTS.emom);
 const phaseEv = (segs: Engine.Segment[], i: number) => ({ type: 'phase' as const, seg: segs[i], next: segs[i + 1] ?? null, isLastWork: Engine.isLastWork(segs, i) });
@@ -33,7 +34,7 @@ describe('deixas por evento', () => {
     expect(c).toEqual([
       { kind: 'sound', key: 'phase-beep', volume: 0.8 },
       { kind: 'haptic', style: 'phase' },
-      { kind: 'speak', text: 'Work, round 1' },
+      { kind: 'speak', text: 'Work, round 1', clips: [['work', 'round_1'], ['work']] },
     ]);
   });
   it('lanterna só quando ligada', () => {
@@ -52,15 +53,57 @@ describe('deixas por evento', () => {
     expect(cuesFor([{ type: 'tick' }], { ...ON, tick: true }, en, 'tabata')).toEqual([{ kind: 'sound', key: 'tick', volume: 0.4 }]);
   });
   it('fim do treino; no For Time é o time cap', () => {
-    expect(cuesFor([{ type: 'done' }], ON, pt, 'tabata').find((c) => c.kind === 'speak')).toEqual({ kind: 'speak', text: 'Treino concluído' });
-    expect(cuesFor([{ type: 'done' }], ON, en, 'fortime').find((c) => c.kind === 'speak')).toEqual({ kind: 'speak', text: 'Time cap' });
+    expect(cuesFor([{ type: 'done' }], ON, pt, 'tabata').find((c) => c.kind === 'speak')).toEqual({ kind: 'speak', text: 'Treino concluído', clips: [['done']] });
+    expect(cuesFor([{ type: 'done' }], ON, en, 'fortime').find((c) => c.kind === 'speak')).toEqual({ kind: 'speak', text: 'Time cap', clips: [['time_cap']] });
   });
   it('volta do cronômetro', () => {
     expect(cuesFor([{ type: 'lap', n: 3 }], ON, pt, 'stopwatch')).toEqual([
-      { kind: 'sound', key: 'lap', volume: 0.8 }, { kind: 'haptic', style: 'lap' }, { kind: 'speak', text: 'Volta 3' },
+      { kind: 'sound', key: 'lap', volume: 0.8 }, { kind: 'haptic', style: 'lap' }, { kind: 'speak', text: 'Volta 3', clips: [['lap_3'], ['lap']] },
     ]);
   });
   it('estilo de som escolhido', () => {
     expect(cuesFor([phaseEv(tabata, 1)], { ...ON, soundScheme: 'gong' }, en, 'tabata')[0]).toMatchObject({ key: 'phase-gong' });
+  });
+});
+
+describe('voz gravada', () => {
+  const lines = LINES as unknown as Record<'en' | 'pt', Record<string, string>> & { limits: Record<string, number> };
+  const has = (lang: 'en' | 'pt') => (id: string) => id in lines[lang];
+
+  it('cada frase do treino tem um áudio na lista (pt e en)', () => {
+    const modes = ['tabata', 'rounds', 'emom', 'amrap', 'fortime', 'stopwatch'] as const;
+    const ids = new Set<string>();
+    for (const m of modes) {
+      const segs = Engine.buildSegments(m, Engine.DEFAULTS[m] as never);
+      segs.forEach((_, i) => phraseClips(phaseEv(segs, i), true)[0].forEach((id) => ids.add(id)));
+    }
+    for (const ev of [{ type: 'done' as const }, { type: 'half' as const }, { type: 'count' as const, n: 3 }, { type: 'lap' as const, n: 2 }]) {
+      for (const m of ['tabata', 'fortime'] as const) {
+        for (const c of cuesFor([ev], { ...ON, voiceCount: true }, en, m)) if (c.kind === 'speak') c.clips[0].forEach((id) => ids.add(id));
+      }
+    }
+    for (const lang of ['en', 'pt'] as const) for (const id of ids) expect([lang, id, has(lang)(id)]).toEqual([lang, id, true]);
+  });
+
+  it('chaves só com a-z, 0-9 e _ (exigência do Android) e iguais nos dois idiomas', () => {
+    expect(Object.keys(lines.en)).toEqual(Object.keys(lines.pt));
+    for (const id of Object.keys(lines.en)) expect(id).toMatch(/^[a-z][a-z0-9_]*$/);
+  });
+
+  it('round além da lista cai para "Work"; volta além da lista cai para "Lap"', () => {
+    const r = lines.limits.round + 1;
+    expect(chooseClips([['work', `round_${r}`], ['work']], has('en'))).toEqual(['work']);
+    expect(chooseClips([[`lap_${lines.limits.lap + 1}`], ['lap']], has('pt'))).toEqual(['lap']);
+  });
+
+  it('sem áudio nenhum, usa a voz do sistema', () => {
+    expect(chooseClips([['work', 'round_1'], ['work']], () => false)).toBeNull();
+  });
+
+  it('contagem falada substitui os bipes, mantendo a vibração no 1', () => {
+    const st = { ...ON, voiceCount: true };
+    expect(cuesFor([{ type: 'count', n: 2 }], st, pt, 'tabata')).toEqual([{ kind: 'speak', text: 'Dois', clips: [['count_2']] }]);
+    expect(cuesFor([{ type: 'count', n: 1 }], st, en, 'tabata')).toEqual([{ kind: 'speak', text: 'One', clips: [['count_1']] }, { kind: 'haptic', style: 'count' }]);
+    expect(cuesFor([{ type: 'count', n: 1 }], { ...st, voice: false }, en, 'tabata')[0]).toMatchObject({ kind: 'sound', key: 'count-last' });
   });
 });

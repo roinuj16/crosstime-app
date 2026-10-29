@@ -4,7 +4,8 @@
 import { createAudioPlayer, setAudioModeAsync, type AudioPlayer } from 'expo-audio';
 import * as Haptics from 'expo-haptics';
 import * as Speech from 'expo-speech';
-import type { Cue, HapticKind, SoundKey } from '@/core/cues';
+import { chooseClips, type Cue, type HapticKind, type SoundKey } from '@/core/cues';
+import { hasClip, playClips, stopClips } from './voiceClips';
 import { pickVoice } from './voices';
 
 const SOURCES: Record<SoundKey, number> = {
@@ -20,7 +21,7 @@ const SOURCES: Record<SoundKey, number> = {
   done: require('../../assets/sounds/done.wav'),
 };
 
-export interface VoiceOptions { lang: 'en' | 'pt'; voiceId: string; rate: number; volume: number }
+export interface VoiceOptions { lang: 'en' | 'pt'; voiceId: string; rate: number; volume: number; source: 'recorded' | 'system' }
 
 const players = new Map<SoundKey, AudioPlayer>();
 const torchListeners = new Set<() => void>();
@@ -76,6 +77,7 @@ export function playSound(key: SoundKey, volume: number) {
 
 export async function speak(text: string, v: VoiceOptions) {
   try {
+    stopClips();
     const voice = await pickVoice(v.lang, v.voiceId);
     Speech.stop();
     Speech.speak(text, {
@@ -115,7 +117,11 @@ export function perform(cues: Cue[], voice: VoiceOptions) {
       spoke = true;
       // deixa o bipe da troca de fase soar antes da voz
       const hasPhaseSound = cues.some((x) => x.kind === 'sound' && x.key.startsWith('phase-'));
-      setTimeout(() => speak(c.text, voice), hasPhaseSound ? 450 : 0);
+      const clips = voice.source === 'recorded' ? chooseClips(c.clips, (id) => hasClip(voice.lang, id)) : null;
+      const say = clips
+        ? () => { Speech.stop(); playClips(voice.lang, clips, Math.min(1, voice.volume + 0.15), duck); }
+        : () => speak(c.text, voice);
+      setTimeout(say, hasPhaseSound ? 400 : 0);
     }
   }
 }

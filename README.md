@@ -82,6 +82,22 @@ desaquecimento ciano.
 - `src/core/cues.ts` decide o que tocar/falar/vibrar em cada evento (testado); `src/services/feedback.ts` executa no aparelho.
 - O áudio toca mesmo com o iPhone no modo silencioso. "Abaixar música de outros apps" liga o *ducking* só durante os avisos.
 - A voz usa as vozes do sistema; em **Ajustes → Voz** dá para ouvir e escolher. Vozes "Premium/Aprimoradas" soam bem melhor.
+- **Voz gravada (coach):** frases prontas em `assets/voice/<idioma>/`, geradas uma vez na ElevenLabs. Sem esses áudios, o app usa a voz do sistema.
+
+### Gerar a voz gravada (ElevenLabs)
+
+As frases ficam em `src/voice/lines.json` (146 por idioma, ~3.600 caracteres no total). Com uma conta paga
+(o áudio gerado no plano pago pode ser usado comercialmente mesmo depois de cancelar):
+
+```bash
+ELEVENLABS_API_KEY=sua_chave npm run voices -- --list                 # vozes da conta e seus IDs
+ELEVENLABS_API_KEY=sua_chave npm run voices -- --voice ID --sample    # 6 frases para ouvir
+ELEVENLABS_API_KEY=sua_chave npm run voices -- --voice ID             # todas, pt e en
+```
+
+A chave fica só no seu computador. Arquivos que já existem são pulados (use `--force` para refazer).
+Depois, `python3 scripts/polish-voices.py` corta os silêncios e iguala o volume (precisa de ffmpeg);
+os originais ficam em `voice-src/`.
 - A lanterna precisa da câmera ativa, então só pisca com o app aberto (limitação do sistema).
 
 ### O que conferir no celular
