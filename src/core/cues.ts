@@ -89,7 +89,9 @@ export function cuesFor(events: TimerEvent[], st: CueSettings, say: Say, mode: M
   for (const ev of events) {
     switch (ev.type) {
       case 'phase':
-        snd(`phase-${st.soundScheme}` as SoundKey);
+        // com a voz guia ligada, a troca de fase é só a voz ("Get ready!", "Go!"):
+        // o som da fase tocando junto parecia um gongo batendo por trás da fala
+        if (!st.voice) snd(`phase-${st.soundScheme}` as SoundKey);
         hap('phase');
         if (st.flash) out.push({ kind: 'torch' });
         talk(phrase(ev, say, st.sayRound), phraseClips(ev, st.sayRound));

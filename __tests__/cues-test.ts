@@ -29,10 +29,9 @@ describe('frases da voz', () => {
 });
 
 describe('deixas por evento', () => {
-  it('troca de fase: som do estilo, vibração e voz', () => {
+  it('troca de fase com a voz ligada: só a voz e a vibração, sem som da fase por baixo', () => {
     const c = cuesFor([phaseEv(tabata, 1)], ON, en, 'tabata');
     expect(c).toEqual([
-      { kind: 'sound', key: 'phase-beep', volume: 0.8 },
       { kind: 'haptic', style: 'phase' },
       { kind: 'speak', text: 'Go, round 1', clips: [['run', 'round_1'], ['run']] },
     ]);
@@ -61,8 +60,9 @@ describe('deixas por evento', () => {
       { kind: 'sound', key: 'lap', volume: 0.8 }, { kind: 'haptic', style: 'lap' }, { kind: 'speak', text: 'Volta 3', clips: [['lap_3'], ['lap']] },
     ]);
   });
-  it('estilo de som escolhido', () => {
-    expect(cuesFor([phaseEv(tabata, 1)], { ...ON, soundScheme: 'gong' }, en, 'tabata')[0]).toMatchObject({ key: 'phase-gong' });
+  it('com a voz desligada, a troca de fase toca o som do estilo escolhido', () => {
+    expect(cuesFor([phaseEv(tabata, 1)], { ...ON, voice: false }, en, 'tabata')[0]).toEqual({ kind: 'sound', key: 'phase-beep', volume: 0.8 });
+    expect(cuesFor([phaseEv(tabata, 1)], { ...ON, voice: false, soundScheme: 'gong' }, en, 'tabata')[0]).toMatchObject({ key: 'phase-gong' });
   });
 });
 
