@@ -2,7 +2,8 @@
 
 - acelera a fala sem mudar o tom da voz (TEMPO);
 - corta o silêncio do começo e do fim (a voz entra na hora certa do bipe);
-- tira o grave que o alto-falante do celular não toca (sobra volume para o resto);
+- tira o grave abaixo de 180 Hz (o celular não toca) e, no começo de cada frase, abaixo de 320 Hz:
+  no "Go!" esse grave soava como uma batida de gongo;
 - deixa todas as frases com o mesmo volume, sem distorcer;
 - salva em mp3 mono 64 kbps (voz não precisa de mais; o app fica menor).
 
@@ -17,17 +18,36 @@ VOICE = os.path.join(ROOT, 'assets', 'voice')
 RAW = os.path.join(ROOT, 'voice-src')  # originais, fora de assets/ (não vão para o app)
 RATE = 44100
 TEMPO = 1.25           # 1.0 = velocidade original da ElevenLabs; 1.25 = 25% mais rápida (escolhida ouvindo)
+HIGHPASS = 180         # Hz; o celular não toca abaixo disso (2 filtros = corte firme)
+ONSET_HP, ONSET_S = 320, 0.12  # no começo da fala (0,12 s), corte em 320 Hz: tira a batida grave do "Go!"
 TARGET_RMS_DB = -16.0   # volume médio da fala
 PEAK_DB = -1.0          # teto
 GATE_DB = -40.0         # abaixo disso (em relação ao pico da frase) é silêncio
 PRE, POST = 0.012, 0.06  # respiro mantido antes e depois da fala (s)
 
 
-def decode(path, tempo=TEMPO):
+def decode(path, tempo=TEMPO, highpass=HIGHPASS):
     # atempo muda a velocidade mantendo o tom (não fica voz de esquilo)
     out = subprocess.run(['ffmpeg', '-v', 'error', '-i', path, '-ac', '1', '-ar', str(RATE),
-                          '-af', f'highpass=f=110:poles=2,atempo={tempo}', '-f', 'f32le', '-'], capture_output=True, check=True).stdout
+                          '-af', f'highpass=f={highpass},highpass=f={highpass},atempo={tempo}', '-f', 'f32le', '-'], capture_output=True, check=True).stdout
     return np.frombuffer(out, dtype=np.float32).astype(np.float64)
+
+
+def deboom(x, sharp):
+    """No começo da fala, troca pelo sinal com corte mais forte de grave (`sharp`):
+    tira o "tum" do ataque de palavras como "Go!" sem afinar o resto da voz."""
+    env = envelope(x)
+    on = np.where(env > env.max() * 10 ** (GATE_DB / 20))[0]
+    if len(on) == 0:
+        return x
+    start = on[0]
+    hold, fade = int(ONSET_S * RATE), int(0.05 * RATE)
+    w = np.zeros(len(x))
+    w[:start + hold] = 1
+    end = min(len(x), start + hold + fade)
+    w[start + hold:end] = np.linspace(1, 0, end - (start + hold))
+    n = min(len(x), len(sharp))
+    return x[:n] * (1 - w[:n]) + sharp[:n] * w[:n]
 
 
 def encode(x, path):
@@ -86,7 +106,7 @@ def main(args):
         if not os.path.exists(raw):  # guarda o original uma vez só
             os.makedirs(os.path.dirname(raw), exist_ok=True)
             shutil.copy2(path, raw)
-        x = polish(decode(raw, tempo))
+        x = polish(deboom(decode(raw, tempo), decode(raw, tempo, ONSET_HP)))
         encode(x, path)
         print(f'  ✔ {rel}  {len(x) / RATE:.2f}s')
     print(f'Pronto: {len(files)} áudios (velocidade {tempo}x).')
