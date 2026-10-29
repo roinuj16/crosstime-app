@@ -6,7 +6,7 @@
 - deixa todas as frases com o mesmo volume, sem distorcer;
 - salva em mp3 mono 64 kbps (voz não precisa de mais; o app fica menor).
 
-Precisa de python3 com numpy e do ffmpeg. Uso: python3 scripts/polish-voices.py [--tempo 1.15] [arquivos...]
+Precisa de python3 com numpy e do ffmpeg. Uso: python3 scripts/polish-voices.py [--tempo 1.25] [arquivos...]
 Os originais da ElevenLabs ficam em voice-src/ (fora do app), para refazer se precisar.
 """
 import os, shutil, subprocess, sys
@@ -16,7 +16,7 @@ ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')
 VOICE = os.path.join(ROOT, 'assets', 'voice')
 RAW = os.path.join(ROOT, 'voice-src')  # originais, fora de assets/ (não vão para o app)
 RATE = 44100
-TEMPO = 1.15           # 1.0 = velocidade original da ElevenLabs; 1.15 = 15% mais rápida
+TEMPO = 1.25           # 1.0 = velocidade original da ElevenLabs; 1.25 = 25% mais rápida (escolhida ouvindo)
 TARGET_RMS_DB = -16.0   # volume médio da fala
 PEAK_DB = -1.0          # teto
 GATE_DB = -40.0         # abaixo disso (em relação ao pico da frase) é silêncio
