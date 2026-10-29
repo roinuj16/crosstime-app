@@ -44,13 +44,17 @@ export default function TimerScreen() {
   };
   const openEdit = () => router.push('/edit');
 
-  const curSize = Math.min(width * 0.46, height * 0.2);
-  const nextSize = Math.min(width * 0.22, height * 0.085);
+  // Deitado: o relógio fica na coluna da esquerda (66% da largura) e divide a altura com a próxima fase.
+  const landscape = width > height;
+  const curSize = landscape ? Math.min(width * 0.66 * 0.3, height * 0.36) : Math.min(width * 0.46, height * 0.2);
+  const nextSize = landscape ? Math.min(width * 0.66 * 0.15, height * 0.13) : Math.min(width * 0.22, height * 0.085);
+  const playSize = landscape ? Math.min(124, height * 0.22) : Math.min(124, width * 0.32);
   const counting = v.nextAction === 'count' || (v.next.label === t.roundsCounter && status === 'done');
   const stat = (s: typeof v.left) => ({ stat: s, color: s ? color(s.role) : UI.muted });
 
   return (
     <TimerTemplate
+      landscape={landscape}
       header={
         <TimerHeader
           color={accent} title={v.title} time={v.headerTime} canReset={status !== 'idle'}
@@ -67,7 +71,7 @@ export default function TimerScreen() {
       next={
         <NextBand
           label={v.next.label} time={v.next.time} color={color(v.next.role)} glow={glowOf(v.next.role, 0.45)} timeGlow={glowOf(v.next.role, 0.5)}
-          size={nextSize} counting={counting}
+          size={nextSize} counting={counting} height={landscape ? '36%' : undefined}
           hint={v.nextAction === 'skip' ? `${t.skip.toUpperCase()} ›` : v.nextAction === 'count' ? '+1' : null}
           onPress={v.nextAction ? () => (v.nextAction === 'count' ? app.addRound(1) : app.skip()) : undefined}
           onLongPress={v.nextAction === 'count' ? () => app.addRound(-1) : undefined}
@@ -80,7 +84,8 @@ export default function TimerScreen() {
           right={v.right === 'finish'
             ? { finish: { label: t.finish, color: color('run'), onPress: () => { app.finish(Date.now(), true); onEvents([{ type: 'done' }]); } } }
             : stat(v.right)}
-          play={{ color: accent, glow: glowOf(v.accent, 0.6), progress: v.progress, running: status === 'running', label: v.playLabel, onPress: () => app.toggle(), size: Math.min(124, width * 0.32) }}
+          play={{ color: accent, glow: glowOf(v.accent, 0.6), progress: v.progress, running: status === 'running', label: v.playLabel, onPress: () => app.toggle(), size: playSize }}
+          vertical={landscape}
         />
       }
       tabs={<ModeTabs tabs={MODES.map((m) => ({ key: m, label: t.modes[m], hint: t.modeHints[m] }))} value={mode} onChange={switchMode} />}

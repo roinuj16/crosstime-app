@@ -16,15 +16,17 @@ export interface NextBandProps {
   onPress?: () => void;
   onLongPress?: () => void;
   accessibilityLabel: string;
+  /** altura da faixa (padrão: 20% da tela) */
+  height?: `${number}%` | number;
 }
 
 /** Faixa do meio: a próxima fase (toque para pular) ou o contador de rounds (toque +1, segure −1). */
-export function NextBand({ label, time, color, glow, timeGlow, size, counting, hint, onPress, onLongPress, accessibilityLabel }: NextBandProps) {
+export function NextBand({ label, time, color, glow, timeGlow, size, counting, hint, onPress, onLongPress, accessibilityLabel, height }: NextBandProps) {
   const active = !!onPress;
   const timeSize = counting ? size * 1.15 : size;
   return (
     <Pressable
-      style={({ pressed }) => [s.band, pressed && active && { backgroundColor: '#262626' }]}
+      style={({ pressed }) => [s.band, height != null && { height }, pressed && active && { backgroundColor: '#262626' }]}
       disabled={!active}
       onPress={onPress}
       onLongPress={onLongPress}

@@ -17,7 +17,7 @@ export function SheetTemplate({ title, right, onBack, keyboard, children }: {
     </ScrollView>
   );
   return (
-    <SafeAreaView style={s.root} edges={['top', 'bottom']}>
+    <SafeAreaView style={s.root} edges={['top', 'bottom', 'left', 'right']}>
       <SheetHeader title={title} right={right} onBack={onBack} />
       {keyboard ? <KeyboardAvoidingView style={s.fill} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>{list}</KeyboardAvoidingView> : list}
     </SafeAreaView>
