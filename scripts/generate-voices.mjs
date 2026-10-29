@@ -7,7 +7,7 @@
  *   ELEVENLABS_API_KEY=sua_chave npm run voices -- --voice ID         # tudo (inglês)
  *
  * Opções:
- *   --voice ID        voz para os dois idiomas (ou ELEVENLABS_VOICE_ID)
+ *   --voice ID        voz (ou ELEVENLABS_VOICE_ID); sem isso, usa a escolhida em src/voice/lines.json
  *   --voice-en ID     voz só do inglês   (ou ELEVENLABS_VOICE_EN)
  *   --voice-pt ID     voz só do português (ou ELEVENLABS_VOICE_PT)
  *   --lang en|pt      só um idioma
@@ -52,8 +52,8 @@ const key = process.env.ELEVENLABS_API_KEY;
 const model = opt('model') ?? process.env.ELEVENLABS_MODEL ?? 'eleven_v4';
 const baseVoice = opt('voice') ?? process.env.ELEVENLABS_VOICE_ID;
 const voiceFor = {
-  en: opt('voice-en') ?? process.env.ELEVENLABS_VOICE_EN ?? baseVoice,
-  pt: opt('voice-pt') ?? process.env.ELEVENLABS_VOICE_PT ?? baseVoice,
+  en: opt('voice-en') ?? process.env.ELEVENLABS_VOICE_EN ?? baseVoice ?? LINES.voice?.en,
+  pt: opt('voice-pt') ?? process.env.ELEVENLABS_VOICE_PT ?? baseVoice ?? LINES.voice?.pt,
 };
 const langs = opt('lang') ? [opt('lang')] : LANGS;
 const only = opt('only')?.split(',').map((s) => s.trim()).filter(Boolean);

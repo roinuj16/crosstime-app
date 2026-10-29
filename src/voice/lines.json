@@ -1,5 +1,9 @@
 {
   "_about": "Frases da voz gravada do CrossTimer. Cada chave vira assets/voice/<idioma>/<chave>.mp3 (npm run voices). Chaves só com a-z, 0-9 e _ (exigência do Android). Mudou um texto? Rode de novo com --only <chave> --force.",
+  "voice": {
+    "en": "SOYHLrjzK2X1ezoPC6cr",
+    "_note": "Voz escolhida na ElevenLabs (ID). Usada pelo npm run voices quando não se passa --voice; mantenha a mesma para frases novas soarem iguais."
+  },
   "limits": {
     "round": 60,
     "cycle": 10,
