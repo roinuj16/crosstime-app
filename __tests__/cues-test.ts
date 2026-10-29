@@ -11,16 +11,16 @@ const phaseEv = (segs: Engine.Segment[], i: number) => ({ type: 'phase' as const
 const en = STRINGS.en.say, pt = STRINGS.pt.say;
 
 describe('frases da voz', () => {
-  it('trabalho com número do round', () => expect(phrase(phaseEv(tabata, 1), en, true)).toBe('Work, round 1'));
-  it('sem número quando desligado', () => expect(phrase(phaseEv(tabata, 1), en, false)).toBe('Work'));
+  it('trabalho começa com "Go" e o número do round', () => expect(phrase(phaseEv(tabata, 1), en, true)).toBe('Go, round 1'));
+  it('sem número quando desligado', () => expect(phrase(phaseEv(tabata, 1), en, false)).toBe('Go'));
   it('início de um novo ciclo', () => {
     const i = tabata.findIndex((s) => s.phase === 'work' && s.cycle === 2 && s.round === 1);
     expect(phrase(phaseEv(tabata, i), pt, true)).toBe('Ciclo 2');
   });
   it('último round', () => expect(phrase(phaseEv(tabata, tabata.map((s) => s.phase).lastIndexOf('work')), pt, true)).toBe('Último round'));
   it('EMOM anuncia o round e o último', () => {
-    expect(phrase(phaseEv(emom, 3), en, true)).toBe('Round 3');
-    expect(phrase(phaseEv(emom, emom.length - 1), en, true)).toBe('Last round');
+    expect(phrase(phaseEv(emom, 3), en, true)).toBe('Go, round 3');
+    expect(phrase(phaseEv(emom, emom.length - 1), en, true)).toBe('Go, last round');
   });
   it('descanso e preparar', () => {
     expect(phrase(phaseEv(tabata, 2), pt, true)).toBe('Descanso');
@@ -34,7 +34,7 @@ describe('deixas por evento', () => {
     expect(c).toEqual([
       { kind: 'sound', key: 'phase-beep', volume: 0.8 },
       { kind: 'haptic', style: 'phase' },
-      { kind: 'speak', text: 'Work, round 1', clips: [['work', 'round_1'], ['work']] },
+      { kind: 'speak', text: 'Go, round 1', clips: [['run', 'round_1'], ['run']] },
     ]);
   });
   it('lanterna só quando ligada', () => {
@@ -90,9 +90,9 @@ describe('voz gravada', () => {
     for (const id of Object.keys(lines.en)) expect(id).toMatch(/^[a-z][a-z0-9_]*$/);
   });
 
-  it('round além da lista cai para "Work"; volta além da lista cai para "Lap"', () => {
+  it('round além da lista cai para "Go"; volta além da lista cai para "Lap"', () => {
     const r = lines.limits.round + 1;
-    expect(chooseClips([['work', `round_${r}`], ['work']], has('en'))).toEqual(['work']);
+    expect(chooseClips([['run', `round_${r}`], ['run']], has('en'))).toEqual(['run']);
     expect(chooseClips([[`lap_${lines.limits.lap + 1}`], ['lap']], has('pt'))).toEqual(['lap']);
   });
 
@@ -105,5 +105,40 @@ describe('voz gravada', () => {
     expect(cuesFor([{ type: 'count', n: 2 }], st, pt, 'tabata')).toEqual([{ kind: 'speak', text: 'Dois', clips: [['count_2']] }]);
     expect(cuesFor([{ type: 'count', n: 1 }], st, en, 'tabata')).toEqual([{ kind: 'speak', text: 'One', clips: [['count_1']] }, { kind: 'haptic', style: 'count' }]);
     expect(cuesFor([{ type: 'count', n: 1 }], { ...st, voice: false }, en, 'tabata')[0]).toMatchObject({ kind: 'sound', key: 'count-last' });
+  });
+});
+
+describe('EMOM: atenção e "3, 2, 1, Go!" em todo round', () => {
+  // EMOM de 1 min, 10 rounds, sem preparação para simplificar a conta
+  const segs = Engine.buildSegments('emom', { prepare: 0, interval: 60, rounds: 10 });
+  const all = (from: number, to: number) => {
+    const out: Engine.TimerEvent[] = [];
+    for (let t = from; t < to; t = Math.round((t + 0.1) * 10) / 10) out.push(...Engine.eventsBetween(segs, t, Math.round((t + 0.1) * 10) / 10));
+    return out;
+  };
+  const evs = all(0, 600);
+
+  it('bipe de atenção 10 s antes de cada round, nos 10 rounds', () => {
+    expect(evs.filter((e) => e.type === 'warn')).toHaveLength(10);
+    expect(cuesFor([{ type: 'warn' }], ON, en, 'emom')).toEqual([{ kind: 'sound', key: 'warn', volume: 0.8 }, { kind: 'haptic', style: 'lap' }]);
+  });
+
+  it('contagem 3, 2, 1 em todos os rounds', () => {
+    expect(evs.filter((e) => e.type === 'count' && e.n === 3)).toHaveLength(10);
+  });
+
+  it('cada round começa com "Go!" e o número; o último com "Go! Last round!"', () => {
+    expect(phraseClips(phaseEv(segs, 4), true)).toEqual([['run', 'round_5'], ['run']]);
+    expect(phraseClips(phaseEv(segs, segs.length - 1), true)).toEqual([['run', 'last'], ['last']]);
+  });
+
+  it('sem bipe de atenção em intervalos curtos (menos de 20 s) e fora do EMOM', () => {
+    const short = Engine.buildSegments('emom', { prepare: 0, interval: 15, rounds: 4 });
+    let n = 0;
+    for (let t = 0; t < 60; t++) n += Engine.eventsBetween(short, t, t + 1).filter((e) => e.type === 'warn').length;
+    expect(n).toBe(0);
+    let m = 0;
+    for (let t = 0; t < 600; t++) m += Engine.eventsBetween(tabata, t, t + 1).filter((e) => e.type === 'warn').length;
+    expect(m).toBe(0);
   });
 });

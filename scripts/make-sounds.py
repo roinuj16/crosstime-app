@@ -165,6 +165,9 @@ wood = tone(0.05, 1850, ((1, 1.0), (2.7, 0.35)), a=0.0008, d=0.012, r=0.005)
 wood[:len(n := noise_burst(0.01, 2500, 6000, 0.0015))] += 0.5 * n
 save('tick', master(wood, hp=600, tail=0.004, drive_db=0))
 
+# ---------- atenção (EMOM): 10 s antes do próximo round, três bipes agudos e rápidos ----------
+save('warn', master(place(*[(i * 0.12, tone(0.07, 2093.0, PIP, a=0.002, d=10, s=1, r=0.02, hold=0.05)) for i in range(3)])))
+
 # ---------- volta do cronômetro: duas notas rápidas (sol → dó) ----------
 save('lap', master(place(
     (0.00, tone(0.12, 1568.0, PIP, a=0.002, d=10, s=1, r=0.03, hold=0.09)),

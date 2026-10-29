@@ -1,11 +1,12 @@
 """Acabamento da voz gravada (assets/voice/<idioma>/*.mp3), depois do `npm run voices`.
 
+- acelera a fala sem mudar o tom da voz (TEMPO);
 - corta o silêncio do começo e do fim (a voz entra na hora certa do bipe);
 - tira o grave que o alto-falante do celular não toca (sobra volume para o resto);
 - deixa todas as frases com o mesmo volume, sem distorcer;
 - salva em mp3 mono 64 kbps (voz não precisa de mais; o app fica menor).
 
-Precisa de python3 com numpy e do ffmpeg. Uso: python3 scripts/polish-voices.py [arquivos...]
+Precisa de python3 com numpy e do ffmpeg. Uso: python3 scripts/polish-voices.py [--tempo 1.25] [arquivos...]
 Os originais da ElevenLabs ficam em voice-src/ (fora do app), para refazer se precisar.
 """
 import os, shutil, subprocess, sys
@@ -15,15 +16,17 @@ ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')
 VOICE = os.path.join(ROOT, 'assets', 'voice')
 RAW = os.path.join(ROOT, 'voice-src')  # originais, fora de assets/ (não vão para o app)
 RATE = 44100
+TEMPO = 1.25           # 1.0 = velocidade original da ElevenLabs; 1.25 = 25% mais rápida (escolhida ouvindo)
 TARGET_RMS_DB = -16.0   # volume médio da fala
 PEAK_DB = -1.0          # teto
 GATE_DB = -40.0         # abaixo disso (em relação ao pico da frase) é silêncio
 PRE, POST = 0.012, 0.06  # respiro mantido antes e depois da fala (s)
 
 
-def decode(path):
+def decode(path, tempo=TEMPO):
+    # atempo muda a velocidade mantendo o tom (não fica voz de esquilo)
     out = subprocess.run(['ffmpeg', '-v', 'error', '-i', path, '-ac', '1', '-ar', str(RATE),
-                          '-af', 'highpass=f=110:poles=2', '-f', 'f32le', '-'], capture_output=True, check=True).stdout
+                          '-af', f'highpass=f=110:poles=2,atempo={tempo}', '-f', 'f32le', '-'], capture_output=True, check=True).stdout
     return np.frombuffer(out, dtype=np.float32).astype(np.float64)
 
 
@@ -65,7 +68,13 @@ def polish(x):
     return x
 
 
-def main(files):
+def main(args):
+    tempo = TEMPO
+    if '--tempo' in args:
+        i = args.index('--tempo')
+        tempo = float(args[i + 1])
+        args = args[:i] + args[i + 2:]
+    files = args
     if not shutil.which('ffmpeg'):
         sys.exit('Precisa do ffmpeg (no Mac: brew install ffmpeg).')
     if not files:
@@ -77,10 +86,10 @@ def main(files):
         if not os.path.exists(raw):  # guarda o original uma vez só
             os.makedirs(os.path.dirname(raw), exist_ok=True)
             shutil.copy2(path, raw)
-        x = polish(decode(raw))
+        x = polish(decode(raw, tempo))
         encode(x, path)
         print(f'  ✔ {rel}  {len(x) / RATE:.2f}s')
-    print(f'Pronto: {len(files)} áudios.')
+    print(f'Pronto: {len(files)} áudios (velocidade {tempo}x).')
 
 
 if __name__ == '__main__':

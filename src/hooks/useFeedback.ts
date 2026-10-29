@@ -25,7 +25,7 @@ export function useFeedback(mode: Mode) {
   useEffect(() => { listVoices(settings.voiceLang).catch(() => {}); preloadClips(settings.voiceLang); }, [settings.voiceLang]);
 
   useEffect(() => {
-    preloadSounds([`phase-${settings.soundScheme}` as SoundKey, 'count', 'count-last', 'done', 'lap', 'tick']);
+    preloadSounds([`phase-${settings.soundScheme}` as SoundKey, 'count', 'count-last', 'done', 'lap', 'warn', 'tick']);
   }, [settings.soundScheme]);
 
   useEffect(() => {

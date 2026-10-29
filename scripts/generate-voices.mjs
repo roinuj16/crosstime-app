@@ -3,16 +3,16 @@
  * Gera a voz gravada do CrossTimer na ElevenLabs.
  *
  *   ELEVENLABS_API_KEY=sua_chave npm run voices -- --list            # lista as vozes da sua conta
- *   ELEVENLABS_API_KEY=sua_chave npm run voices -- --voice ID --sample   # 6 frases para ouvir antes
- *   ELEVENLABS_API_KEY=sua_chave npm run voices -- --voice ID         # tudo (pt + en)
+ *   ELEVENLABS_API_KEY=sua_chave npm run voices -- --voice ID --sample   # 3 frases de teste em voice-samples/
+ *   ELEVENLABS_API_KEY=sua_chave npm run voices -- --voice ID         # tudo (inglês)
  *
  * Opções:
- *   --voice ID        voz para os dois idiomas (ou ELEVENLABS_VOICE_ID)
+ *   --voice ID        voz (ou ELEVENLABS_VOICE_ID); sem isso, usa a escolhida em src/voice/lines.json
  *   --voice-en ID     voz só do inglês   (ou ELEVENLABS_VOICE_EN)
  *   --voice-pt ID     voz só do português (ou ELEVENLABS_VOICE_PT)
  *   --lang en|pt      só um idioma
  *   --only a,b,c      só estas frases (chaves de src/voice/lines.json)
- *   --sample          só algumas frases, para testar a voz gastando pouco
+ *   --sample          só as frases de teste (SAMPLE abaixo), em voice-samples/<voz>/ — não mexe no app
  *   --force           gera de novo mesmo se o arquivo já existir
  *   --model ID        modelo da ElevenLabs (padrão: eleven_v4; alternativa: eleven_multilingual_v2)
  *   --manifest        não chama a API; só atualiza src/voice/clips.ts
@@ -29,8 +29,18 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const LINES = JSON.parse(readFileSync(join(ROOT, 'src/voice/lines.json'), 'utf8'));
 const OUT = join(ROOT, 'assets/voice');
 const MANIFEST = join(ROOT, 'src/voice/clips.ts');
-const LANGS = ['en', 'pt'];
-const SAMPLE = ['prepare', 'work', 'round_5', 'last', 'count_3', 'done'];
+// Só inglês por enquanto: a voz em português soava mal. As frases em pt continuam em lines.json
+// e podem ser geradas de propósito com --lang pt (não entram no app enquanto LANGS não tiver 'pt').
+const LANGS = ['en'];
+const ALL_LANGS = ['en', 'pt'];
+// Frases de teste para comparar vozes. Ficam em voice-samples/<id da voz>/ (fora do app, fora do Git)
+// e são sempre geradas de novo, então dá para testar várias vozes e comparar lado a lado.
+const SAMPLE = [
+  ['are_you_ready', 'Are you ready?'],
+  ['countdown_go', 'Three... two... one... GO!'],
+  ['last_round', 'Last round!'],
+];
+const SAMPLES_DIR = join(ROOT, 'voice-samples');
 const API = process.env.ELEVENLABS_API_BASE ?? 'https://api.elevenlabs.io/v1'; // trocar só para testes
 
 // ---------- argumentos ----------
@@ -42,8 +52,8 @@ const key = process.env.ELEVENLABS_API_KEY;
 const model = opt('model') ?? process.env.ELEVENLABS_MODEL ?? 'eleven_v4';
 const baseVoice = opt('voice') ?? process.env.ELEVENLABS_VOICE_ID;
 const voiceFor = {
-  en: opt('voice-en') ?? process.env.ELEVENLABS_VOICE_EN ?? baseVoice,
-  pt: opt('voice-pt') ?? process.env.ELEVENLABS_VOICE_PT ?? baseVoice,
+  en: opt('voice-en') ?? process.env.ELEVENLABS_VOICE_EN ?? baseVoice ?? LINES.voice?.en,
+  pt: opt('voice-pt') ?? process.env.ELEVENLABS_VOICE_PT ?? baseVoice ?? LINES.voice?.pt,
 };
 const langs = opt('lang') ? [opt('lang')] : LANGS;
 const only = opt('only')?.split(',').map((s) => s.trim()).filter(Boolean);
@@ -119,14 +129,17 @@ if (flag('list')) {
 }
 
 for (const lang of langs) {
-  if (!LANGS.includes(lang)) fail(`Idioma desconhecido: ${lang} (use en ou pt)`);
+  if (!ALL_LANGS.includes(lang)) fail(`Idioma desconhecido: ${lang} (use en ou pt)`);
   if (!voiceFor[lang]) fail(`Falta escolher a voz. Rode --list para ver os IDs e depois --voice ID.`);
 }
 
 // ---------- geração ----------
 const jobs = [];
-for (const lang of langs) {
-  const keys = flag('sample') ? SAMPLE : only ?? Object.keys(LINES[lang]);
+if (flag('sample')) {
+  const lang = langs[0];
+  for (const [k, text] of SAMPLE) jobs.push({ lang, k, text, file: join(SAMPLES_DIR, voiceFor[lang], `${k}.mp3`) });
+} else for (const lang of langs) {
+  const keys = only ?? Object.keys(LINES[lang]);
   for (const k of keys) {
     const text = LINES[lang][k];
     if (!text) fail(`Frase desconhecida: ${k}`);
@@ -158,7 +171,12 @@ async function worker() {
 }
 await Promise.all([worker(), worker()]); // 2 de cada vez: dentro do limite dos planos mais baratos
 
+if (flag('sample')) {
+  console.log(`\nPronto: ${done} áudios de teste em voice-samples/${voiceFor[langs[0]]}/`);
+  console.log('Para abrir a pasta: open voice-samples');
+  console.log('Gostou da voz? Gere as frases do app: npm run voices -- --voice ' + voiceFor[langs[0]]);
+  process.exit(0);
+}
 writeManifest();
 console.log(`\nPronto: ${done} áudios em assets/voice/.`);
-if (flag('sample')) console.log('Ouça os arquivos. Gostou? Rode sem --sample (e com --force se trocar de voz).');
-else console.log('Ouça alguns e, se estiver tudo certo:\n  git add -A && git commit -m "Voz gravada" && git push');
+ console.log('Ouça alguns e, se estiver tudo certo:\n  git add -A && git commit -m "Voz gravada" && git push');

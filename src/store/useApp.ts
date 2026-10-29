@@ -13,6 +13,7 @@ export interface Settings {
   countdown: boolean;
   tick: boolean;
   voice: boolean;
+  /** idioma da voz guia; hoje só inglês (o português soava mal). A interface continua em pt/en. */
   voiceLang: 'en' | 'pt';
   voiceId: string;
   voiceRate: number;
@@ -70,11 +71,14 @@ function initial(): Persisted {
   };
   const d = loadJSON<Partial<Persisted>>();
   if (!d || d.v !== 1) return base;
+  const settings: Settings = { ...base.settings, ...d.settings };
+  // A voz em português saiu do app (soava mal): quem tinha escolhido volta para o inglês.
+  if (settings.voiceLang !== 'en') { settings.voiceLang = 'en'; settings.voiceId = ''; }
   return {
     ...base, ...d,
     configs: { ...base.configs, ...d.configs },
     colors: { ...base.colors, ...d.colors },
-    settings: { ...base.settings, ...d.settings },
+    settings,
   } as Persisted;
 }
 

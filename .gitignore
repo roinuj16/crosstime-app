@@ -39,3 +39,6 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+
+# testes de voz da ElevenLabs (npm run voices -- --sample)
+voice-samples/

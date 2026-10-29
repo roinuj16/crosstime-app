@@ -74,3 +74,15 @@ describe('estado do app', () => {
     expect(saved.settings.voiceLang).toBe('pt');
   });
 });
+
+describe('voz só em inglês', () => {
+  it('quem tinha escolhido a voz em português volta para o inglês, com a voz automática', () => {
+    mockMem.set('crosstimer.state.v1', JSON.stringify({ v: 1, settings: { voiceLang: 'pt', voiceId: 'com.apple.voice.pt-BR.Luciana', sound: false } }));
+    jest.isolateModules(() => {
+      const { useApp: fresh } = require('../src/store/useApp') as typeof import('../src/store/useApp');
+      const st = fresh.getState().settings;
+      expect([st.voiceLang, st.voiceId, st.sound]).toEqual(['en', '', false]);
+    });
+    mockMem.clear();
+  });
+});

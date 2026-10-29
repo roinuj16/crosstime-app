@@ -1,109 +1,48 @@
 import { router } from 'expo-router';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { Button, Section, SheetHeader } from '@/components/ui';
+import { StyleSheet, View } from 'react-native';
+import { Button, SectionTitle } from '@/components/atoms';
+import { ColorRow, PresetCard } from '@/components/molecules';
+import { ColorPreview } from '@/components/organisms';
+import { SheetTemplate } from '@/components/templates';
 import { useStrings } from '@/hooks/useStrings';
 import { useApp } from '@/store/useApp';
-import { DEFAULT_COLORS, glow, hex, LED_KEYS, LED_NAMES, PRESETS, UI, type ColorRole, type ColorScheme } from '@/theme/palette';
-import { FONT, teko } from '@/theme/type';
+import { DEFAULT_COLORS, hex, LED_KEYS, LED_NAMES, PRESETS, type ColorRole, type ColorScheme } from '@/theme/palette';
 
 const ROLES: ColorRole[] = ['prepare', 'work', 'rest', 'restBC', 'cooldown', 'run', 'lap', 'rounds', 'cycles'];
+const PREVIEW_ROLES: ColorRole[] = ['prepare', 'work', 'rest', 'cooldown'];
 
-/** Mini placar: mostra como as cores ficam na tela do timer. */
-function Preview({ c, t }: { c: ColorScheme; t: ReturnType<typeof useStrings>['t'] }) {
-  const led = (role: ColorRole, size: number, kind: 'digits' | 'label' = 'digits') => ({ color: hex(c[role]), textShadowColor: glow(c[role], 0.55), textShadowRadius: 10, ...teko(size, kind) });
-  return (
-    <View style={styles.preview} accessible accessibilityLabel={t.colors.preview}>
-      <View style={styles.pvCur}>
-        <Text style={[styles.pvText, led('work', 18, 'label')]}>{t.phases.work.toUpperCase()}</Text>
-        <Text style={[styles.pvText, led('work', 56)]}>00:24</Text>
-      </View>
-      <View style={styles.pvNext}>
-        <Text style={[styles.pvText, led('rest', 13, 'label')]}>{t.phases.rest.toUpperCase()}</Text>
-        <Text style={[styles.pvText, led('rest', 30)]}>00:15</Text>
-      </View>
-      <View style={styles.pvDeck}>
-        <Text style={[styles.pvText, led('rounds', 30)]}>3</Text>
-        <View style={[styles.pvPlay, { backgroundColor: hex(c.work) }]} />
-        <Text style={[styles.pvText, led('cycles', 30)]}>2</Text>
-      </View>
-    </View>
-  );
-}
-
+/** Página de cores: prévia do placar, combinações prontas e a cor de cada fase. */
 export default function ColorsScreen() {
   const { t, lang } = useStrings();
   const colors = useApp((s) => s.colors);
   const setColor = useApp((s) => s.setColor);
   const setColors = useApp((s) => s.setColors);
   const same = (a: ColorScheme, b: ColorScheme) => ROLES.every((r) => a[r] === b[r]);
+  const options = LED_KEYS.map((k) => ({ key: k, hex: hex(k), name: LED_NAMES[k][lang] }));
 
   return (
-    <SafeAreaView style={styles.root} edges={['top', 'bottom']}>
-      <SheetHeader title={t.colors.title} onBack={() => router.back()} right={<Button label={t.settings.done} kind="primary" onPress={() => router.back()} />} />
-      <ScrollView contentContainerStyle={styles.body}>
-        <Preview c={colors} t={t} />
+    <SheetTemplate title={t.colors.title} onBack={() => router.back()} right={<Button label={t.settings.done} kind="primary" onPress={() => router.back()} />}>
+      <ColorPreview colors={colors} workLabel={t.phases.work} restLabel={t.phases.rest} accessibilityLabel={t.colors.preview} />
 
-        <Section title={t.colors.presets} />
-        <View style={styles.presets}>
-          {Object.entries(PRESETS).map(([id, p]) => {
-            const sel = same(p.colors, colors);
-            return (
-              <Pressable key={id} onPress={() => setColors(p.colors)} accessibilityRole="radio" accessibilityState={{ selected: sel }} style={[styles.preset, sel && styles.presetSel]}>
-                <View style={styles.presetDots}>
-                  {(['prepare', 'work', 'rest', 'cooldown'] as ColorRole[]).map((r) => <View key={r} style={[styles.dot, { backgroundColor: hex(p.colors[r]) }]} />)}
-                </View>
-                <Text style={styles.presetName}>{p.name[lang]}</Text>
-              </Pressable>
-            );
-          })}
-        </View>
-
-        <Section title={t.colors.perPhase} />
-        {ROLES.map((role) => (
-          <View key={role} style={styles.role}>
-            <Text style={[styles.roleName, { color: hex(colors[role]) }]}>{t.colors.roles[role]}</Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.swRow}>
-              {LED_KEYS.map((k) => {
-                const sel = colors[role] === k;
-                return (
-                  <Pressable
-                    key={k} onPress={() => setColor(role, k)} hitSlop={4}
-                    accessibilityRole="radio" accessibilityState={{ selected: sel }} accessibilityLabel={`${t.colors.roles[role]}: ${LED_NAMES[k][lang]}`}
-                    style={[styles.sw, { backgroundColor: hex(k) }, sel && styles.swSel]}
-                  />
-                );
-              })}
-            </ScrollView>
-          </View>
+      <SectionTitle title={t.colors.presets} />
+      <View style={s.presets}>
+        {Object.entries(PRESETS).map(([id, p]) => (
+          <PresetCard key={id} name={p.name[lang]} colors={PREVIEW_ROLES.map((r) => hex(p.colors[r]))} selected={same(p.colors, colors)} onPress={() => setColors(p.colors)} />
         ))}
+      </View>
 
-        <View style={{ flexDirection: 'row', marginTop: 20 }}>
-          <Button label={t.colors.restore} onPress={() => setColors(DEFAULT_COLORS)} disabled={same(colors, DEFAULT_COLORS)} />
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+      <SectionTitle title={t.colors.perPhase} />
+      {ROLES.map((role) => (
+        <ColorRow key={role} label={t.colors.roles[role]} color={hex(colors[role])} options={options} value={colors[role]} onChange={(k) => setColor(role, k)} />
+      ))}
+
+      <View style={{ flexDirection: 'row', marginTop: 20 }}>
+        <Button label={t.colors.restore} onPress={() => setColors(DEFAULT_COLORS)} disabled={same(colors, DEFAULT_COLORS)} />
+      </View>
+    </SheetTemplate>
   );
 }
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: '#161616' },
-  body: { paddingHorizontal: 16, paddingBottom: 48 },
-  preview: { borderRadius: 18, overflow: 'hidden', borderWidth: 1, borderColor: UI.line, marginTop: 4 },
-  pvCur: { backgroundColor: UI.bg, alignItems: 'center', paddingVertical: 14 },
-  pvNext: { backgroundColor: UI.panel, alignItems: 'center', paddingVertical: 8 },
-  pvDeck: { backgroundColor: UI.deck, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-around', paddingVertical: 10 },
-  pvText: { fontFamily: FONT.display, fontVariant: ['tabular-nums'], includeFontPadding: false },
-  pvPlay: { width: 40, height: 40, borderRadius: 20 },
+const s = StyleSheet.create({
   presets: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginTop: 8 },
-  preset: { flexGrow: 1, flexBasis: 100, padding: 12, borderRadius: 14, backgroundColor: '#202020', borderWidth: 2, borderColor: 'transparent', gap: 8 },
-  presetSel: { borderColor: '#F2F2F2' },
-  presetDots: { flexDirection: 'row', gap: 5 },
-  presetName: { color: UI.text, fontFamily: FONT.label, ...teko(18) },
-  dot: { width: 14, height: 14, borderRadius: 7 },
-  role: { paddingVertical: 12, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: UI.line, gap: 10 },
-  roleName: { fontFamily: FONT.label, letterSpacing: 0.5, ...teko(20) },
-  swRow: { gap: 10, paddingRight: 8 },
-  sw: { width: 34, height: 34, borderRadius: 17 },
-  swSel: { borderWidth: 3, borderColor: '#FFFFFF' },
 });
