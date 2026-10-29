@@ -119,7 +119,7 @@ const s = StyleSheet.create({
   btn: { width: 40, height: 40, borderRadius: 10, backgroundColor: '#262626', alignItems: 'center', justifyContent: 'center' },
   value: { minWidth: 70, textAlign: 'center' },
   /** valor tocável: um sublinhado discreto mostra que dá para digitar */
-  tap: { width: 96, alignItems: 'center', borderRadius: 8, borderBottomWidth: 2, borderBottomColor: '#3A3A3A' },
+  tap: { width: 96, alignItems: 'center', paddingBottom: 4, borderRadius: 8, borderBottomWidth: 2, borderBottomColor: '#3A3A3A' },
   /** caixa de digitação: sem lineHeight (no iOS ele cortaria a Teko), altura cobre a linha inteira */
   input: {
     width: 96, flexGrow: 0, flexShrink: 0, height: 46, paddingVertical: 0, paddingHorizontal: 6, textAlign: 'center',

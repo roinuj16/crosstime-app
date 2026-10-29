@@ -71,6 +71,8 @@ export type TimerEvent =
   | { type: 'phase'; seg: Segment; next: Segment | null; isLastWork: boolean }
   | { type: 'count'; n: number }
   | { type: 'half' }
+  /** aviso de atenção: faltam WARN_AT segundos para o próximo round do EMOM */
+  | { type: 'warn' }
   | { type: 'lap'; n: number }
   | { type: 'tick' }
   | { type: 'done' };
@@ -212,6 +214,9 @@ export function isLastWork(segs: Segment[], i: number): boolean {
  * Se o salto for grande (app voltou do segundo plano), só reporta a fase atual,
  * para não disparar uma rajada de sons.
  */
+/** Segundos antes do fim de cada intervalo do EMOM em que toca o bipe de atenção. */
+export const WARN_AT = 10;
+
 export function eventsBetween(segs: Segment[], prevEl: number, el: number): TimerEvent[] {
   const ev: TimerEvent[] = [];
   if (el <= prevEl) return ev;
@@ -231,6 +236,9 @@ export function eventsBetween(segs: Segment[], prevEl: number, el: number): Time
     const half = seg.start + seg.duration / 2;
     const halfable = seg.phase === 'work' || seg.phase === 'amrap' || seg.phase === 'fortime';
     if (halfable && seg.duration >= 20 && prevEl < half && el >= half) ev.push({ type: 'half' });
+    // EMOM: bipe de atenção 10 s antes do próximo round (só em intervalos de 20 s ou mais)
+    const warn = seg.start + seg.duration - WARN_AT;
+    if (seg.phase === 'emom' && seg.duration >= 2 * WARN_AT && prevEl < warn && el >= warn) ev.push({ type: 'warn' });
   } else if (seg.phase === 'run' && seg.lap) {
     const lapsA = Math.floor(Math.max(0, prevEl - seg.start) / seg.lap);
     const lapsB = Math.floor((el - seg.start) / seg.lap);

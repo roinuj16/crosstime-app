@@ -18,6 +18,7 @@ const SOURCES: Record<SoundKey, number> = {
   'count-last': require('../../assets/sounds/count_last.wav'),
   tick: require('../../assets/sounds/tick.wav'),
   lap: require('../../assets/sounds/lap.wav'),
+  warn: require('../../assets/sounds/warn.wav'),
   done: require('../../assets/sounds/done.wav'),
 };
 
@@ -66,11 +67,13 @@ function player(key: SoundKey): AudioPlayer {
 /** Carrega os sons antes do treino, para o primeiro bipe não atrasar. */
 export function preloadSounds(keys: SoundKey[]) { for (const k of keys) player(k); }
 
-export function playSound(key: SoundKey, volume: number) {
+export async function playSound(key: SoundKey, volume: number) {
   try {
     const p = player(key);
     p.volume = volume;
-    p.seekTo(0);
+    // espera voltar ao começo antes de tocar: sem isso, um som que já terminou
+    // podia ficar mudo uma vez sim, outra não (o play chegava antes do seek)
+    await p.seekTo(0);
     p.play();
   } catch { /* som é opcional */ }
 }

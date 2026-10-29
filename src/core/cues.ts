@@ -5,7 +5,7 @@
 import type { Mode, TimerEvent } from './engine';
 import type { Strings } from '@/i18n/strings';
 
-export type SoundKey = 'phase-beep' | 'phase-bell' | 'phase-gong' | 'phase-horn' | 'phase-whistle' | 'count' | 'count-last' | 'tick' | 'lap' | 'done';
+export type SoundKey = 'phase-beep' | 'phase-bell' | 'phase-gong' | 'phase-horn' | 'phase-whistle' | 'count' | 'count-last' | 'tick' | 'lap' | 'warn' | 'done';
 export type HapticKind = 'phase' | 'count' | 'lap' | 'done';
 
 /**
@@ -60,11 +60,12 @@ export function phraseClips(ev: Extract<TimerEvent, { type: 'phase' }>, sayRound
   switch (s.phase) {
     case 'prepare': return [['prepare']];
     case 'work':
-      if (ev.isLastWork && (s.rounds ?? 1) > 1) return [['last']];
+      if (ev.isLastWork && (s.rounds ?? 1) > 1) return [['run', 'last'], ['last']];
       // início do trabalho: "Go!" (mais curto e com mais energia que "Work!")
       if ((s.cycles ?? 1) > 1 && s.round === 1 && (s.cycle ?? 1) > 1) return [[`cycle_${s.cycle}`], ['run']];
       return sayRound && (s.rounds ?? 1) > 1 ? [['run', `round_${s.round ?? 1}`], ['run']] : [['run']];
-    case 'emom': return ev.isLastWork && (s.rounds ?? 1) > 1 ? [['last']] : [[`round_${s.round ?? 1}`]];
+    // EMOM: todo round começa com "Go!" (depois do 3, 2, 1)
+    case 'emom': return ev.isLastWork && (s.rounds ?? 1) > 1 ? [['run', 'last'], ['last']] : [['run', `round_${s.round ?? 1}`], ['run']];
     case 'amrap': return [['amrap']];
     case 'fortime': return [['fortime']];
     case 'rest': return [['rest']];
@@ -101,6 +102,9 @@ export function cuesFor(events: TimerEvent[], st: CueSettings, say: Say, mode: M
         break;
       case 'half':
         talk(say.half, [['half']]);
+        break;
+      case 'warn':
+        snd('warn'); hap('lap');
         break;
       case 'lap':
         snd('lap'); hap('lap');

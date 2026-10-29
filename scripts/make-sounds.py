@@ -62,6 +62,8 @@ tick = render(0.05, [(0, 'tri', 1800, 0.5, 0.001, 0.008, 0, 0)])
 tick = [x + 0.15 * (random.random() * 2 - 1) * math.exp(-i / 60) for i, x in enumerate(tick)]
 save('tick', tick, fade=0.005)
 # volta do cronômetro: duas notas
+# atenção (EMOM, 10 s antes do próximo round): três bipes agudos e rápidos
+save('warn', render(0.42, [(i * 0.13, 'sine', 1760, 0.7, 0.002, 0.04, 0, 0) for i in range(3)] + [(i * 0.13, 'sine', 3520, 0.1, 0.002, 0.02, 0, 0) for i in range(3)]))
 save('lap', render(0.9, [(0, 'sine', 1046, 0.6, 0.004, 0.25, 0, 0), (0.12, 'sine', 1568, 0.5, 0.004, 0.3, 0, 0)]))
 # fim do treino: três notas subindo
 save('done', render(1.2, [(i * 0.18, 'square', f, 0.35, 0.005, 0.12 if i < 2 else 0.35, 0, 0) for i, f in enumerate([660, 880, 1320])]))
