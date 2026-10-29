@@ -1,12 +1,13 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
-import { FONT } from '@/theme/type';
+import { LedText } from '@/components/atoms';
 import { UI } from '@/theme/palette';
 
-interface Props {
+export interface PlayButtonProps {
   color: string;
   glow: string;
+  /** 0 a 1: quanto da fase já passou (anel em volta) */
   progress: number;
   running: boolean;
   label: string;
@@ -15,12 +16,12 @@ interface Props {
 }
 
 /** Botão redondo com anel de progresso da fase, no estilo do relógio do box. */
-export function PlayButton({ color, glow, progress, running, label, onPress, size = 120 }: Props) {
+export function PlayButton({ color, glow, progress, running, label, onPress, size = 120 }: PlayButtonProps) {
   const r = 47;
   const c = 2 * Math.PI * r;
   const p = Math.max(0, Math.min(1, progress));
   return (
-    <View style={styles.wrap}>
+    <View style={s.wrap}>
       <Pressable
         onPress={onPress}
         accessibilityRole="button"
@@ -36,20 +37,19 @@ export function PlayButton({ color, glow, progress, running, label, onPress, siz
             />
           )}
         </Svg>
-        <View style={[styles.core, { backgroundColor: color, shadowColor: color }]}>
+        <View style={[s.core, { backgroundColor: color, shadowColor: color }]}>
           <Ionicons name={running ? 'pause' : 'play'} size={size * 0.34} color={UI.ink} style={running ? undefined : { marginLeft: size * 0.04 }} />
         </View>
       </Pressable>
-      <Text style={[styles.label, { color, textShadowColor: glow }]}>{label.toUpperCase()}</Text>
+      <LedText size={24} color={color} glow={glow} glowRadius={10} tracking={1.5}>{label.toUpperCase()}</LedText>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
+const s = StyleSheet.create({
   wrap: { alignItems: 'center', gap: 4 },
   core: {
     position: 'absolute', top: '12%', left: '12%', right: '12%', bottom: '12%', borderRadius: 999,
     alignItems: 'center', justifyContent: 'center', shadowOpacity: 0.6, shadowRadius: 16, shadowOffset: { width: 0, height: 0 }, elevation: 6,
   },
-  label: { fontFamily: FONT.label, fontSize: 24, letterSpacing: 1.5, textShadowRadius: 10 },
 });

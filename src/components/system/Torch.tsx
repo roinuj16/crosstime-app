@@ -5,6 +5,9 @@ import { onTorchPulse } from '@/services/feedback';
 import { useApp } from '@/store/useApp';
 
 /**
+ * Componente de sistema: não desenha nada, só liga a lanterna. Por isso fica fora
+ * da hierarquia de Atomic Design (atoms → molecules → organisms → templates).
+ *
  * Lanterna que pisca a cada troca de fase.
  * O sistema só liga a lanterna com a câmera ativa, então uma prévia invisível de 1 px
  * fica montada enquanto a opção estiver ligada e o treino estiver rodando.

@@ -50,16 +50,35 @@ Timer de intervalos para cross training — **Tabata, Rounds, EMOM, AMRAP, For T
 
 ```
 src/
-  app/            telas (Expo Router): timer, edição, ajustes, cores, treinos
-  components/     componentes visuais (botão play com anel de progresso…)
-  core/engine.ts  motor do timer: só cálculo, sem React — coração do app
-  core/view.ts    o que a tela mostra em cada estado (testável, sem React)
-  hooks/          laço do relógio (eventos de fase, 3-2-1, volta, fim)
+  app/            páginas (Expo Router): ligam o estado do app aos componentes
+  components/     interface em Atomic Design (veja abaixo)
+  core/           regras sem React, testadas: motor do timer, o que a tela mostra, avisos, digitação
+  hooks/          laço do relógio, som/voz/vibração, segundo plano
   i18n/           textos em português e inglês (idioma do aparelho por padrão)
+  services/       áudio, voz, notificações (falam com o aparelho)
   store/          estado do app (Zustand) salvo no aparelho (SQLite chave-valor)
-  theme/          cores de LED, combinações prontas e fontes
+  theme/          tokens: cores de LED, combinações prontas e fontes
+  voice/          frases da voz gravada e a lista de áudios
 __tests__/        testes Jest
 ```
+
+### Componentes em Atomic Design
+
+| Nível | Pasta | O que é | Exemplos |
+|---|---|---|---|
+| Tokens | `theme/` | cores, fontes, ajuste da Teko | `palette.ts`, `type.ts` |
+| Átomos | `components/atoms/` | peças mínimas | `LedText`, `Button`, `IconButton`, `Tag`, `Swatch` |
+| Moléculas | `components/molecules/` | átomos juntos com uma função | `Stepper`, `Row`, `Toggle`, `Stat`, `PlayButton` |
+| Organismos | `components/organisms/` | blocos da tela | `TimerHeader`, `CurrentBand`, `NextBand`, `ControlDeck`, `ModeTabs`, `WorkoutCard` |
+| Templates | `components/templates/` | esqueleto de cada tipo de tela | `TimerTemplate`, `SheetTemplate` |
+| Páginas | `app/` | template + dados reais | `index.tsx` (timer), `settings.tsx`… |
+
+Regras (o teste `__tests__/atomic-test.ts` falha se alguma for quebrada):
+- cada nível só usa os níveis **abaixo** dele, sempre por `@/components/<nível>`;
+- componentes **não buscam dados**: nada de `store`, `services`, `hooks` ou navegação; tudo chega por props, e quem busca é a página;
+- todo componente novo entra no `index.ts` do seu nível.
+
+`components/system/Torch.tsx` fica fora da hierarquia: não desenha nada, só liga a lanterna.
 
 ### Como o motor funciona
 
