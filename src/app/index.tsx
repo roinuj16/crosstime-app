@@ -15,7 +15,7 @@ import { formatRoomCode } from '@/core/sync';
 import { analyticsAvailable } from '@/services/analytics';
 import { useRemote } from '@/services/remote';
 import { useApp } from '@/store/useApp';
-import { glow, hex, UI, type ColorRole } from '@/theme/palette';
+import { glow, hex, LED, UI, type ColorRole } from '@/theme/palette';
 
 /** Página do timer: liga o estado do app aos blocos do placar. */
 export default function TimerScreen() {
@@ -39,6 +39,8 @@ export default function TimerScreen() {
   const color = (role: ColorRole | null) => (role ? hex(app.colors[role]) : UI.muted);
   const glowOf = (role: ColorRole | null, a = 0.5) => (role ? glow(app.colors[role], a) : 'transparent');
   const accent = color(v.accent);
+  // bolinha no ícone da TV: verde = TV respondendo, âmbar = esperando a TV, vermelho = sem internet
+  const tvBadge = !paired ? undefined : remote.status === 'error' ? LED.vermelho : remote.status === 'online' && remote.peer ? LED.verde : LED.ambar;
   const active = status === 'running' || status === 'paused';
 
   const ask = (title: string, onYes: () => void) =>
@@ -64,9 +66,10 @@ export default function TimerScreen() {
       landscape={landscape}
       header={
         <TimerHeader
-          color={accent} title={v.title} time={v.headerTime} canReset={status !== 'idle'}
-          labels={{ settings: t.settings.title, workouts: t.workouts.title, reset: t.reset, edit: t.edit.title }}
-          onSettings={() => router.push('/settings')} onWorkouts={() => router.push('/workouts')} onReset={confirmReset} onEdit={openEdit}
+          color={accent} title={v.title} time={v.headerTime} canReset={status !== 'idle'} tvBadge={tvBadge}
+          labels={{ settings: t.settings.title, workouts: t.workouts.title, tv: t.tv.connect.title, reset: t.reset, edit: t.edit.title }}
+          onSettings={() => router.push('/settings')} onWorkouts={() => router.push('/workouts')} onTv={() => router.push('/connect')}
+          onReset={confirmReset} onEdit={openEdit}
         />
       }
       current={

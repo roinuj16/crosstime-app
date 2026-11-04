@@ -136,7 +136,11 @@ npm run build:web     # gera dist/ (com páginas diretas: /tv, /settings…)
 npm run deploy:web    # gera e publica no EAS Hosting (a primeira vez pergunta o endereço)
 ```
 
-**Modo TV** (`/tv`, ou Ajustes → Modo TV no navegador): placar 16:9 com margem para TVs que
+O endereço publicado fica em `src/config/app.ts` (`WEB_URL`, hoje `https://cronobox.expo.app`).
+O app instalado usa ele para mostrar e enviar o link da TV; se o EAS publicar em outro
+endereço, troque essa linha.
+
+**Modo TV** (`/tv`, ou ícone de TV no topo do timer → Usar este aparelho como TV): placar 16:9 com margem para TVs que
 cortam a borda. A primeira tecla ou toque ativa o som e a tela cheia. Controle remoto ou teclado:
 
 | Tecla | Parado | Treino valendo |
@@ -146,7 +150,8 @@ cortam a borda. A primeira tecla ou toque ativa o som e a tela cheia. Controle r
 | ↑ ↓ | — | +1 / −1 round (AMRAP, For Time) |
 | Voltar / Esc / R | — | zera (aperte duas vezes em 3 s) |
 
-**Controle pelo celular do coach:** a TV mostra um QR code e um código; o celular lê e passa a
+**Controle pelo celular do coach:** ícone de TV no topo do timer → Conectar à TV. A TV abre
+`<endereço>/tv` e mostra um QR code e um código; o celular lê (botão Escanear, dentro do app) ou digita e passa a
 comandar a TV (treino, play, pausa, rounds, nome do box, logo, WOD). Configuração do Firebase em
 [docs/FIREBASE.md](docs/FIREBASE.md).
 

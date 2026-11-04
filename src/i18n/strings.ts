@@ -75,6 +75,13 @@ export interface Strings {
     customize: string; customizeHint: string; setupCard: string; setupCardHint: string;
     pair: { title: string; hint: string; connected: string; linked: string; section: string; waiting: string; offline: string; tvOf: (code: string) => string; connect: string; connectHint: string; codeLabel: string; disconnect: string; invalid: string; error: string };
     setup: { title: string; boxName: string; boxNamePh: string; logo: string; logoPick: string; logoRemove: string; logoHint: string; wod: string; wodHint: string; wodPh: string; open: string };
+    /** tela "Conectar à TV" e leitor de QR */
+    connect: {
+      button: string; title: string; statusOn: (code: string) => string; how: string;
+      step1: string; step2: string; step3: string; share: string; shareMsg: (url: string) => string; copied: string;
+      scan: string; typeCode: string; connectShort: string; thisDevice: string; thisDeviceHint: string; hardware: string; iosTip: string;
+      unavailable: string; scanTitle: string; scanAim: string; scanAllow: string; scanDenied: string; scanWrong: string; scanNoCamera: string;
+    };
   };
   colors: {
     title: string; presets: string; perPhase: string; restore: string; preview: string;
@@ -259,7 +266,7 @@ const pt: Strings = {
     customize: 'Personalizar modo TV', customizeHint: 'Nome do box, logo e o treino do dia (WOD) na TV',
     setupCard: 'Deixe a TV com a cara do box', setupCardHint: 'Coloque o nome, o logo e o WOD do dia em Ajustes → Personalizar modo TV.',
     pair: {
-      title: 'Controle pelo celular', hint: 'Abra o CronoBox no celular e aponte a câmera, ou digite o código',
+      title: 'Controle pelo celular', hint: 'No celular: CronoBox → ícone da TV → Escanear, ou digite o código',
       connected: 'Celular do coach conectado', linked: 'conectada', section: 'TV do box', waiting: 'Aguardando a TV', offline: 'Sem conexão com a TV',
       tvOf: (code) => `TV ${code}`, connect: 'Conectar à TV', connectHint: 'Digite o código que aparece na TV do box',
       codeLabel: 'Código da TV', disconnect: 'Desconectar', invalid: 'Código inválido: são 6 letras e números, como K7Q-4M2',
@@ -270,6 +277,21 @@ const pt: Strings = {
       logoHint: 'PNG ou JPG; aparece no canto da TV', wod: 'Treino do dia (WOD)',
       wodHint: 'Uma linha por movimento. Aparece na tela inicial da TV e ao lado do relógio no AMRAP e no For Time.',
       wodPh: '10 Thrusters 43/30 kg\n15 Pull-ups\n20 Double unders', open: 'Abrir o modo TV',
+    },
+    connect: {
+      button: 'TV do box', title: 'Conectar à TV', statusOn: (code) => `Conectado à TV ${code}`, how: 'Como conectar',
+      step1: 'Na TV do box, abra o navegador e entre neste endereço:',
+      step2: 'A TV mostra um QR code e um código de 6 letras e números, como K7Q-4M2.',
+      step3: 'Escaneie o QR code da TV aqui no app, ou digite o código. Pronto: este celular vira o controle e a TV toca os sons.',
+      share: 'Enviar o link', shareMsg: (url) => `Abra este endereço no navegador da TV do box: ${url}`, copied: 'Link copiado',
+      scan: 'Escanear QR da TV', typeCode: 'Digitar o código', connectShort: 'Conectar',
+      thisDevice: 'Usar este aparelho como TV', thisDeviceHint: 'Para um notebook, tablet ou TV box ligado na TV',
+      hardware: 'Serve qualquer TV com navegador (Samsung, LG, Android TV, Fire TV) ou um notebook ligado na TV pelo HDMI. A TV e o celular precisam de internet, mas não precisam estar no mesmo Wi-Fi.',
+      iosTip: 'No iPhone com o CronoBox na tela de início, use o botão Escanear daqui ou digite o código: a câmera do iPhone abre o link no Safari, que é separado do app.',
+      unavailable: 'A conexão com a TV não está ativa nesta versão.',
+      scanTitle: 'Escanear QR da TV', scanAim: 'Aponte para o QR code que aparece na TV',
+      scanAllow: 'Permitir câmera', scanDenied: 'Sem acesso à câmera. Libere nos ajustes do aparelho ou digite o código da TV.',
+      scanWrong: 'Esse QR code não é de uma TV do CronoBox', scanNoCamera: 'Este aparelho não tem câmera disponível. Digite o código da TV.',
     },
   },
   colors: {
@@ -461,7 +483,7 @@ const en: Strings = {
     customize: 'Customize TV mode', customizeHint: 'Box name, logo and the workout of the day (WOD) on the TV',
     setupCard: 'Make the TV look like your box', setupCardHint: 'Add the name, logo and today\'s WOD in Settings → Customize TV mode.',
     pair: {
-      title: 'Control from your phone', hint: 'Open CronoBox on your phone and point the camera, or type the code',
+      title: 'Control from your phone', hint: 'On your phone: CronoBox → TV icon → Scan, or type the code',
       connected: 'Coach phone connected', linked: 'connected', section: 'Box TV', waiting: 'Waiting for the TV', offline: 'No connection to the TV',
       tvOf: (code) => `TV ${code}`, connect: 'Connect to a TV', connectHint: 'Type the code shown on the box TV',
       codeLabel: 'TV code', disconnect: 'Disconnect', invalid: 'Invalid code: 6 letters and numbers, like K7Q-4M2',
@@ -472,6 +494,21 @@ const en: Strings = {
       logoHint: 'PNG or JPG; shows in the TV corner', wod: 'Workout of the day (WOD)',
       wodHint: 'One line per movement. Shows on the TV start screen and next to the clock in AMRAP and For Time.',
       wodPh: '10 Thrusters 43/30 kg\n15 Pull-ups\n20 Double unders', open: 'Open TV mode',
+    },
+    connect: {
+      button: 'Box TV', title: 'Connect to a TV', statusOn: (code) => `Connected to TV ${code}`, how: 'How to connect',
+      step1: 'On the box TV, open the web browser and go to this address:',
+      step2: 'The TV shows a QR code and a 6-character code, like K7Q-4M2.',
+      step3: 'Scan the TV QR code here in the app, or type the code. Done: this phone becomes the remote and the TV plays the sounds.',
+      share: 'Send the link', shareMsg: (url) => `Open this address in the box TV browser: ${url}`, copied: 'Link copied',
+      scan: 'Scan TV QR code', typeCode: 'Type the code', connectShort: 'Connect',
+      thisDevice: 'Use this device as the TV', thisDeviceHint: 'For a laptop, tablet or TV box plugged into the TV',
+      hardware: 'Any TV with a web browser works (Samsung, LG, Android TV, Fire TV), or a laptop plugged into the TV over HDMI. The TV and the phone need internet, but not the same Wi-Fi.',
+      iosTip: 'On iPhone with CronoBox on the home screen, use the Scan button here or type the code: the iPhone camera opens the link in Safari, which is separate from the app.',
+      unavailable: 'TV connection is not active in this version.',
+      scanTitle: 'Scan TV QR code', scanAim: 'Point at the QR code on the TV',
+      scanAllow: 'Allow camera', scanDenied: 'No camera access. Allow it in the device settings or type the TV code.',
+      scanWrong: 'That QR code is not from a CronoBox TV', scanNoCamera: 'No camera available on this device. Type the TV code.',
     },
   },
   colors: {

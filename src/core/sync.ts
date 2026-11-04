@@ -90,5 +90,16 @@ export function parseRoomCode(input: string): string | null {
   return c.length === 6 && [...c].every((ch) => ALPHABET.includes(ch)) ? c : null;
 }
 
+/**
+ * O que veio do leitor de QR: o link da TV (…/pair?code=K7Q4M2) ou só o código.
+ * Qualquer outro QR (cardápio, Wi-Fi…) devolve null.
+ */
+export function codeFromScan(data: string): string | null {
+  const text = data.trim();
+  const fromLink = /[?&]code=([^&#\s]+)/i.exec(text);
+  if (fromLink) return parseRoomCode(decodeURIComponent(fromLink[1]));
+  return /^[A-Za-z0-9 -]{6,9}$/.test(text) ? parseRoomCode(text) : null;
+}
+
 /** "K7Q4M2" → "K7Q-4M2" (como aparece na TV). */
 export const formatRoomCode = (c: string) => `${c.slice(0, 3)}-${c.slice(3)}`;

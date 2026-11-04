@@ -3,16 +3,16 @@ import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Platform, View } from 'react-native';
 import { Button, Note, SectionTitle } from '@/components/atoms';
-import { Field, LinkRow, Row, SaveBar, Segmented, Toggle } from '@/components/molecules';
+import { Field, LinkRow, Segmented, Toggle } from '@/components/molecules';
 import { SheetTemplate } from '@/components/templates';
 import { cuesFor } from '@/core/cues';
 import { buildSegments, DEFAULTS } from '@/core/engine';
 import { useStrings } from '@/hooks/useStrings';
 import { STRINGS } from '@/i18n/strings';
-import { formatRoomCode, parseRoomCode } from '@/core/sync';
+import { formatRoomCode } from '@/core/sync';
 import { notify } from '@/services/dialog';
 import { analyticsAvailable } from '@/services/analytics';
-import { remoteAvailable, useRemote } from '@/services/remote';
+import { useRemote } from '@/services/remote';
 import { configureAudio, perform, unlockAudio } from '@/services/feedback';
 import { hasRecordedVoice } from '@/services/voiceClips';
 import { pickVoice } from '@/services/voices';
@@ -33,15 +33,9 @@ export default function SettingsScreen() {
   const [voiceName, setVoiceName] = useState('');
   useEffect(() => { pickVoice(st.voiceLang, st.voiceId).then((v) => setVoiceName(v?.name ?? '')); }, [st.voiceLang, st.voiceId]);
 
-  const [pairInput, setPairInput] = useState('');
   const remote = useRemote();
   const P = t.tv.pair;
-  const connectTv = () => {
-    const c = parseRoomCode(pairInput);
-    if (!c) { notify(P.connect, P.invalid); return; }
-    set('pairedCode', c);
-    setPairInput('');
-  };
+  const tvHint = !st.pairedCode ? t.tv.connect.step2 : remote.status === 'error' ? P.error : remote.peer ? t.tv.connect.statusOn(formatRoomCode(st.pairedCode)) : `${P.tvOf(formatRoomCode(st.pairedCode))} · ${P.waiting}`;
 
   const recorded = hasRecordedVoice(st.voiceLang);
   const systemVoice = !recorded || st.voiceSource === 'system';
@@ -73,28 +67,12 @@ export default function SettingsScreen() {
         dots={(['prepare', 'work', 'rest', 'cooldown'] as ColorRole[]).map((r) => hex(colors[r]))}
       />
 
-      {isWeb && <LinkRow label={t.tv.open} hint={t.tv.openHint} onPress={() => router.push('/tv')} />}
+      <SectionTitle title={P.section} />
+      <LinkRow label={t.tv.connect.title} hint={tvHint} onPress={() => router.push('/connect')} />
       {isWeb && <LinkRow label={t.tv.customize} hint={t.tv.customizeHint} onPress={() => router.push('/tv-setup')} />}
       {isWeb && <Note>{S.webNote}</Note>}
       {isWeb && !isInstalled() && (
         <Field label={S.install} hint={isIOSBrowser() ? S.installIos : S.installAndroid}>{null}</Field>
-      )}
-
-      {remoteAvailable && (
-        <>
-          <SectionTitle title={P.section} />
-          {st.pairedCode ? (
-            <Row
-              label={P.tvOf(formatRoomCode(st.pairedCode))}
-              hint={remote.status === 'error' ? P.error : remote.peer ? P.linked : P.waiting}
-              right={<Button label={P.disconnect} kind="danger" onPress={() => set('pairedCode', '')} />}
-            />
-          ) : (
-            <Field label={P.connect} hint={P.connectHint}>
-              <SaveBar value={pairInput} onChange={setPairInput} placeholder="K7Q-4M2" label={P.connect} onSave={connectTv} />
-            </Field>
-          )}
-        </>
       )}
 
       <SectionTitle title={S.general} />

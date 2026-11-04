@@ -52,10 +52,10 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "O CronoBox usa a lanterna da câmera para piscar a cada troca de fase. A câmera não grava nada.",
+          "cameraPermission": "O CronoBox usa a câmera para ler o QR code da TV do box e a lanterna para piscar a cada troca de fase. Nada é gravado.",
           "microphonePermission": false,
           "recordAudioAndroid": false,
-          "barcodeScannerEnabled": false
+          "barcodeScannerEnabled": true
         }
       ],
       [

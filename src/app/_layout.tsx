@@ -26,6 +26,8 @@ export default function RootLayout() {
         <Stack.Screen name="tv-setup" />
         <Stack.Screen name="pair" options={{ animation: 'fade' }} />
         <Stack.Screen name="privacy" />
+        <Stack.Screen name="connect" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="scan" options={{ presentation: 'fullScreenModal', animation: 'fade' }} />
       </Stack>
     </SafeAreaProvider>
   );

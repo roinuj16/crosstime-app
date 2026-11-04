@@ -53,3 +53,21 @@ describe('sincronização TV ↔ celular', () => {
     expect(formatRoomCode('K7Q4M2')).toBe('K7Q-4M2');
   });
 });
+
+describe('leitor de QR da TV', () => {
+  const { codeFromScan } = require('@/core/sync') as typeof import('@/core/sync');
+  it('aceita o link do QR da TV', () => {
+    expect(codeFromScan('https://cronobox.expo.app/pair?code=K7Q4M2')).toBe('K7Q4M2');
+    expect(codeFromScan('http://localhost:8081/pair?x=1&code=k7q-4m2#a')).toBe('K7Q4M2');
+  });
+  it('aceita só o código', () => {
+    expect(codeFromScan(' K7Q-4M2 ')).toBe('K7Q4M2');
+    expect(codeFromScan('k7q4m2')).toBe('K7Q4M2');
+  });
+  it('recusa outros QR codes', () => {
+    expect(codeFromScan('https://cardapio.exemplo.com/mesa/12')).toBeNull();
+    expect(codeFromScan('WIFI:S:Box;T:WPA;P:12345678;;')).toBeNull();
+    expect(codeFromScan('https://x.com/pair?code=K7Q4M')).toBeNull();
+    expect(codeFromScan('K7Q-4M1')).toBeNull(); // 1 não existe no alfabeto do código
+  });
+});
