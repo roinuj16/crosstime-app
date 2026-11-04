@@ -55,9 +55,14 @@ export function autoHideCursor(ms = 2500): () => void {
   return () => { clearTimeout(timer); window.removeEventListener('mousemove', show); document.body.style.cursor = ''; };
 }
 
+/** Tamanho máximo do logo em texto (data URL). A sala do Firebase aceita até 200 mil; sobra folga. */
+export const LOGO_MAX_CHARS = 120_000;
+
 /**
- * Escolhe uma imagem do computador/celular e devolve em data URL, já reduzida
- * (lado maior = `max` px) para caber no armazenamento do navegador. Só na web.
+ * Escolhe uma imagem do computador/celular e devolve em data URL, já reduzida para caber
+ * na sala da TV (LOGO_MAX_CHARS). Tenta PNG (mantém o fundo transparente) em tamanhos
+ * cada vez menores; se ainda ficar grande (foto), usa WebP e por fim JPEG sobre fundo escuro.
+ * Só na web.
  */
 export function pickImage(max = 256): Promise<string | null> {
   if (!isWeb || typeof document === 'undefined') return Promise.resolve(null);
@@ -70,16 +75,51 @@ export function pickImage(max = 256): Promise<string | null> {
       if (!file) { resolve(null); return; }
       const img = new Image();
       img.onload = () => {
-        const k = Math.min(1, max / Math.max(img.width, img.height));
-        const c = document.createElement('canvas');
-        c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
-        c.getContext('2d')?.drawImage(img, 0, 0, c.width, c.height);
         URL.revokeObjectURL(img.src);
-        resolve(c.toDataURL('image/png'));
+        resolve(shrinkImage(img, max));
       };
       img.onerror = () => resolve(null);
       img.src = URL.createObjectURL(file);
     };
     input.click();
   });
+}
+
+/** Reduz um logo já salvo que passou do limite (logos escolhidos antes desta versão). */
+export function shrinkDataUrl(url: string, max = 256): Promise<string | null> {
+  if (!isWeb || typeof Image === 'undefined') return Promise.resolve(null);
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => resolve(shrinkImage(img, max));
+    img.onerror = () => resolve(null);
+    img.src = url;
+  });
+}
+
+function shrinkImage(img: HTMLImageElement, max: number): string | null {
+  const w0 = img.naturalWidth || img.width || max, h0 = img.naturalHeight || img.height || max;
+  const draw = (side: number, bg?: string) => {
+    const k = Math.min(1, side / Math.max(w0, h0));
+    const c = document.createElement('canvas');
+    c.width = Math.max(1, Math.round(w0 * k)); c.height = Math.max(1, Math.round(h0 * k));
+    const g = c.getContext('2d');
+    if (!g) return null;
+    if (bg) { g.fillStyle = bg; g.fillRect(0, 0, c.width, c.height); }
+    g.drawImage(img, 0, 0, c.width, c.height);
+    return c;
+  };
+  const fits = (url: string | undefined) => !!url && url.length <= LOGO_MAX_CHARS;
+  for (const side of [max, 200, 160, 128]) {
+    const png = draw(side)?.toDataURL('image/png');
+    if (fits(png)) return png!;
+  }
+  for (const side of [max, 160]) {
+    const webp = draw(side)?.toDataURL('image/webp', 0.85);
+    if (webp?.startsWith('data:image/webp') && fits(webp)) return webp;
+  }
+  for (const [side, q] of [[max, 0.85], [160, 0.8], [128, 0.7]] as const) {
+    const jpg = draw(side, '#0B0B0B')?.toDataURL('image/jpeg', q);
+    if (fits(jpg)) return jpg!;
+  }
+  return null;
 }

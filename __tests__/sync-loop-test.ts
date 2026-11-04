@@ -12,6 +12,16 @@ import { DEFAULT_COLORS } from '../src/theme/palette';
 jest.mock('../src/services/remote', () => ({}));
 
 type Snap = Record<string, unknown> & { by: string };
+/** O Firebase devolve os objetos com as chaves em ordem alfabética e some com nulos e listas vazias. */
+function firebaseCopy(x: unknown): unknown {
+  if (Array.isArray(x)) return x.length ? x.map(firebaseCopy) : undefined;
+  if (x && typeof x === 'object') {
+    const out: Record<string, unknown> = {};
+    for (const k of Object.keys(x).sort()) { const v = firebaseCopy((x as Record<string, unknown>)[k]); if (v != null) out[k] = v; }
+    return Object.keys(out).length ? out : undefined;
+  }
+  return x === null ? undefined : x;
+}
 function fakeServer() {
   const rooms = new Map<string, { timer?: Snap; brand?: Snap; subs: { uid: string; h: RoomHandlers }[] }>();
   let writes = 0;
@@ -21,7 +31,7 @@ function fakeServer() {
     r.subs.push({ uid, h });
     const send = (kind: 'timer' | 'brand', v: object) => {
       writes++;
-      const snap = JSON.parse(JSON.stringify({ ...v, by: uid })) as Snap; // como o Firebase: sem undefined
+      const snap = firebaseCopy({ ...v, by: uid }) as Snap; // como o Firebase: sem undefined, chaves em ordem alfabética
       r[kind] = snap;
       for (const s of r.subs) if (s.uid !== uid) queueMicrotask(() => (kind === 'timer' ? s.h.onTimer(snap as never) : s.h.onBrand(snap as never)));
     };
@@ -75,6 +85,29 @@ describe('TV e celular sincronizando', () => {
     await flush(); await flush();
     expect(server.writes()).toBe(w);
     expect(w).toBeLessThanOrEqual(6);
+    stopTv(); stopPhone();
+  });
+
+  it('digitar no celular não perde letras (sem eco da TV)', async () => {
+    const server = fakeServer();
+    const tv = createStore(initial), phone = createStore(initial);
+    const stopTv = startSync(tv, server.open(0, 'tv') as never, 'tv', 'K7Q4M2', undefined, 50);
+    await flush();
+    const stopPhone = startSync(phone, server.open(0, 'phone') as never, 'coach', 'K7Q4M2', undefined, 50);
+    await flush();
+    const typed = 'Box Fortaleza';
+    for (let i = 1; i <= typed.length; i++) {
+      phone.setState({ settings: { ...phone.getState().settings, tvBoxName: typed.slice(0, i) } });
+      jest.advanceTimersByTime(60); // uma letra a cada 60 ms
+      await Promise.resolve(); await new Promise((r) => jest.requireActual('timers').setImmediate(r));
+      expect(phone.getState().settings.tvBoxName).toBe(typed.slice(0, i));
+    }
+    await flush();
+    expect(phone.getState().settings.tvBoxName).toBe(typed);
+    expect(tv.getState().settings.tvBoxName).toBe(typed);
+    const w = server.writes();
+    await flush(); await flush();
+    expect(server.writes()).toBe(w);
     stopTv(); stopPhone();
   });
 });

@@ -22,17 +22,22 @@ export function startSync(store: SyncStore, open: OpenRoom, role: RemoteRole, co
   let closed = false;
   let lastTimer = '', lastBrand = '';
   let queued: ReturnType<typeof setTimeout> | undefined;
+  let queuedBrand: ReturnType<typeof setTimeout> | undefined;
   const source = () => store.getState() as SyncSource;
 
-  const publish = () => {
+  const publishTimer = () => {
     if (!room) return;
     const t = timerSnapshot(source(), room.offset());
     const tk = timerKey(t);
     if (tk !== lastTimer) { lastTimer = tk; room.publishTimer(t); }
+  };
+  const publishBrand = () => {
+    if (!room) return;
     const b = brandSnapshot(source());
     const bk = brandKey(b);
     if (bk !== lastBrand) { lastBrand = bk; room.publishBrand(b); }
   };
+  const publish = () => { publishTimer(); publishBrand(); };
 
   open(code, role, {
     onTimer: (snap) => {
@@ -44,12 +49,14 @@ export function startSync(store: SyncStore, open: OpenRoom, role: RemoteRole, co
     },
     onBrand: (snap) => {
       const b = strip(snap) as BrandSnapshot;
-      lastBrand = brandKey(b);
       const st = source();
-      store.setState({
+      const next = {
         colors: b.colors ?? st.colors,
         settings: { ...st.settings, tvBoxName: b.boxName ?? '', tvLogo: b.logo ?? '', tvWod: b.wod ?? '', timeFormat: b.timeFormat ?? st.settings.timeFormat },
-      });
+      };
+      // a chave sai do estado que vai ficar aqui (não do que veio), para não devolver o mesmo para a sala
+      lastBrand = brandKey(brandSnapshot({ ...st, ...next } as SyncSource));
+      store.setState(next);
     },
   }).then((r) => {
     if (closed) { r.close(); return; }
@@ -59,9 +66,13 @@ export function startSync(store: SyncStore, open: OpenRoom, role: RemoteRole, co
     else { lastTimer = timerKey(timerSnapshot(source(), r.offset())); lastBrand = brandKey(brandSnapshot(source())); }
   }).catch((e) => { if (!closed) onError?.(e); });
 
+  // junta mudanças seguidas (ex.: segurar o +). A marca leva o logo, então espera a pessoa
+  // parar de digitar o nome ou o WOD antes de enviar, em vez de mandar o logo a cada letra.
   const unsub = store.subscribe(() => {
     clearTimeout(queued);
-    queued = setTimeout(publish, debounceMs); // junta mudanças seguidas (ex.: segurar o +)
+    queued = setTimeout(publishTimer, debounceMs);
+    clearTimeout(queuedBrand);
+    queuedBrand = setTimeout(publishBrand, debounceMs * 5);
   });
-  return () => { closed = true; unsub(); clearTimeout(queued); room?.close(); };
+  return () => { closed = true; unsub(); clearTimeout(queued); clearTimeout(queuedBrand); room?.close(); };
 }

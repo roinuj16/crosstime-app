@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { openRoom, remoteAvailable, type RemoteRole } from '@/services/remote';
 import { startSync } from '@/services/syncLoop';
 import { useApp } from '@/store/useApp';
+import { LOGO_MAX_CHARS, shrinkDataUrl } from '@/services/webApp';
 
 const RETRY_MS = 10_000;
 
@@ -11,6 +12,12 @@ const RETRY_MS = 10_000;
  */
 export function useRemoteSync(role: RemoteRole, code: string | null, onTaken?: () => void) {
   const [attempt, setAttempt] = useState(0);
+  // logo salvo antes do limite: grande demais para a sala (o Firebase recusava a marca inteira)
+  const logo = useApp((s) => s.settings.tvLogo);
+  useEffect(() => {
+    if (!logo || logo.length <= LOGO_MAX_CHARS) return;
+    shrinkDataUrl(logo).then((small) => { if (small && useApp.getState().settings.tvLogo === logo) useApp.getState().setSetting('tvLogo', small); });
+  }, [logo]);
   useEffect(() => {
     if (!remoteAvailable || !code) return;
     let retry: ReturnType<typeof setTimeout> | undefined;

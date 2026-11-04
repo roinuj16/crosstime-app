@@ -62,16 +62,34 @@ export function applyTimer(snap: TimerSnapshot, offset: number): Pick<SyncSource
 }
 
 /**
+ * JSON com as chaves em ordem alfabética, sem nulos e sem listas vazias — igual ao que o
+ * Firebase devolve. Assim o que saiu daqui e o que voltou da sala dão a mesma chave,
+ * mesmo com as chaves em outra ordem (senão as duas telas ficam reenviando uma para a outra).
+ */
+export function stableKey(x: unknown): string {
+  const norm = (v: unknown): unknown => {
+    if (Array.isArray(v)) return v.length ? v.map(norm) : undefined;
+    if (v && typeof v === 'object') {
+      const out: Record<string, unknown> = {};
+      for (const k of Object.keys(v).sort()) { const n = norm((v as Record<string, unknown>)[k]); if (n != null) out[k] = n; }
+      return Object.keys(out).length ? out : undefined;
+    }
+    return v ?? undefined;
+  };
+  return JSON.stringify(norm(x) ?? null);
+}
+
+/**
  * Chave para comparar dois snapshots do timer ignorando diferenças de poucos ms nos horários
  * (o offset do servidor oscila um pouco). Evita que as duas telas fiquem reenviando a mesma coisa.
  */
 export function timerKey(snap: TimerSnapshot): string {
   const r = (t: number | null | undefined) => (t == null ? null : Math.round(t / 250));
   const s = snap.session;
-  return JSON.stringify({ ...snap, saved: snap.saved ?? [], session: s ? { ...s, startedAt: r(s.startedAt), state: { ...s.state, runningSince: r(s.state.runningSince) } } : null });
+  return stableKey({ ...snap, saved: snap.saved ?? [], session: s ? { ...s, startedAt: r(s.startedAt), state: { ...s.state, runningSince: r(s.state.runningSince) } } : null });
 }
 
-export const brandKey = (b: BrandSnapshot) => JSON.stringify(b);
+export const brandKey = (b: BrandSnapshot) => stableKey(b);
 
 // ---------- código da sala ----------
 

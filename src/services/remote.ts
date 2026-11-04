@@ -57,43 +57,71 @@ export interface Room {
   close: () => void;
 }
 
-/** Entra na sala (como TV ou como coach) e começa a ouvir. */
+/**
+ * Entra na sala (como TV ou como coach) e começa a ouvir.
+ *
+ * Presença: "coach" e "tvOnline" somem sozinhos quando a conexão cai (onDisconnect). O Firebase
+ * reconecta sozinho, mas não recoloca esses nós — então, a cada reconexão (.info/connected),
+ * marcamos presença de novo. Sem isso, depois de o celular ficar parado (tela apagada, Wi-Fi
+ * trocando), as escritas do coach eram recusadas e a sincronização "caía".
+ */
 export async function openRoom(code: string, role: RemoteRole, h: RoomHandlers): Promise<Room> {
   useRemote.setState({ status: 'connecting', peer: false, role, code });
   try {
     const { db, uid } = await connect();
     const base = `rooms/${code}`;
     let offset = 0;
+    let closed = false;
     const subs: (() => void)[] = [];
     subs.push(onValue(ref(db, '.info/serverTimeOffset'), (s) => { offset = Number(s.val()) || 0; }));
 
-    if (role === 'tv') {
-      await set(ref(db, `${base}/tv`), { uid, at: serverTimestamp() });
-      const online = ref(db, `${base}/tvOnline`);
-      await onDisconnect(online).remove();
-      await set(online, true);
-      subs.push(onValue(ref(db, `${base}/coach`), (s) => useRemote.setState({ peer: s.exists() })));
-    } else {
-      const me = ref(db, `${base}/coach`);
-      await onDisconnect(me).remove();
-      await set(me, { uid, at: serverTimestamp() });
-      subs.push(onValue(ref(db, `${base}/tvOnline`), (s) => useRemote.setState({ peer: s.val() === true })));
-    }
+    const presence = ref(db, role === 'tv' ? `${base}/tvOnline` : `${base}/coach`);
+    /** marca "estou aqui" e deixa combinado com o servidor apagar isso se a conexão cair */
+    const claim = async () => {
+      await onDisconnect(presence).remove();
+      await set(presence, role === 'tv' ? true : { uid, at: serverTimestamp() });
+    };
+    if (role === 'tv') await set(ref(db, `${base}/tv`), { uid, at: serverTimestamp() }); // recusa se a sala for de outra TV
+    await claim();
+
+    // o que foi enviado por último e o que o servidor recusou (para mandar de novo ao reconectar)
+    const latest: Partial<Record<'timer' | 'brand', object>> = {};
+    const failed = new Set<'timer' | 'brand'>();
+    const write = (path: 'timer' | 'brand', value: object) => {
+      latest[path] = value;
+      set(ref(db, `${base}/${path}`), { ...value, by: uid, sentAt: serverTimestamp() })
+        .then(() => { failed.delete(path); if (!closed && useRemote.getState().status === 'error') useRemote.setState({ status: 'online' }); })
+        .catch(() => { failed.add(path); if (!closed) useRemote.setState({ status: 'error' }); });
+    };
+
+    subs.push(onValue(ref(db, '.info/connected'), (s) => {
+      if (closed) return;
+      if (s.val() !== true) { useRemote.setState({ status: 'connecting' }); return; }
+      claim()
+        .then(() => {
+          if (closed) return;
+          useRemote.setState({ status: 'online' });
+          for (const path of [...failed]) write(path, latest[path]!);
+        })
+        .catch(() => { if (!closed) useRemote.setState({ status: 'error' }); });
+    }));
+
+    if (role === 'tv') subs.push(onValue(ref(db, `${base}/coach`), (s) => useRemote.setState({ peer: s.exists() })));
+    else subs.push(onValue(ref(db, `${base}/tvOnline`), (s) => useRemote.setState({ peer: s.val() === true })));
     subs.push(onValue(ref(db, `${base}/timer`), (s) => { const v = s.val(); if (v && v.by !== uid) h.onTimer(v); }));
     subs.push(onValue(ref(db, `${base}/brand`), (s) => { const v = s.val(); if (v && v.by !== uid) h.onBrand(v); }));
     useRemote.setState({ status: 'online' });
 
-    const write = (path: string, value: object) =>
-      set(ref(db, `${base}/${path}`), { ...value, by: uid, sentAt: serverTimestamp() }).catch(() => useRemote.setState({ status: 'error' }));
     return {
       uid,
       offset: () => offset,
-      publishTimer: (s) => { write('timer', s); },
-      publishBrand: (s) => { write('brand', s); },
+      publishTimer: (s) => write('timer', s),
+      publishBrand: (s) => write('brand', s),
       close: () => {
+        closed = true;
         subs.forEach((u) => u());
-        if (role === 'coach') remove(ref(db, `${base}/coach`)).catch(() => {});
-        else remove(ref(db, `${base}/tvOnline`)).catch(() => {});
+        onDisconnect(presence).cancel().catch(() => {});
+        remove(presence).catch(() => {});
         useRemote.setState({ status: 'off', peer: false, role: null, code: null });
       },
     };
