@@ -3,6 +3,7 @@ export { ColorRow, type ColorOption } from './ColorRow';
 export { Field } from './Field';
 export { FinishButton } from './FinishButton';
 export { HistoryRow } from './HistoryRow';
+export { KeyHint } from './KeyHint';
 export { LinkRow } from './LinkRow';
 export { PlayButton, type PlayButtonProps } from './PlayButton';
 export { PresetCard } from './PresetCard';

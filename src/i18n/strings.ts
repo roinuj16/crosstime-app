@@ -58,9 +58,16 @@ export interface Strings {
     device: string; vibrate: string; keepAwake: string; keepAwakeHint: string; flash: string; flashHint: string; duck: string; duckHint: string;
     colors: string; colorsHint: string;
     test: string; voicePick: string; voiceAuto: string; flashDenied: string; bgAlerts: string; bgAlertsHint: string;
+    install: string; installIos: string; installAndroid: string; webNote: string;
     voiceSource: string; voiceRecorded: string; voiceSystem: string; voiceSourceHint: string; voiceCount: string; voiceCountHint: string;
   };
   voices: { title: string; auto: string; enhanced: string; empty: string; help: string; listen: string };
+  /** modo TV (placar em tela cheia para a TV do box) */
+  tv: {
+    open: string; openHint: string; start: string; startHint: string; exit: string;
+    keys: { play: string; skip: string; back: string; mode: string; rounds: string; finish: string; reset: string };
+    pressAgain: string; paused: string;
+  };
   colors: {
     title: string; presets: string; perPhase: string; restore: string; preview: string;
     roles: Record<'prepare' | 'work' | 'rest' | 'restBC' | 'cooldown' | 'run' | 'lap' | 'rounds' | 'cycles', string>;
@@ -202,6 +209,10 @@ const pt: Strings = {
     voiceAuto: 'Automática',
     bgAlerts: 'Avisos com a tela bloqueada',
     bgAlertsHint: 'Notificação a cada troca de fase, mesmo se o sistema pausar o app',
+    install: 'Instalar na tela de início',
+    installIos: 'No Safari: toque em Compartilhar e depois em "Adicionar à Tela de Início". Abre em tela cheia e funciona sem internet.',
+    installAndroid: 'No Chrome: toque no menu ⋮ e depois em "Instalar app". Abre em tela cheia e funciona sem internet.',
+    webNote: 'No navegador, deixe o CrossTimer aberto e a tela acesa durante o treino: com a tela bloqueada, o navegador pausa o timer.',
     voiceSource: 'Tipo de voz',
     voiceRecorded: 'Coach (gravada)',
     voiceSystem: 'Do sistema',
@@ -217,6 +228,16 @@ const pt: Strings = {
     empty: 'Nenhuma voz nesse idioma foi encontrada no aparelho.',
     help: 'Vozes "Premium" ou "Aprimorada" soam bem mais naturais e são gratuitas. iPhone: Ajustes → Acessibilidade → Conteúdo Falado → Vozes. Android: Configurações → Sistema → Idiomas → Conversão de texto em voz. Depois, volte aqui.',
     listen: 'Toque numa voz para ouvir e escolher.',
+  },
+  tv: {
+    open: 'Modo TV',
+    openHint: 'Placar em tela cheia para a TV do box, com controle remoto ou teclado',
+    start: 'Aperte OK para começar',
+    startHint: 'Ativa o som e a tela cheia. Use o controle remoto da TV ou um teclado.',
+    exit: 'Sair do modo TV',
+    keys: { play: 'iniciar / pausar', skip: 'pular fase', back: 'voltar fase', mode: 'trocar modo', rounds: '+1 / −1 round', finish: 'terminei', reset: 'zerar' },
+    pressAgain: 'Aperte voltar de novo para zerar',
+    paused: 'Pausado',
   },
   colors: {
     title: 'Cores',
@@ -365,6 +386,10 @@ const en: Strings = {
     voiceAuto: 'Automatic',
     bgAlerts: 'Alerts on the lock screen',
     bgAlertsHint: 'A notification at every phase change, even if the system pauses the app',
+    install: 'Add to Home Screen',
+    installIos: 'In Safari: tap Share, then "Add to Home Screen". It opens full screen and works offline.',
+    installAndroid: 'In Chrome: tap the ⋮ menu, then "Install app". It opens full screen and works offline.',
+    webNote: 'In the browser, keep CrossTimer open and the screen on while you train: with the screen locked, the browser pauses the timer.',
     voiceSource: 'Voice type',
     voiceRecorded: 'Coach (recorded)',
     voiceSystem: 'System',
@@ -380,6 +405,16 @@ const en: Strings = {
     empty: 'No voices in this language were found on the device.',
     help: '"Premium" or "Enhanced" voices sound much more natural and are free. iPhone: Settings → Accessibility → Spoken Content → Voices. Android: Settings → System → Languages → Text-to-speech output. Then come back here.',
     listen: 'Tap a voice to hear it and choose it.',
+  },
+  tv: {
+    open: 'TV mode',
+    openHint: 'Full-screen scoreboard for the box TV, with a remote or keyboard',
+    start: 'Press OK to start',
+    startHint: 'Turns on sound and full screen. Use the TV remote or a keyboard.',
+    exit: 'Leave TV mode',
+    keys: { play: 'start / pause', skip: 'skip phase', back: 'previous phase', mode: 'change mode', rounds: '+1 / −1 round', finish: 'finish', reset: 'reset' },
+    pressAgain: 'Press back again to reset',
+    paused: 'Paused',
   },
   colors: {
     title: 'Colors',

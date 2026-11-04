@@ -7,7 +7,7 @@ export function Stat({ stat, color, size = 64 }: { stat: { value: number; label:
   return (
     <View style={[s.stat, !stat && { opacity: 0 }]} accessible={!!stat} accessibilityLabel={stat ? `${stat.value} ${stat.label}` : undefined}>
       <LedText variant="display" tabular size={size} trim="digits" color={color} style={s.num}>{stat ? String(stat.value) : '0'}</LedText>
-      <LedText size={15} color={UI.text} tracking={1} style={s.label}>{stat ? stat.label.toUpperCase() : ' '}</LedText>
+      <LedText size={Math.max(15, Math.round(size * 0.235))} color={UI.text} tracking={1} style={s.label}>{stat ? stat.label.toUpperCase() : ' '}</LedText>
     </View>
   );
 }

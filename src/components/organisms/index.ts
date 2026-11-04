@@ -6,3 +6,6 @@ export { ModeTabs, type ModeTab } from './ModeTabs';
 export { NextBand, type NextBandProps } from './NextBand';
 export { TimerHeader, type TimerHeaderProps } from './TimerHeader';
 export { WorkoutCard, type WorkoutCardProps } from './WorkoutCard';
+export { TvHelp, type TvHelpItem } from './TvHelp';
+export { TvOverlay } from './TvOverlay';
+export { TvTopBar } from './TvTopBar';

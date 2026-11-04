@@ -1,17 +1,19 @@
 import { useCameraPermissions } from 'expo-camera';
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Alert, Platform, View } from 'react-native';
-import { Button, SectionTitle } from '@/components/atoms';
+import { Platform, View } from 'react-native';
+import { Button, Note, SectionTitle } from '@/components/atoms';
 import { Field, LinkRow, Segmented, Toggle } from '@/components/molecules';
 import { SheetTemplate } from '@/components/templates';
 import { cuesFor } from '@/core/cues';
 import { buildSegments, DEFAULTS } from '@/core/engine';
 import { useStrings } from '@/hooks/useStrings';
 import { STRINGS } from '@/i18n/strings';
-import { configureAudio, perform } from '@/services/feedback';
+import { notify } from '@/services/dialog';
+import { configureAudio, perform, unlockAudio } from '@/services/feedback';
 import { hasRecordedVoice } from '@/services/voiceClips';
 import { pickVoice } from '@/services/voices';
+import { isInstalled, isIOSBrowser, isWeb } from '@/services/webApp';
 import { useApp, type Settings } from '@/store/useApp';
 import { hex, type ColorRole } from '@/theme/palette';
 
@@ -40,11 +42,12 @@ export default function SettingsScreen() {
     if (!on) { set('flash', false); return; }
     const res = await requestCamera();
     if (res.granted) set('flash', true);
-    else Alert.alert(S.flash, S.flashDenied);
+    else notify(S.flash, S.flashDenied);
   };
 
   /** Toca uma troca de fase de exemplo com as configurações atuais. */
   const test = async () => {
+    unlockAudio();
     await configureAudio({ duckOthers: st.duckOthers });
     const seg = buildSegments('tabata', DEFAULTS.tabata)[1];
     const cues = cuesFor([{ type: 'phase', seg, next: null, isLastWork: false }], { ...st, flash: false }, STRINGS[st.voiceLang].say, 'tabata');
@@ -56,6 +59,12 @@ export default function SettingsScreen() {
         label={S.colors} hint={S.colorsHint} onPress={() => router.push('/colors')}
         dots={(['prepare', 'work', 'rest', 'cooldown'] as ColorRole[]).map((r) => hex(colors[r]))}
       />
+
+      {isWeb && <LinkRow label={t.tv.open} hint={t.tv.openHint} onPress={() => router.push('/tv')} />}
+      {isWeb && <Note>{S.webNote}</Note>}
+      {isWeb && !isInstalled() && (
+        <Field label={S.install} hint={isIOSBrowser() ? S.installIos : S.installAndroid}>{null}</Field>
+      )}
 
       <SectionTitle title={S.general} />
       <Field label={S.language}>

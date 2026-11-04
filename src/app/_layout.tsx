@@ -18,6 +18,7 @@ export default function RootLayout() {
         <Stack.Screen name="colors" />
         <Stack.Screen name="voices" />
         <Stack.Screen name="workouts" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="tv" options={{ animation: 'fade' }} />
       </Stack>
     </SafeAreaProvider>
   );

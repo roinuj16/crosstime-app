@@ -126,10 +126,33 @@ os originais ficam em `voice-src/`.
 3. Com música tocando em outro app: com "Abaixar música" desligado ela deve continuar no mesmo volume; ligado, baixar só nos avisos.
 4. Lanterna: ligar em Ajustes (pede permissão da câmera) e iniciar um treino.
 
+## Web app e modo TV
+
+O mesmo código vira um **web app** instalável (tela de início, tela cheia, funciona sem internet
+depois do primeiro acesso) e o **modo TV** em `/tv`, para a TV do box.
+
+```bash
+npm run build:web     # gera dist/ (com páginas diretas: /tv, /settings…)
+npm run deploy:web    # gera e publica no EAS Hosting (a primeira vez pergunta o endereço)
+```
+
+**Modo TV** (`/tv`, ou Ajustes → Modo TV no navegador): placar 16:9 com margem para TVs que
+cortam a borda. A primeira tecla ou toque ativa o som e a tela cheia. Controle remoto ou teclado:
+
+| Tecla | Parado | Treino valendo |
+|---|---|---|
+| OK / Enter / espaço / play-pause | inicia | pausa / continua |
+| ← → | troca o modo | volta / pula fase (For Time: → = Terminei) |
+| ↑ ↓ | — | +1 / −1 round (AMRAP, For Time) |
+| Voltar / Esc / R | — | zera (aperte duas vezes em 3 s) |
+
+Limites do navegador: com a tela bloqueada o timer pausa, e o iPhone não vibra. Para treinar com o
+celular bloqueado, use o app instalado. Lógica do controle em `src/core/tvKeys.ts` (testada).
+
 ## Pré-visualizar no navegador
 
 `npx expo start --web` abre o app no navegador (o armazenamento usa o `localStorage`).
-No web, as caixas de confirmação nativas (zerar treino, trocar de modo) não aparecem; no celular, sim.
+As confirmações (zerar, apagar treino) usam as caixas do próprio navegador.
 
 ## Roteiro
 

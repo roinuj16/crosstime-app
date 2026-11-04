@@ -35,7 +35,14 @@
       ]
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/favicon.png",
+      "output": "single",
+      "name": "CrossTimer",
+      "shortName": "CrossTimer",
+      "lang": "pt-BR",
+      "themeColor": "#0B0B0B",
+      "backgroundColor": "#0B0B0B",
+      "description": "Timer de intervalos para cross training: Tabata, EMOM, AMRAP, For Time e cronômetro."
     },
     "plugins": [
       "expo-router",

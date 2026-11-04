@@ -2,11 +2,15 @@
  * Executa as deixas (sons, voz, vibração, lanterna) no aparelho.
  */
 import { createAudioPlayer, setAudioModeAsync, type AudioPlayer } from 'expo-audio';
+import { Platform } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import * as Speech from 'expo-speech';
 import { chooseClips, type Cue, type HapticKind, type SoundKey } from '@/core/cues';
 import { hasClip, playClips, stopClips } from './voiceClips';
 import { pickVoice } from './voices';
+import { playWebAudio, preloadWebAudio, unlockWebAudio } from './webAudio';
+
+const WEB = Platform.OS === 'web';
 
 const SOURCES: Record<SoundKey, number> = {
   'phase-beep': require('../../assets/sounds/phase_beep.wav'),
@@ -65,9 +69,16 @@ function player(key: SoundKey): AudioPlayer {
 }
 
 /** Carrega os sons antes do treino, para o primeiro bipe não atrasar. */
-export function preloadSounds(keys: SoundKey[]) { for (const k of keys) player(k); }
+export function preloadSounds(keys: SoundKey[]) {
+  if (WEB) { preloadWebAudio(keys.map((k) => SOURCES[k])); return; }
+  for (const k of keys) player(k);
+}
+
+/** Web: libera o som no primeiro toque (o navegador exige). No celular não faz nada. */
+export function unlockAudio() { if (WEB) unlockWebAudio(); }
 
 export async function playSound(key: SoundKey, volume: number) {
+  if (WEB) { playWebAudio(SOURCES[key], volume); return; }
   try {
     const p = player(key);
     p.volume = volume;

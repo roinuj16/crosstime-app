@@ -3,6 +3,7 @@ export { Button, type ButtonProps } from './Button';
 export { Dot } from './Dot';
 export { Hint } from './Hint';
 export { IconButton, type IconButtonProps } from './IconButton';
+export { KeyCap } from './KeyCap';
 export { LedText, type LedTextProps } from './LedText';
 export { Note } from './Note';
 export { SectionTitle } from './SectionTitle';

@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import { Alert, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { Button, Hint, SectionTitle } from '@/components/atoms';
 import { HistoryRow } from '@/components/molecules';
 import { WorkoutCard } from '@/components/organisms';
@@ -7,6 +7,7 @@ import { SheetTemplate } from '@/components/templates';
 import { describeWorkout } from '@/core/describeWorkout';
 import * as Engine from '@/core/engine';
 import { useStrings } from '@/hooks/useStrings';
+import { confirmAction } from '@/services/dialog';
 import { useApp, type SavedWorkout } from '@/store/useApp';
 import { hex } from '@/theme/palette';
 
@@ -25,13 +26,13 @@ export default function WorkoutsScreen() {
     const go = () => { useApp.getState().loadWorkout(w); router.back(); };
     const status = st.session?.state.status;
     if (status === 'running' || status === 'paused') {
-      Alert.alert(t.switchTitle, t.resetText, [{ text: t.cancel, style: 'cancel' }, { text: t.reset, style: 'destructive', onPress: () => { useApp.getState().reset(); go(); } }]);
+      confirmAction(t.switchTitle, t.resetText, t.reset, t.cancel).then((ok) => { if (ok) { useApp.getState().reset(); go(); } });
     } else go();
   };
   const del = (w: SavedWorkout) =>
-    Alert.alert(W.deleteTitle(w.name), undefined, [{ text: t.cancel, style: 'cancel' }, { text: t.delete, style: 'destructive', onPress: () => useApp.getState().deleteWorkout(w.id) }]);
+    confirmAction(W.deleteTitle(w.name), undefined, t.delete, t.cancel).then((ok) => { if (ok) useApp.getState().deleteWorkout(w.id); });
   const clear = () =>
-    Alert.alert(W.clearTitle, undefined, [{ text: t.cancel, style: 'cancel' }, { text: W.clear, style: 'destructive', onPress: () => useApp.getState().clearHistory() }]);
+    confirmAction(W.clearTitle, undefined, W.clear, t.cancel).then((ok) => { if (ok) useApp.getState().clearHistory(); });
 
   const locale = lang === 'pt' ? 'pt-BR' : 'en-US';
   const when = (ms: number) => {

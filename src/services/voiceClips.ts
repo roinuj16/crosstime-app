@@ -4,7 +4,11 @@
  * pelo `npm run voices`; sem áudios, o app usa a voz do sistema.
  */
 import { createAudioPlayer, type AudioPlayer } from 'expo-audio';
+import { Platform } from 'react-native';
 import { VOICE_CLIPS } from '@/voice/clips';
+import { playWebAudio, preloadWebAudio, stopWebVoice } from './webAudio';
+
+const WEB = Platform.OS === 'web';
 
 type Lang = 'en' | 'pt';
 
@@ -33,11 +37,13 @@ function player(lang: Lang, id: string): AudioPlayer | null {
 
 /** Carrega antes do treino as frases que tocam em quase todo treino. */
 export function preloadClips(lang: Lang) {
+  if (WEB) { preloadWebAudio(Object.values(VOICE_CLIPS[lang] ?? {})); return; }
   for (const id of ['prepare', 'run', 'rest', 'last', 'done', 'half', 'count_3', 'count_2', 'count_1']) player(lang, id);
 }
 
 export function stopClips() {
   token++;
+  if (WEB) { stopWebVoice(); return; }
   try { if (current?.playing) current.pause(); } catch { /* já parou */ }
   current = null;
 }
@@ -46,6 +52,20 @@ export function stopClips() {
 export function playClips(lang: Lang, ids: string[], volume: number, onStart?: () => void) {
   stopClips();
   const mine = token;
+  if (WEB) {
+    // web: um AudioContext toca a frase inteira, um áudio depois do outro
+    (async () => {
+      for (const id of ids) {
+        const src = VOICE_CLIPS[lang]?.[id];
+        if (mine !== token) return;
+        if (!src) continue;
+        onStart?.();
+        await playWebAudio(src, volume, true);
+        await new Promise((r) => setTimeout(r, GAP_MS));
+      }
+    })();
+    return;
+  }
   const next = (i: number) => {
     if (mine !== token || i >= ids.length) return;
     const p = player(lang, ids[i]);

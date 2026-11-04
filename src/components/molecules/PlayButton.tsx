@@ -41,7 +41,7 @@ export function PlayButton({ color, glow, progress, running, label, onPress, siz
           <Ionicons name={running ? 'pause' : 'play'} size={size * 0.34} color={UI.ink} style={running ? undefined : { marginLeft: size * 0.04 }} />
         </View>
       </Pressable>
-      <LedText size={24} color={color} glow={glow} glowRadius={10} tracking={1.5}>{label.toUpperCase()}</LedText>
+      <LedText size={Math.max(24, Math.round(size * 0.19))} color={color} glow={glow} glowRadius={10} tracking={1.5}>{label.toUpperCase()}</LedText>
     </View>
   );
 }

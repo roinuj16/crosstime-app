@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import { Alert, useWindowDimensions } from 'react-native';
+import { useWindowDimensions } from 'react-native';
 import { ControlDeck, CurrentBand, ModeTabs, NextBand, TimerHeader } from '@/components/organisms';
 import { Torch } from '@/components/system/Torch';
 import { TimerTemplate } from '@/components/templates';
@@ -9,6 +9,8 @@ import { useBackground } from '@/hooks/useBackground';
 import { useFeedback } from '@/hooks/useFeedback';
 import { useStrings } from '@/hooks/useStrings';
 import { useTimerLoop } from '@/hooks/useTimerLoop';
+import { confirmAction } from '@/services/dialog';
+import { unlockAudio } from '@/services/feedback';
 import { useApp } from '@/store/useApp';
 import { glow, hex, UI, type ColorRole } from '@/theme/palette';
 
@@ -35,7 +37,7 @@ export default function TimerScreen() {
   const active = status === 'running' || status === 'paused';
 
   const ask = (title: string, onYes: () => void) =>
-    Alert.alert(title, t.resetText, [{ text: t.cancel, style: 'cancel' }, { text: t.reset, style: 'destructive', onPress: onYes }]);
+    confirmAction(title, t.resetText, t.reset, t.cancel).then((ok) => { if (ok) onYes(); });
   const confirmReset = () => (status === 'done' ? app.reset() : ask(t.resetTitle, () => app.reset()));
   const switchMode = (m: Mode) => {
     if (m === mode) return;
@@ -84,7 +86,7 @@ export default function TimerScreen() {
           right={v.right === 'finish'
             ? { finish: { label: t.finish, color: color('run'), onPress: () => { app.finish(Date.now(), true); onEvents([{ type: 'done' }]); } } }
             : stat(v.right)}
-          play={{ color: accent, glow: glowOf(v.accent, 0.6), progress: v.progress, running: status === 'running', label: v.playLabel, onPress: () => app.toggle(), size: playSize }}
+          play={{ color: accent, glow: glowOf(v.accent, 0.6), progress: v.progress, running: status === 'running', label: v.playLabel, onPress: () => { unlockAudio(); app.toggle(); }, size: playSize }}
           vertical={landscape}
         />
       }

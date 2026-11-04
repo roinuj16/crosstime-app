@@ -48,7 +48,9 @@
     "typecheck": "tsc --noEmit",
     "go": "expo start --go",
     "dev": "expo start --dev-client",
-    "voices": "node scripts/generate-voices.mjs"
+    "voices": "node scripts/generate-voices.mjs",
+    "build:web": "expo export -p web && node scripts/web-routes.mjs",
+    "deploy:web": "npm run build:web && npx eas-cli@latest deploy --prod"
   },
   "private": true,
   "jest": {

@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Alert, View } from 'react-native';
+import { View } from 'react-native';
 import { Button, Hint, Note } from '@/components/atoms';
 import { Row, SaveBar, StepValue, Stepper } from '@/components/molecules';
 import { SheetTemplate } from '@/components/templates';
@@ -8,6 +8,7 @@ import * as Engine from '@/core/engine';
 import type { Mode } from '@/core/engine';
 import { useStrings } from '@/hooks/useStrings';
 import type { FieldKey } from '@/i18n/strings';
+import { notify } from '@/services/dialog';
 import { useApp } from '@/store/useApp';
 import { UI } from '@/theme/palette';
 
@@ -69,7 +70,7 @@ export default function EditScreen() {
     const n = name.trim() || `${t.modes[mode]} ${Engine.format(total || 0, fmt)}`;
     useApp.getState().saveWorkout(n);
     setName('');
-    Alert.alert(t.edit.saved, n);
+    notify(t.edit.saved, n);
   };
 
   return (
