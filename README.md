@@ -146,6 +146,10 @@ cortam a borda. A primeira tecla ou toque ativa o som e a tela cheia. Controle r
 | ↑ ↓ | — | +1 / −1 round (AMRAP, For Time) |
 | Voltar / Esc / R | — | zera (aperte duas vezes em 3 s) |
 
+**Controle pelo celular do coach:** a TV mostra um QR code e um código; o celular lê e passa a
+comandar a TV (treino, play, pausa, rounds, nome do box, logo, WOD). Configuração do Firebase em
+[docs/FIREBASE.md](docs/FIREBASE.md).
+
 Limites do navegador: com a tela bloqueada o timer pausa, e o iPhone não vibra. Para treinar com o
 celular bloqueado, use o app instalado. Lógica do controle em `src/core/tvKeys.ts` (testada).
 

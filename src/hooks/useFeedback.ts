@@ -6,6 +6,7 @@ import type { Mode, TimerEvent } from '@/core/engine';
 import { STRINGS } from '@/i18n/strings';
 import { configureAudio, perform, preloadSounds } from '@/services/feedback';
 import { preloadClips } from '@/services/voiceClips';
+import { useRemote } from '@/services/remote';
 import { listVoices } from '@/services/voices';
 import { useApp } from '@/store/useApp';
 
@@ -41,6 +42,9 @@ export function useFeedback(mode: Mode) {
     if (Platform.OS === 'android' && st.backgroundAlerts && AppState.currentState !== 'active') {
       cues = cues.filter((c) => c.kind !== 'sound');
     }
+    // celular do coach ligado a uma TV que está no ar: o som e a voz saem na TV (aqui só vibra)
+    const r = useRemote.getState();
+    if (r.role === 'coach' && r.peer) cues = cues.filter((c) => c.kind !== 'sound' && c.kind !== 'speak');
     perform(cues, { lang: st.voiceLang, voiceId: st.voiceId, rate: st.voiceRate, volume: st.volume, source: st.voiceSource });
   }, [mode]);
 }

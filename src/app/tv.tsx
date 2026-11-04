@@ -1,17 +1,20 @@
 import { useEffect, useRef, useState } from 'react';
 import { Platform, useWindowDimensions, View } from 'react-native';
 import {
-  TvClock, TvDone, TvHeader, TvHelp, TvIdle, TvLapsAside, TvOverlay, TvPhase, TvRoundsAside, TvSetupCard, TvWodAside, type TvHelpItem,
+  TvClock, TvDone, TvHeader, TvHelp, TvIdle, TvLapsAside, TvLinkStatus, TvOverlay, TvPairCard, TvPhase, TvRoundsAside, TvSetupCard, TvWodAside, type TvHelpItem,
 } from '@/components/organisms';
 import { TvTemplate } from '@/components/templates';
 import * as Engine from '@/core/engine';
 import { MODES } from '@/core/engine';
+import { formatRoomCode, newRoomCode } from '@/core/sync';
 import { tvBoard } from '@/core/tvBoard';
 import { cycleMode, tvAction } from '@/core/tvKeys';
 import { useFeedback } from '@/hooks/useFeedback';
+import { useRemoteSync } from '@/hooks/useRemoteSync';
 import { useStrings } from '@/hooks/useStrings';
 import { useTimerLoop } from '@/hooks/useTimerLoop';
 import { unlockAudio } from '@/services/feedback';
+import { remoteAvailable, useRemote } from '@/services/remote';
 import { autoHideCursor, enterFullscreen, keepScreenOn } from '@/services/webApp';
 import { useApp } from '@/store/useApp';
 import { glow, hex, UI, type ColorRole } from '@/theme/palette';
@@ -43,6 +46,13 @@ export default function TvScreen() {
   const [armed, setArmed] = useState(false);
   const armTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const [clock, setClock] = useState(() => new Date());
+
+  // Sala de pareamento desta TV: o código fica guardado, então a TV mostra sempre o mesmo.
+  // Se a sala foi tomada (ex.: o navegador apagou os dados), gera outro código.
+  const room = app.settings.tvRoomCode;
+  useEffect(() => { if (remoteAvailable && !room) useApp.getState().setSetting('tvRoomCode', newRoomCode()); }, [room]);
+  useRemoteSync('tv', remoteAvailable && room ? room : null, () => useApp.getState().setSetting('tvRoomCode', newRoomCode()));
+  const coach = useRemote((r) => r.role === 'tv' && r.peer);
 
   useEffect(() => keepScreenOn(), []);
   useEffect(() => autoHideCursor(), []);
@@ -107,7 +117,13 @@ export default function TvScreen() {
   const T = t.tv, K = T.keys;
   const box = S.tvBoxName.trim();
   const hh = String(clock.getHours()).padStart(2, '0'), mm = String(clock.getMinutes()).padStart(2, '0');
-  const clockNode = <TvClock time={`${hh}:${mm}`} u={u} />;
+  const clockNode = coach ? (
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 28 * u }}>
+      <TvLinkStatus label={T.pair.connected} u={u} />
+      <TvClock time={`${hh}:${mm}`} u={u} />
+    </View>
+  ) : <TvClock time={`${hh}:${mm}`} u={u} />;
+  const pairUrl = typeof window !== 'undefined' && room ? `${window.location.origin}/pair?code=${room}` : '';
   const headerTitle = (workout: string) => (box ? `${box} · ${workout}` : workout);
 
   let help: TvHelpItem[];
@@ -141,7 +157,9 @@ export default function TvScreen() {
         }
         side={
           <View style={{ flex: 1, paddingVertical: 40 * u, paddingRight: 48 * u }}>
-            <TvSetupCard title={b.wod.length ? T.wod : T.setupCard} lines={b.wod} hint={T.setupCardHint} u={u} />
+            {remoteAvailable && room && !coach
+              ? <TvPairCard title={T.pair.title} hint={T.pair.hint} url={pairUrl} code={formatRoomCode(room)} u={u} />
+              : <TvSetupCard title={b.wod.length ? T.wod : T.setupCard} lines={b.wod} hint={T.setupCardHint} u={u} />}
           </View>
         }
         sideWidth={408}

@@ -18,3 +18,4 @@ export { VoiceOption } from './VoiceOption';
 export { TvStat, type ColoredPiece } from './TvStat';
 export { WodList, type WodItem } from './WodList';
 export { TextField } from './TextField';
+export { QrCode } from './QrCode';

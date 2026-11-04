@@ -71,6 +71,7 @@ export interface Strings {
     round: string; cycle: string; next: string; remaining: string; wod: string; roundsHint: string; laps: string;
     doneTitle: string; doneMsg: string; backHome: string;
     customize: string; customizeHint: string; setupCard: string; setupCardHint: string;
+    pair: { title: string; hint: string; connected: string; linked: string; section: string; waiting: string; offline: string; tvOf: (code: string) => string; connect: string; connectHint: string; codeLabel: string; disconnect: string; invalid: string; error: string };
     setup: { title: string; boxName: string; boxNamePh: string; logo: string; logoPick: string; logoRemove: string; logoHint: string; wod: string; wodHint: string; wodPh: string; open: string };
   };
   colors: {
@@ -249,6 +250,13 @@ const pt: Strings = {
     doneTitle: 'Treino concluído', doneMsg: 'Mandou bem!', backHome: 'Volta para a tela inicial em 2 minutos',
     customize: 'Personalizar modo TV', customizeHint: 'Nome do box, logo e o treino do dia (WOD) na TV',
     setupCard: 'Deixe a TV com a cara do box', setupCardHint: 'Coloque o nome, o logo e o WOD do dia em Ajustes → Personalizar modo TV.',
+    pair: {
+      title: 'Controle pelo celular', hint: 'Abra o CrossTimer no celular e aponte a câmera, ou digite o código',
+      connected: 'Celular do coach conectado', linked: 'conectada', section: 'TV do box', waiting: 'Aguardando a TV', offline: 'Sem conexão com a TV',
+      tvOf: (code) => `TV ${code}`, connect: 'Conectar à TV', connectHint: 'Digite o código que aparece na TV do box',
+      codeLabel: 'Código da TV', disconnect: 'Desconectar', invalid: 'Código inválido: são 6 letras e números, como K7Q-4M2',
+      error: 'Não deu para conectar. Confira a internet e o código.',
+    },
     setup: {
       title: 'Modo TV', boxName: 'Nome do box', boxNamePh: 'Ex.: Box Fortaleza', logo: 'Logo', logoPick: 'Escolher imagem', logoRemove: 'Remover',
       logoHint: 'PNG ou JPG; aparece no canto da TV', wod: 'Treino do dia (WOD)',
@@ -438,6 +446,13 @@ const en: Strings = {
     doneTitle: 'Workout complete', doneMsg: 'Great job!', backHome: 'Back to the start screen in 2 minutes',
     customize: 'Customize TV mode', customizeHint: 'Box name, logo and the workout of the day (WOD) on the TV',
     setupCard: 'Make the TV look like your box', setupCardHint: 'Add the name, logo and today\'s WOD in Settings → Customize TV mode.',
+    pair: {
+      title: 'Control from your phone', hint: 'Open CrossTimer on your phone and point the camera, or type the code',
+      connected: 'Coach phone connected', linked: 'connected', section: 'Box TV', waiting: 'Waiting for the TV', offline: 'No connection to the TV',
+      tvOf: (code) => `TV ${code}`, connect: 'Connect to a TV', connectHint: 'Type the code shown on the box TV',
+      codeLabel: 'TV code', disconnect: 'Disconnect', invalid: 'Invalid code: 6 letters and numbers, like K7Q-4M2',
+      error: 'Could not connect. Check the internet and the code.',
+    },
     setup: {
       title: 'TV mode', boxName: 'Box name', boxNamePh: 'e.g. Downtown CrossBox', logo: 'Logo', logoPick: 'Choose image', logoRemove: 'Remove',
       logoHint: 'PNG or JPG; shows in the TV corner', wod: 'Workout of the day (WOD)',

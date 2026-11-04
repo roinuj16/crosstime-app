@@ -14,3 +14,5 @@ export { TvClock, TvHeader } from './TvHeader';
 export { TvIdle } from './TvIdle';
 export { TvPhase } from './TvPhase';
 export { TvSetupCard } from './TvSetupCard';
+export { TvLinkStatus, TvPairCard } from './TvPairCard';
+export { RemoteBanner } from './RemoteBanner';

@@ -3,6 +3,7 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { CoachLink } from '@/components/system/CoachLink';
 import { UI } from '@/theme/palette';
 
 export default function RootLayout() {
@@ -11,6 +12,7 @@ export default function RootLayout() {
   return (
     <SafeAreaProvider>
       <StatusBar style="light" />
+      <CoachLink />
       <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: UI.bg } }}>
         <Stack.Screen name="index" />
         <Stack.Screen name="edit" options={{ presentation: 'modal' }} />
@@ -20,6 +22,7 @@ export default function RootLayout() {
         <Stack.Screen name="workouts" options={{ presentation: 'modal' }} />
         <Stack.Screen name="tv" options={{ animation: 'fade' }} />
         <Stack.Screen name="tv-setup" />
+        <Stack.Screen name="pair" options={{ animation: 'fade' }} />
       </Stack>
     </SafeAreaProvider>
   );

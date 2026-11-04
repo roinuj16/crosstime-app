@@ -1,0 +1,94 @@
+/**
+ * Pareamento TV ↔ celular do coach: o que vai e volta pela sala (sem Firebase aqui; testado).
+ *
+ * A sala tem duas partes, enviadas separadamente para não reenviar o logo a cada play:
+ *  - timer: modo, treino escolhido, configurações, treinos salvos e a sessão (play/pausa);
+ *  - brand: nome do box, logo, WOD, cores e formato do tempo.
+ *
+ * O motor conta o tempo a partir de horários ("começou às 10:02:15"), então basta mandar a
+ * sessão: cada tela calcula o próprio relógio. Os horários viajam no relógio do servidor
+ * (horário local + offset) para não importar se o relógio da TV está alguns segundos errado.
+ */
+import type { AnyConfig, Mode, ModeConfigs, TimeFormat } from './engine';
+import type { ColorScheme } from '@/theme/palette';
+
+export interface SyncSession {
+  mode: Mode; name: string | null; config: AnyConfig; startedAt: number; rounds: number;
+  state: { status: 'idle' | 'running' | 'paused' | 'done'; elapsedBase: number; runningSince: number | null };
+}
+export interface SyncWorkout { id: string; name: string; mode: Mode; config: AnyConfig; example?: boolean }
+
+export interface TimerSnapshot { v: 1; mode: Mode; activeName: string | null; configs: ModeConfigs; saved: SyncWorkout[]; session: SyncSession | null }
+export interface BrandSnapshot { v: 1; boxName: string; logo: string; wod: string; colors: ColorScheme; timeFormat: TimeFormat }
+
+/** O pedaço do estado do app que participa da sincronização. */
+export interface SyncSource {
+  mode: Mode; activeName: string | null; configs: ModeConfigs; saved: SyncWorkout[]; session: SyncSession | null;
+  colors: ColorScheme; settings: { tvBoxName: string; tvLogo: string; tvWod: string; timeFormat: TimeFormat };
+}
+
+const shift = (t: number | null, d: number) => (t == null ? null : Math.round(t + d));
+
+/** Copia limpa para o Firebase (sem `undefined`, que ele recusa). */
+const clean = <T>(x: T): T => JSON.parse(JSON.stringify(x));
+
+export function timerSnapshot(s: SyncSource, offset: number): TimerSnapshot {
+  const session = s.session && {
+    ...s.session,
+    startedAt: shift(s.session.startedAt, offset) as number,
+    state: { ...s.session.state, runningSince: shift(s.session.state.runningSince, offset) },
+  };
+  return clean({ v: 1, mode: s.mode, activeName: s.activeName ?? null, configs: s.configs, saved: s.saved, session: session ?? null });
+}
+
+export function brandSnapshot(s: SyncSource): BrandSnapshot {
+  return clean({ v: 1, boxName: s.settings.tvBoxName, logo: s.settings.tvLogo, wod: s.settings.tvWod, colors: s.colors, timeFormat: s.settings.timeFormat });
+}
+
+/** O que muda no app ao receber o timer da sala. O Firebase some com nulos e listas vazias: aqui voltam. */
+export function applyTimer(snap: TimerSnapshot, offset: number): Pick<SyncSource, 'mode' | 'activeName' | 'configs' | 'saved' | 'session'> {
+  const s = snap.session ?? null;
+  return {
+    mode: snap.mode,
+    activeName: snap.activeName ?? null,
+    configs: snap.configs,
+    saved: Array.isArray(snap.saved) ? snap.saved : Object.values(snap.saved ?? {}),
+    session: s && {
+      ...s, name: s.name ?? null, rounds: s.rounds ?? 0,
+      startedAt: shift(s.startedAt, -offset) as number,
+      state: { status: s.state.status, elapsedBase: s.state.elapsedBase ?? 0, runningSince: shift(s.state.runningSince ?? null, -offset) },
+    },
+  };
+}
+
+/**
+ * Chave para comparar dois snapshots do timer ignorando diferenças de poucos ms nos horários
+ * (o offset do servidor oscila um pouco). Evita que as duas telas fiquem reenviando a mesma coisa.
+ */
+export function timerKey(snap: TimerSnapshot): string {
+  const r = (t: number | null | undefined) => (t == null ? null : Math.round(t / 250));
+  const s = snap.session;
+  return JSON.stringify({ ...snap, saved: snap.saved ?? [], session: s ? { ...s, startedAt: r(s.startedAt), state: { ...s.state, runningSince: r(s.state.runningSince) } } : null });
+}
+
+export const brandKey = (b: BrandSnapshot) => JSON.stringify(b);
+
+// ---------- código da sala ----------
+
+/** Sem I, O, 0 e 1 (fáceis de confundir na TV). */
+const ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+
+export function newRoomCode(random: () => number = Math.random): string {
+  let c = '';
+  for (let i = 0; i < 6; i++) c += ALPHABET[Math.floor(random() * ALPHABET.length)];
+  return c;
+}
+
+/** "k7q 4m2" → "K7Q4M2"; null se não for um código válido. */
+export function parseRoomCode(input: string): string | null {
+  const c = input.toUpperCase().replace(/[^A-Z0-9]/g, '');
+  return c.length === 6 && [...c].every((ch) => ALPHABET.includes(ch)) ? c : null;
+}
+
+/** "K7Q4M2" → "K7Q-4M2" (como aparece na TV). */
+export const formatRoomCode = (c: string) => `${c.slice(0, 3)}-${c.slice(3)}`;

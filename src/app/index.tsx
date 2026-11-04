@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
 import { useWindowDimensions } from 'react-native';
-import { ControlDeck, CurrentBand, ModeTabs, NextBand, TimerHeader } from '@/components/organisms';
+import { ControlDeck, CurrentBand, ModeTabs, NextBand, RemoteBanner, TimerHeader } from '@/components/organisms';
 import { Torch } from '@/components/system/Torch';
 import { TimerTemplate } from '@/components/templates';
 import { MODES, type Mode } from '@/core/engine';
@@ -11,6 +11,8 @@ import { useStrings } from '@/hooks/useStrings';
 import { useTimerLoop } from '@/hooks/useTimerLoop';
 import { confirmAction } from '@/services/dialog';
 import { unlockAudio } from '@/services/feedback';
+import { formatRoomCode } from '@/core/sync';
+import { useRemote } from '@/services/remote';
 import { useApp } from '@/store/useApp';
 import { glow, hex, UI, type ColorRole } from '@/theme/palette';
 
@@ -25,6 +27,8 @@ export default function TimerScreen() {
   useBackground(); // tela bloqueada: mantém vivo e agenda avisos
 
   const status = app.session?.state.status ?? 'idle';
+  const paired = app.settings.pairedCode;
+  const remote = useRemote();
   const v = timerView({
     mode, config: app.currentConfig(), status, elapsed: el,
     doneAt: app.session?.state.elapsedBase ?? 0, rounds: app.session?.rounds ?? 0,
@@ -93,6 +97,13 @@ export default function TimerScreen() {
       tabs={<ModeTabs tabs={MODES.map((m) => ({ key: m, label: t.modes[m], hint: t.modeHints[m] }))} value={mode} onChange={switchMode} />}
     >
       <Torch />
+      {!!paired && (
+        <RemoteBanner
+          title={t.tv.pair.tvOf(formatRoomCode(paired))}
+          status={remote.status === 'error' ? t.tv.pair.offline : remote.peer ? t.tv.pair.linked : t.tv.pair.waiting}
+          online={remote.peer} disconnect={t.tv.pair.disconnect} onDisconnect={() => app.setSetting('pairedCode', '')}
+        />
+      )}
     </TimerTemplate>
   );
 }

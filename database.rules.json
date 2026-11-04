@@ -1,0 +1,33 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "rooms": {
+      "$code": {
+        ".validate": "$code.matches(/^[A-HJ-NP-Z2-9]{6}$/)",
+        ".read": "auth != null",
+        "tv": {
+          ".write": "auth != null && (!data.exists() || data.child('uid').val() === auth.uid)",
+          ".validate": "newData.child('uid').val() === auth.uid"
+        },
+        "tvOnline": {
+          ".write": "auth != null && root.child('rooms').child($code).child('tv/uid').val() === auth.uid",
+          ".validate": "newData.isBoolean()"
+        },
+        "coach": {
+          ".write": "auth != null && (!data.exists() || data.child('uid').val() === auth.uid)",
+          ".validate": "newData.child('uid').val() === auth.uid"
+        },
+        "timer": {
+          ".write": "auth != null && (root.child('rooms').child($code).child('tv/uid').val() === auth.uid || root.child('rooms').child($code).child('coach/uid').val() === auth.uid)",
+          ".validate": "newData.hasChildren(['v', 'by', 'mode']) && newData.child('by').val() === auth.uid"
+        },
+        "brand": {
+          ".write": "auth != null && (root.child('rooms').child($code).child('tv/uid').val() === auth.uid || root.child('rooms').child($code).child('coach/uid').val() === auth.uid)",
+          ".validate": "newData.hasChildren(['v', 'by']) && newData.child('by').val() === auth.uid && (!newData.child('logo').exists() || newData.child('logo').val().length < 200000)"
+        },
+        "$other": { ".validate": false }
+      }
+    }
+  }
+}
