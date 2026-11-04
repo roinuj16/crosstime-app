@@ -1,9 +1,10 @@
 import { router } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
 import { BoxLogo, Button, Hint } from '@/components/atoms';
-import { Row, TextField } from '@/components/molecules';
+import { LinkRow, Row, TextField, Toggle } from '@/components/molecules';
 import { SheetTemplate } from '@/components/templates';
 import { useStrings } from '@/hooks/useStrings';
+import { analyticsAvailable } from '@/services/analytics';
 import { isWeb, pickImage } from '@/services/webApp';
 import { useApp } from '@/store/useApp';
 
@@ -31,6 +32,12 @@ export default function TvSetupScreen() {
         />
       )}
       <TextField label={S.wod} hint={S.wodHint} value={st.tvWod} onChange={(v) => set('tvWod', v)} placeholder={S.wodPh} multiline maxLength={400} />
+      {analyticsAvailable && (
+        <>
+          <Toggle label={t.privacy.toggle} hint={t.privacy.toggleHint} value={st.analyticsConsent === 'granted'} onChange={(v) => set('analyticsConsent', v ? 'granted' : 'denied')} />
+          <LinkRow label={t.privacy.policy} onPress={() => router.push('/privacy')} />
+        </>
+      )}
       <View style={s.open}>
         <Button label={S.open} kind="primary" onPress={() => router.push('/tv')} />
       </View>

@@ -1,4 +1,4 @@
-# Pareamento TV ↔ celular do coach (Firebase)
+# Firebase: pareamento TV ↔ celular e Google Analytics
 
 O pareamento usa o **Firebase Realtime Database** (plano grátis Spark) com **login anônimo**.
 Nenhum dado pessoal é guardado: só o estado do timer, o treino escolhido e a marca do box
@@ -18,6 +18,12 @@ Nenhum dado pessoal é guardado: só o estado do timer, o treino escolhido e a m
 
 Sem esse passo, o app funciona normalmente e só o pareamento fica escondido.
 
+7. **Authentication → Configurações → Domínios autorizados → Adicionar domínio**: o endereço do
+   web app (ex.: `crosstimer.expo.app`). Sem isso, o login anônimo é recusado no site publicado
+   e o pareamento não conecta (no `localhost` já funciona).
+
+Projeto atual: **Cronobox** (`cronobox-ba0cc`), configurado em `src/config/firebase.ts`.
+
 ## Como funciona
 
 - A TV (`/tv`) cria a sala `rooms/<código>` e mostra o QR code (`…/pair?code=<código>`) e o código.
@@ -30,3 +36,14 @@ Sem esse passo, o app funciona normalmente e só o pareamento fica escondido.
 
 Código: `src/core/sync.ts` (o que vai e volta, testado), `src/services/syncLoop.ts` (envia e
 aplica, testado com duas telas falsas), `src/services/remote.ts` (Firebase).
+
+## Google Analytics (web)
+
+- Só liga depois que a pessoa toca em **Aceitar** no aviso (ou liga em Ajustes → Estatísticas de uso).
+  Antes disso nenhum script do Google é carregado (conferido: zero requisições ao Google antes do aceite).
+- Eventos: `page_view` por tela, `workout_start`, `workout_complete`, `workout_reset` (modo e tempos),
+  `tv_start`, `tv_remote` (ação do controle), `pairing_connected`, `pwa_installed` e `app_error`
+  (na web não existe Crashlytics). Nunca vão nome do box, WOD, nomes de treino ou texto digitado.
+- Política de privacidade em `/privacy` (texto em `src/i18n/privacy.ts`).
+- No app instalado (iPhone/Android), Analytics e **Crashlytics** entram com o `@react-native-firebase`
+  num build novo (precisa dos arquivos `google-services.json` e `GoogleService-Info.plist`).

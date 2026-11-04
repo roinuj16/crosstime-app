@@ -62,6 +62,8 @@ export interface Strings {
     voiceSource: string; voiceRecorded: string; voiceSystem: string; voiceSourceHint: string; voiceCount: string; voiceCountHint: string;
   };
   voices: { title: string; auto: string; enhanced: string; empty: string; help: string; listen: string };
+  /** estatísticas de uso (Google Analytics) e privacidade */
+  privacy: { banner: string; accept: string; decline: string; policy: string; toggle: string; toggleHint: string; title: string };
   /** modo TV (placar em tela cheia para a TV do box) */
   tv: {
     open: string; openHint: string; start: string; startHint: string; exit: string;
@@ -234,6 +236,12 @@ const pt: Strings = {
     empty: 'Nenhuma voz nesse idioma foi encontrada no aparelho.',
     help: 'Vozes "Premium" ou "Aprimorada" soam bem mais naturais e são gratuitas. iPhone: Ajustes → Acessibilidade → Conteúdo Falado → Vozes. Android: Configurações → Sistema → Idiomas → Conversão de texto em voz. Depois, volte aqui.',
     listen: 'Toque numa voz para ouvir e escolher.',
+  },
+  privacy: {
+    banner: 'Usamos o Google Analytics para saber quais recursos são usados e corrigir erros. Sem nome, sem e-mail e sem o que você digita.',
+    accept: 'Aceitar', decline: 'Recusar', policy: 'Política de privacidade',
+    toggle: 'Estatísticas de uso', toggleHint: 'Google Analytics, sem dados pessoais. Ajuda a melhorar o CrossTimer.',
+    title: 'Privacidade',
   },
   tv: {
     open: 'Modo TV',
@@ -430,6 +438,12 @@ const en: Strings = {
     empty: 'No voices in this language were found on the device.',
     help: '"Premium" or "Enhanced" voices sound much more natural and are free. iPhone: Settings → Accessibility → Spoken Content → Voices. Android: Settings → System → Languages → Text-to-speech output. Then come back here.',
     listen: 'Tap a voice to hear it and choose it.',
+  },
+  privacy: {
+    banner: 'We use Google Analytics to learn which features are used and to fix errors. No name, no email and nothing you type.',
+    accept: 'Accept', decline: 'Decline', policy: 'Privacy policy',
+    toggle: 'Usage statistics', toggleHint: 'Google Analytics, no personal data. Helps improve CrossTimer.',
+    title: 'Privacy',
   },
   tv: {
     open: 'TV mode',

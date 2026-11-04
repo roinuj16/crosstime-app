@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
 import { useWindowDimensions } from 'react-native';
-import { ControlDeck, CurrentBand, ModeTabs, NextBand, RemoteBanner, TimerHeader } from '@/components/organisms';
+import { ConsentBanner, ControlDeck, CurrentBand, ModeTabs, NextBand, RemoteBanner, TimerHeader } from '@/components/organisms';
 import { Torch } from '@/components/system/Torch';
 import { TimerTemplate } from '@/components/templates';
 import { MODES, type Mode } from '@/core/engine';
@@ -12,6 +12,7 @@ import { useTimerLoop } from '@/hooks/useTimerLoop';
 import { confirmAction } from '@/services/dialog';
 import { unlockAudio } from '@/services/feedback';
 import { formatRoomCode } from '@/core/sync';
+import { analyticsAvailable } from '@/services/analytics';
 import { useRemote } from '@/services/remote';
 import { useApp } from '@/store/useApp';
 import { glow, hex, UI, type ColorRole } from '@/theme/palette';
@@ -97,6 +98,13 @@ export default function TimerScreen() {
       tabs={<ModeTabs tabs={MODES.map((m) => ({ key: m, label: t.modes[m], hint: t.modeHints[m] }))} value={mode} onChange={switchMode} />}
     >
       <Torch />
+      {analyticsAvailable && app.settings.analyticsConsent === 'unknown' && (
+        <ConsentBanner
+          text={t.privacy.banner} accept={t.privacy.accept} decline={t.privacy.decline} policy={t.privacy.policy}
+          onAccept={() => app.setSetting('analyticsConsent', 'granted')} onDecline={() => app.setSetting('analyticsConsent', 'denied')}
+          onPolicy={() => router.push('/privacy')}
+        />
+      )}
       {!!paired && (
         <RemoteBanner
           title={t.tv.pair.tvOf(formatRoomCode(paired))}

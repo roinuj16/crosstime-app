@@ -13,6 +13,7 @@ import { useFeedback } from '@/hooks/useFeedback';
 import { useRemoteSync } from '@/hooks/useRemoteSync';
 import { useStrings } from '@/hooks/useStrings';
 import { useTimerLoop } from '@/hooks/useTimerLoop';
+import { track } from '@/services/analytics';
 import { unlockAudio } from '@/services/feedback';
 import { remoteAvailable, useRemote } from '@/services/remote';
 import { autoHideCursor, enterFullscreen, keepScreenOn } from '@/services/webApp';
@@ -66,7 +67,7 @@ export default function TvScreen() {
     return () => clearTimeout(id);
   }, [status]);
 
-  const start = () => { unlockAudio(); enterFullscreen(); setReady(true); };
+  const start = () => { unlockAudio(); enterFullscreen(); setReady(true); track('tv_start', { paired: useRemote.getState().peer }); };
 
   // Controle remoto / teclado. Lê o estado na hora da tecla (não o da última renderização).
   useEffect(() => {
@@ -85,6 +86,7 @@ export default function TvScreen() {
       if (!action) return;
       e.preventDefault();
       unlockAudio();
+      track('tv_remote', { action });
       if (action !== 'armReset') { setArmed(false); clearTimeout(armTimer.current); }
       switch (action) {
         case 'toggle': st.toggle(); break;

@@ -16,3 +16,4 @@ export { TvPhase } from './TvPhase';
 export { TvSetupCard } from './TvSetupCard';
 export { TvLinkStatus, TvPairCard } from './TvPairCard';
 export { RemoteBanner } from './RemoteBanner';
+export { ConsentBanner } from './ConsentBanner';

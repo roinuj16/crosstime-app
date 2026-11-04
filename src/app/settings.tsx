@@ -11,6 +11,7 @@ import { useStrings } from '@/hooks/useStrings';
 import { STRINGS } from '@/i18n/strings';
 import { formatRoomCode, parseRoomCode } from '@/core/sync';
 import { notify } from '@/services/dialog';
+import { analyticsAvailable } from '@/services/analytics';
 import { remoteAvailable, useRemote } from '@/services/remote';
 import { configureAudio, perform, unlockAudio } from '@/services/feedback';
 import { hasRecordedVoice } from '@/services/voiceClips';
@@ -143,6 +144,14 @@ export default function SettingsScreen() {
       {Platform.OS !== 'web' && tog('backgroundAlerts', S.bgAlerts, S.bgAlertsHint)}
       {Platform.OS !== 'web' && <Toggle label={S.flash} hint={S.flashHint} value={st.flash} onChange={toggleFlash} />}
       {tog('duckOthers', S.duck, S.duckHint)}
+
+      {analyticsAvailable && (
+        <>
+          <SectionTitle title={t.privacy.title} />
+          <Toggle label={t.privacy.toggle} hint={t.privacy.toggleHint} value={st.analyticsConsent === 'granted'} onChange={(v) => set('analyticsConsent', v ? 'granted' : 'denied')} />
+          <LinkRow label={t.privacy.policy} onPress={() => router.push('/privacy')} />
+        </>
+      )}
     </SheetTemplate>
   );
 }
