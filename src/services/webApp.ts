@@ -54,3 +54,32 @@ export function autoHideCursor(ms = 2500): () => void {
   window.addEventListener('mousemove', show);
   return () => { clearTimeout(timer); window.removeEventListener('mousemove', show); document.body.style.cursor = ''; };
 }
+
+/**
+ * Escolhe uma imagem do computador/celular e devolve em data URL, já reduzida
+ * (lado maior = `max` px) para caber no armazenamento do navegador. Só na web.
+ */
+export function pickImage(max = 256): Promise<string | null> {
+  if (!isWeb || typeof document === 'undefined') return Promise.resolve(null);
+  return new Promise((resolve) => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/png,image/jpeg,image/webp,image/svg+xml';
+    input.onchange = () => {
+      const file = input.files?.[0];
+      if (!file) { resolve(null); return; }
+      const img = new Image();
+      img.onload = () => {
+        const k = Math.min(1, max / Math.max(img.width, img.height));
+        const c = document.createElement('canvas');
+        c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
+        c.getContext('2d')?.drawImage(img, 0, 0, c.width, c.height);
+        URL.revokeObjectURL(img.src);
+        resolve(c.toDataURL('image/png'));
+      };
+      img.onerror = () => resolve(null);
+      img.src = URL.createObjectURL(file);
+    };
+    input.click();
+  });
+}

@@ -61,6 +61,7 @@ export default function SettingsScreen() {
       />
 
       {isWeb && <LinkRow label={t.tv.open} hint={t.tv.openHint} onPress={() => router.push('/tv')} />}
+      {isWeb && <LinkRow label={t.tv.customize} hint={t.tv.customizeHint} onPress={() => router.push('/tv-setup')} />}
       {isWeb && <Note>{S.webNote}</Note>}
       {isWeb && !isInstalled() && (
         <Field label={S.install} hint={isIOSBrowser() ? S.installIos : S.installAndroid}>{null}</Field>

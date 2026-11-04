@@ -30,6 +30,10 @@ export interface Settings {
   /** notificação a cada troca de fase com o app fora da tela */
   backgroundAlerts: boolean;
   timeFormat: TimeFormat;
+  /** modo TV: nome do box, logo (imagem em data URL, já reduzida) e o WOD do dia */
+  tvBoxName: string;
+  tvLogo: string;
+  tvWod: string;
 }
 
 export interface SavedWorkout { id: string; name: string; mode: Mode; config: AnyConfig; example?: boolean }
@@ -53,6 +57,7 @@ export const DEFAULT_SETTINGS: Settings = {
   language: 'auto', sound: true, soundScheme: 'beep', volume: 0.75, countdown: true, tick: false,
   voice: true, voiceLang: 'en', voiceId: '', voiceRate: 1, voiceSource: 'recorded', voiceCount: false, sayRound: true,
   vibrate: true, keepAwake: true, flash: false, duckOthers: false, backgroundAlerts: true, timeFormat: '00:00',
+  tvBoxName: '', tvLogo: '', tvWod: '',
 };
 
 const EXAMPLES: SavedWorkout[] = [

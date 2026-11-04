@@ -15,3 +15,6 @@ export { Stat } from './Stat';
 export { StepValue, Stepper, type StepperEntry, type StepperProps } from './Stepper';
 export { Toggle } from './Toggle';
 export { VoiceOption } from './VoiceOption';
+export { TvStat, type ColoredPiece } from './TvStat';
+export { WodList, type WodItem } from './WodList';
+export { TextField } from './TextField';

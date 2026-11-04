@@ -45,3 +45,54 @@ describe('controle remoto do modo TV', () => {
     expect(cycleMode(modes, 'tabata', -1)).toBe('emom');
   });
 });
+
+import * as Engine from '../src/core/engine';
+import { parseWod, tvBoard, type TvInput } from '../src/core/tvBoard';
+import { STRINGS } from '../src/i18n/strings';
+
+describe('cenas da TV', () => {
+  const t = STRINGS.pt;
+  const D = Engine.DEFAULTS;
+  const board = (p: Partial<TvInput>) => tvBoard({ mode: 'tabata', config: D.tabata, status: 'idle', elapsed: 0, doneAt: 0, rounds: 0, name: null, wod: '', t, fmt: '00:00', ...p });
+
+  it('parada: próximo treino com duração, rounds e trabalho/descanso coloridos', () => {
+    const b = board({ name: 'Tabata 20/10 × 8', config: { prepare: 10, work: 20, rest: 10, rounds: 8, cycles: 1, restBC: 0, cooldown: 0 } });
+    expect(b.scene).toBe('idle');
+    if (b.scene !== 'idle') return;
+    expect(b.title).toBe('Tabata 20/10 × 8');
+    expect(b.summary.map((s) => s.label)).toEqual(['Duração', 'Rounds', 'Trabalho / descanso']);
+    expect(b.summary[2].value).toEqual([{ text: '20s', role: 'work' }, { text: ' / ', role: null }, { text: '10s', role: 'rest' }]);
+  });
+
+  it('valendo: round atual, próxima fase e quanto falta', () => {
+    const b = board({ status: 'paused', elapsed: 5 + 30 + 15 + 3 }); // round 2, trabalho
+    expect(b.scene).toBe('live');
+    if (b.scene !== 'live' || b.aside.kind !== 'rounds') throw new Error('cena errada');
+    expect(b.aside.round).toEqual({ n: 2, of: 4 });
+    expect(b.aside.cycle).toEqual({ n: 1, of: 3 });
+    expect(b.aside.next?.label).toBe('Descanso');
+    expect(b.paused).toBe(true);
+  });
+
+  it('borda acesa na cor da próxima fase nos 3 segundos finais', () => {
+    expect((board({ status: 'running', elapsed: 5 + 28 }) as { frame: unknown }).frame).toBe('rest');
+    expect((board({ status: 'running', elapsed: 5 + 20 }) as { frame: unknown }).frame).toBeNull();
+  });
+
+  it('AMRAP com WOD: lista do treino e contador de rounds; sem WOD, só o contador', () => {
+    const b = board({ mode: 'amrap', config: D.amrap, status: 'running', elapsed: 100, rounds: 4, wod: '10 Thrusters 43/30 kg\n15 Pull-ups' });
+    if (b.scene !== 'live') throw new Error('cena errada');
+    expect(b.aside).toEqual({ kind: 'wod', rounds: 4, lines: [{ main: '10 THRUSTERS', note: '43/30 kg' }, { main: '15 PULL-UPS', note: '' }] });
+    const c = board({ mode: 'amrap', config: D.amrap, status: 'running', elapsed: 100, rounds: 2 });
+    expect(c.scene === 'live' && c.aside).toEqual({ kind: 'counter', rounds: 2 });
+  });
+
+  it('fim: treino concluído com o tempo total', () => {
+    const b = board({ status: 'done', doneAt: 0 });
+    expect(b.scene).toBe('done');
+  });
+
+  it('WOD: linhas vazias somem e o peso vira detalhe', () => {
+    expect(parseWod('  \n21-15-9\nRow 500 m\n')).toEqual([{ main: '21-15-9', note: '' }, { main: 'ROW', note: '500 m' }]);
+  });
+});

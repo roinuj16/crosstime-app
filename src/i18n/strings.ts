@@ -65,8 +65,13 @@ export interface Strings {
   /** modo TV (placar em tela cheia para a TV do box) */
   tv: {
     open: string; openHint: string; start: string; startHint: string; exit: string;
-    keys: { play: string; skip: string; back: string; mode: string; rounds: string; finish: string; reset: string };
+    keys: { play: string; skip: string; back: string; mode: string; rounds: string; finish: string; reset: string; workout: string; repeat: string };
     pressAgain: string; paused: string;
+    nextWorkout: string; duration: string; rounds: string; workRest: string; every: string; cap: string; lap: string; okToStart: string;
+    round: string; cycle: string; next: string; remaining: string; wod: string; roundsHint: string; laps: string;
+    doneTitle: string; doneMsg: string; backHome: string;
+    customize: string; customizeHint: string; setupCard: string; setupCardHint: string;
+    setup: { title: string; boxName: string; boxNamePh: string; logo: string; logoPick: string; logoRemove: string; logoHint: string; wod: string; wodHint: string; wodPh: string; open: string };
   };
   colors: {
     title: string; presets: string; perPhase: string; restore: string; preview: string;
@@ -235,9 +240,21 @@ const pt: Strings = {
     start: 'Aperte OK para começar',
     startHint: 'Ativa o som e a tela cheia. Use o controle remoto da TV ou um teclado.',
     exit: 'Sair do modo TV',
-    keys: { play: 'iniciar / pausar', skip: 'pular fase', back: 'voltar fase', mode: 'trocar modo', rounds: '+1 / −1 round', finish: 'terminei', reset: 'zerar' },
+    keys: { play: 'iniciar / pausar', skip: 'pular fase', back: 'voltar fase', mode: 'trocar modo', rounds: '+1 / −1 round', finish: 'terminei', reset: 'zerar', workout: 'trocar treino', repeat: 'repetir' },
     pressAgain: 'Aperte voltar de novo para zerar',
     paused: 'Pausado',
+    nextWorkout: 'Próximo treino', duration: 'Duração', rounds: 'Rounds', workRest: 'Trabalho / descanso', every: 'A cada', cap: 'Time cap', lap: 'Volta',
+    okToStart: 'no controle da TV para começar',
+    round: 'Round', cycle: 'Ciclo', next: 'Próximo', remaining: 'Faltam no treino', wod: 'O treino', roundsHint: 'marque com ↑ ↓ no controle', laps: 'voltas completas',
+    doneTitle: 'Treino concluído', doneMsg: 'Mandou bem!', backHome: 'Volta para a tela inicial em 2 minutos',
+    customize: 'Personalizar modo TV', customizeHint: 'Nome do box, logo e o treino do dia (WOD) na TV',
+    setupCard: 'Deixe a TV com a cara do box', setupCardHint: 'Coloque o nome, o logo e o WOD do dia em Ajustes → Personalizar modo TV.',
+    setup: {
+      title: 'Modo TV', boxName: 'Nome do box', boxNamePh: 'Ex.: Box Fortaleza', logo: 'Logo', logoPick: 'Escolher imagem', logoRemove: 'Remover',
+      logoHint: 'PNG ou JPG; aparece no canto da TV', wod: 'Treino do dia (WOD)',
+      wodHint: 'Uma linha por movimento. Aparece na tela inicial da TV e ao lado do relógio no AMRAP e no For Time.',
+      wodPh: '10 Thrusters 43/30 kg\n15 Pull-ups\n20 Double unders', open: 'Abrir o modo TV',
+    },
   },
   colors: {
     title: 'Cores',
@@ -412,9 +429,21 @@ const en: Strings = {
     start: 'Press OK to start',
     startHint: 'Turns on sound and full screen. Use the TV remote or a keyboard.',
     exit: 'Leave TV mode',
-    keys: { play: 'start / pause', skip: 'skip phase', back: 'previous phase', mode: 'change mode', rounds: '+1 / −1 round', finish: 'finish', reset: 'reset' },
+    keys: { play: 'start / pause', skip: 'skip phase', back: 'previous phase', mode: 'change mode', rounds: '+1 / −1 round', finish: 'finish', reset: 'reset', workout: 'change workout', repeat: 'repeat' },
     pressAgain: 'Press back again to reset',
     paused: 'Paused',
+    nextWorkout: 'Next workout', duration: 'Duration', rounds: 'Rounds', workRest: 'Work / rest', every: 'Every', cap: 'Time cap', lap: 'Lap',
+    okToStart: 'on the TV remote to start',
+    round: 'Round', cycle: 'Cycle', next: 'Next', remaining: 'Left in workout', wod: 'The workout', roundsHint: 'count with ↑ ↓ on the remote', laps: 'laps done',
+    doneTitle: 'Workout complete', doneMsg: 'Great job!', backHome: 'Back to the start screen in 2 minutes',
+    customize: 'Customize TV mode', customizeHint: 'Box name, logo and the workout of the day (WOD) on the TV',
+    setupCard: 'Make the TV look like your box', setupCardHint: 'Add the name, logo and today\'s WOD in Settings → Customize TV mode.',
+    setup: {
+      title: 'TV mode', boxName: 'Box name', boxNamePh: 'e.g. Downtown CrossBox', logo: 'Logo', logoPick: 'Choose image', logoRemove: 'Remove',
+      logoHint: 'PNG or JPG; shows in the TV corner', wod: 'Workout of the day (WOD)',
+      wodHint: 'One line per movement. Shows on the TV start screen and next to the clock in AMRAP and For Time.',
+      wodPh: '10 Thrusters 43/30 kg\n15 Pull-ups\n20 Double unders', open: 'Open TV mode',
+    },
   },
   colors: {
     title: 'Colors',

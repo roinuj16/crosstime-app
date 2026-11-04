@@ -1,13 +1,13 @@
-import { router } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
-import { Platform, StyleSheet, useWindowDimensions, View } from 'react-native';
-import { CurrentBand, NextBand, TvHelp, TvOverlay, TvTopBar, type TvHelpItem } from '@/components/organisms';
-import { PlayButton, Stat } from '@/components/molecules';
+import { Platform, useWindowDimensions, View } from 'react-native';
+import {
+  TvClock, TvDone, TvHeader, TvHelp, TvIdle, TvLapsAside, TvOverlay, TvPhase, TvRoundsAside, TvSetupCard, TvWodAside, type TvHelpItem,
+} from '@/components/organisms';
 import { TvTemplate } from '@/components/templates';
 import * as Engine from '@/core/engine';
 import { MODES } from '@/core/engine';
+import { tvBoard } from '@/core/tvBoard';
 import { cycleMode, tvAction } from '@/core/tvKeys';
-import { timerView } from '@/core/view';
 import { useFeedback } from '@/hooks/useFeedback';
 import { useStrings } from '@/hooks/useStrings';
 import { useTimerLoop } from '@/hooks/useTimerLoop';
@@ -15,12 +15,25 @@ import { unlockAudio } from '@/services/feedback';
 import { autoHideCursor, enterFullscreen, keepScreenOn } from '@/services/webApp';
 import { useApp } from '@/store/useApp';
 import { glow, hex, UI, type ColorRole } from '@/theme/palette';
+import { tvUnit } from '@/theme/tv';
 
 const RESET_WINDOW_MS = 3000;
+const BACK_HOME_MS = 2 * 60 * 1000;
 
-/** Página do modo TV: placar em tela cheia para a TV do box, controlado pelo controle remoto ou teclado. */
+/** Troca para o treino salvo seguinte/anterior (os de "Meus treinos"); sem treinos salvos, troca o modo. */
+function changeWorkout(dir: 1 | -1) {
+  const st = useApp.getState();
+  const list = st.saved;
+  if (!list.length) { st.setMode(cycleMode(MODES, st.currentMode(), dir)); return; }
+  const n = list.length;
+  const i = list.findIndex((w) => w.name === st.activeName && w.mode === st.mode);
+  st.loadWorkout(list[i < 0 ? (dir > 0 ? 0 : n - 1) : (i + dir + n) % n]);
+}
+
+/** Página do modo TV: placar do box em tela cheia, controlado pelo controle remoto ou teclado. */
 export default function TvScreen() {
   const { width, height } = useWindowDimensions();
+  const u = tvUnit(width, height);
   const app = useApp();
   const { t } = useStrings();
   const mode = app.currentMode();
@@ -36,14 +49,12 @@ export default function TvScreen() {
   useEffect(() => { const id = setInterval(() => setClock(new Date()), 15_000); return () => clearInterval(id); }, []);
 
   const status = app.session?.state.status ?? 'idle';
-  const v = timerView({
-    mode, config: app.currentConfig(), status, elapsed: el,
-    doneAt: app.session?.state.elapsedBase ?? 0, rounds: app.session?.rounds ?? 0,
-    name: app.session?.name ?? app.activeName, t, fmt: app.settings.timeFormat,
-  });
-  const color = (role: ColorRole | null) => (role ? hex(app.colors[role]) : UI.muted);
-  const glowOf = (role: ColorRole | null, a = 0.5) => (role ? glow(app.colors[role], a) : 'transparent');
-  const accent = color(v.accent);
+  // fim do treino: volta sozinha para a tela inicial depois de 2 minutos
+  useEffect(() => {
+    if (status !== 'done') return;
+    const id = setTimeout(() => useApp.getState().reset(), BACK_HOME_MS);
+    return () => clearTimeout(id);
+  }, [status]);
 
   const start = () => { unlockAudio(); enterFullscreen(); setReady(true); };
 
@@ -72,8 +83,8 @@ export default function TvScreen() {
         case 'finish': st.finish(Date.now(), true); onEvents([{ type: 'done' }]); break;
         case 'roundUp': st.addRound(1); break;
         case 'roundDown': st.addRound(-1); break;
-        case 'modeNext': st.setMode(cycleMode(MODES, m, 1)); break;
-        case 'modePrev': st.setMode(cycleMode(MODES, m, -1)); break;
+        case 'modeNext': changeWorkout(1); break;
+        case 'modePrev': changeWorkout(-1); break;
         case 'reset': st.reset(); break;
         case 'armReset':
           setArmed(true);
@@ -86,70 +97,102 @@ export default function TvScreen() {
     return () => window.removeEventListener('keydown', onKey);
   }, [ready, armed, onEvents]);
 
-  // Tamanhos a partir da tela: o relógio ocupa a coluna grande (70% da largura útil).
-  const innerW = width * 0.93, bodyH = height * 0.92 * 0.78;
-  const curSize = Math.min(innerW * 0.7 * 0.34, bodyH * 0.62);
-  const sideW = innerW * 0.3;
-  const nextSize = Math.min(sideW * 0.3, bodyH * 0.16);
-  const ui = Math.max(14, height * 0.024); // texto pequeno (dicas, rótulos)
-  const active = status === 'running' || status === 'paused';
-  const counting = v.nextAction === 'count' || (v.next.label === t.roundsCounter && status === 'done');
-
-  const K = t.tv.keys;
-  const help: TvHelpItem[] = status === 'running'
-    ? [{ keys: ['OK'], label: K.play }]
-    : active
-      ? [
-        { keys: ['OK'], label: K.play },
-        { keys: ['←', '→'], label: mode === 'fortime' ? `${K.back} / ${K.finish}` : `${K.back} / ${K.skip}` },
-        ...(Engine.tapsRounds(mode) ? [{ keys: ['↑', '↓'], label: K.rounds }] : []),
-        { keys: ['↩'], label: K.reset },
-      ]
-      : [{ keys: ['OK'], label: K.play }, { keys: ['←', '→'], label: K.mode }];
-
-  const stat = (s: typeof v.left) => (s ? <Stat stat={s} color={color(s.role)} size={height * 0.075} /> : null);
+  const S = app.settings;
+  const b = tvBoard({
+    mode, config: app.currentConfig(), status, elapsed: el, doneAt: app.session?.state.elapsedBase ?? 0,
+    rounds: app.session?.rounds ?? 0, name: app.session?.name ?? app.activeName, wod: S.tvWod, t, fmt: S.timeFormat,
+  });
+  const color = (role: ColorRole | null) => (role ? hex(app.colors[role]) : UI.muted);
+  const glowOf = (role: ColorRole | null, a = 0.45) => (role ? glow(app.colors[role], a) : 'transparent');
+  const T = t.tv, K = T.keys;
+  const box = S.tvBoxName.trim();
   const hh = String(clock.getHours()).padStart(2, '0'), mm = String(clock.getMinutes()).padStart(2, '0');
+  const clockNode = <TvClock time={`${hh}:${mm}`} u={u} />;
+  const headerTitle = (workout: string) => (box ? `${box} · ${workout}` : workout);
 
+  let help: TvHelpItem[];
+  if (b.scene === 'idle') help = [{ keys: ['OK'], label: K.play }, { keys: ['◀', '▶'], label: K.workout }];
+  else if (b.scene === 'done') help = [{ keys: ['OK'], label: K.repeat }, { keys: ['◀', '▶'], label: K.workout }, { keys: [], label: T.backHome }];
+  else if (status === 'running') help = [{ keys: ['OK'], label: K.play }];
+  else {
+    help = [
+      { keys: ['OK'], label: K.play },
+      { keys: ['◀', '▶'], label: mode === 'fortime' ? `${K.back} / ${K.finish}` : `${K.back} / ${K.skip}` },
+      ...(Engine.tapsRounds(mode) ? [{ keys: ['▲', '▼'], label: K.rounds }] : []),
+      { keys: ['↩'], label: K.reset },
+    ];
+  }
+  const footer = <TvHelp items={help} warning={armed ? T.pressAgain : null} size={17 * u} />;
+  const overlay = ready ? null : <TvOverlay title={T.start} hint={T.startHint} size={30 * u} onStart={start} />;
+
+  if (b.scene === 'idle') {
+    return (
+      <TvTemplate
+        divider
+        header={<TvHeader logo={S.tvLogo || undefined} title={box || 'CrossTimer'} strong right={clockNode} u={u} />}
+        main={
+          <View style={{ flex: 1, paddingVertical: 40 * u, paddingLeft: 48 * u, paddingRight: 40 * u }}>
+            <TvIdle
+              label={T.nextWorkout} title={b.title} color={color(b.accent)} glow={glowOf(b.accent, 0.35)}
+              stats={b.summary.map((it) => ({ label: it.label, value: it.value.map((p) => ({ text: p.text, color: p.role ? color(p.role) : UI.text })) }))}
+              okHint={T.okToStart} u={u}
+            />
+          </View>
+        }
+        side={
+          <View style={{ flex: 1, paddingVertical: 40 * u, paddingRight: 48 * u }}>
+            <TvSetupCard title={b.wod.length ? T.wod : T.setupCard} lines={b.wod} hint={T.setupCardHint} u={u} />
+          </View>
+        }
+        sideWidth={408}
+        footer={footer}
+        overlay={overlay}
+      />
+    );
+  }
+
+  if (b.scene === 'done') {
+    return (
+      <TvTemplate
+        header={<TvHeader logo={S.tvLogo || undefined} title={headerTitle(b.title)} right={clockNode} u={u} />}
+        main={<TvDone label={b.label === t.done ? T.doneTitle : b.label} time={b.time} message={T.doneMsg} color={color(b.role)} glow={glowOf(b.role)} u={u} />}
+        footer={footer}
+        overlay={overlay}
+      />
+    );
+  }
+
+  // ao vivo: o relógio diminui se não couber (ex.: 1:05:00) na coluna grande
+  const aside = b.aside;
+  const sideWidth = aside.kind === 'wod' ? 380 : 330;
+  const mainW = width * 0.96 - sideWidth * u - 64 * u;
+  const clockSize = Math.min(360 * u, mainW / (b.time.length * 0.5));
   return (
     <TvTemplate
-      top={
-        <TvTopBar
-          title={v.title} time={v.headerTime} clock={`${hh}:${mm}`} color={accent} size={height * 0.045}
-          exitLabel={t.tv.exit} onExit={() => router.replace('/')}
-        />
-      }
+      frame={b.frame ? color(b.frame) : null}
+      header={<TvHeader logo={S.tvLogo || undefined} title={headerTitle(b.title)} right={clockNode} u={u} />}
       main={
-        <CurrentBand
-          label={status === 'paused' ? `${v.cur.label} · ${t.tv.paused}` : v.cur.label}
-          time={v.cur.time} color={accent} glow={glowOf(v.cur.role)} timeGlow={glowOf(v.cur.role, 0.6)}
-          size={curSize} dim={status === 'paused'}
+        <TvPhase
+          label={b.paused ? `${b.label} · ${T.paused}` : b.label} time={b.time} color={color(b.role)}
+          glow={glowOf(b.role)} timeGlow={glowOf(b.role, 0.5)} progress={b.progress} size={clockSize} dim={b.paused} u={u}
         />
       }
       side={
-        <View style={s.side}>
-          <NextBand
-            label={v.next.label} time={v.next.time} color={color(v.next.role)} glow={glowOf(v.next.role, 0.45)} timeGlow={glowOf(v.next.role, 0.5)}
-            size={nextSize} counting={counting} height="42%" accessibilityLabel={v.next.label}
+        aside.kind === 'rounds' ? (
+          <TvRoundsAside
+            round={aside.round} cycle={aside.cycle} remaining={aside.remaining}
+            next={aside.next ? { ...aside.next, color: color(aside.next.role) } : null}
+            labels={{ round: T.round, cycle: T.cycle, next: T.next, remaining: T.remaining }} u={u}
           />
-          {(v.left || (v.right && v.right !== 'finish')) && (
-            <View style={s.stats}>{stat(v.left)}{v.right && v.right !== 'finish' ? stat(v.right) : null}</View>
-          )}
-          <View style={s.play}>
-            <PlayButton
-              color={accent} glow={glowOf(v.accent, 0.6)} progress={v.progress} running={status === 'running'}
-              label={v.playLabel} onPress={() => { unlockAudio(); app.toggle(); }} size={Math.min(sideW * 0.42, bodyH * 0.26)}
-            />
-          </View>
-        </View>
+        ) : aside.kind === 'laps' ? (
+          <TvLapsAside lap={aside.lap} completed={aside.completed} next={{ ...aside.next, color: color('lap') }} labels={{ lap: T.lap, laps: T.laps }} u={u} />
+        ) : (
+          <TvWodAside lines={aside.kind === 'wod' ? aside.lines : []} rounds={aside.rounds} labels={{ wod: T.wod, rounds: T.rounds, hint: T.roundsHint }} u={u} />
+        )
       }
-      footer={<TvHelp items={help} warning={armed ? t.tv.pressAgain : null} size={ui} />}
-      overlay={ready ? null : <TvOverlay title={t.tv.start} hint={t.tv.startHint} size={height * 0.035} onStart={start} />}
+      sideWidth={sideWidth}
+      footer={status === 'running' && !armed ? null : footer}
+      overlay={overlay}
     />
   );
 }
-
-const s = StyleSheet.create({
-  side: { flex: 1 },
-  stats: { flexDirection: 'row', justifyContent: 'space-around', paddingTop: 12 },
-  play: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-});
