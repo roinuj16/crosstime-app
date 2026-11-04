@@ -1,8 +1,8 @@
-# Instalar o CrossTimer de verdade no celular
+# Instalar o CronoBox de verdade no celular
 
 O **Expo Go** serve para testar telas, sons e voz. Mas o **timer com a tela bloqueada**
 (fase 4) precisa do app instalado como app próprio: um *build de desenvolvimento*.
-Ele funciona como o Expo Go, só que com as configurações do CrossTimer
+Ele funciona como o Expo Go, só que com as configurações do CronoBox
 (áudio em segundo plano, notificações, lanterna).
 
 Você faz isso **uma vez**. Depois, as mudanças de código chegam pelo `npm run dev`,
@@ -24,7 +24,7 @@ npx eas-cli@latest build --profile development --platform android
 1. O build roda na nuvem da Expo (~10–20 min). No fim aparece um link e um QR code.
 2. Abra o link no celular Android e instale o APK. O Android pede para permitir
    "instalar apps desta fonte": permita só para essa instalação.
-3. No Mac: `npm run dev` e abra o CrossTimer no celular. Ele encontra o servidor
+3. No Mac: `npm run dev` e abra o CronoBox no celular. Ele encontra o servidor
    na mesma rede Wi-Fi.
 
 ## iPhone: duas opções
@@ -53,7 +53,7 @@ Abra no iPhone o link que aparece no fim do build e instale. Depois,
 
 ## Como testar a fase 4
 
-1. Abra o CrossTimer (build de desenvolvimento), toque em **Iniciar** num Tabata.
+1. Abra o CronoBox (build de desenvolvimento), toque em **Iniciar** num Tabata.
    Na primeira vez, o app pede permissão de **notificações**: permita.
 2. **Bloqueie a tela.** Deve continuar tocando bipes, 3-2-1 e voz.
    - iPhone: um áudio silencioso mantém o app vivo; as notificações chegam sem som (para não duplicar).
@@ -68,7 +68,7 @@ Se algo não se comportar assim, anote o celular, a versão do sistema e o que a
 ## Limitações conhecidas
 
 - **iPhone:** se outro app tomar o áudio só para ele (uma ligação, por exemplo), o sistema pode
-  congelar o CrossTimer. As notificações continuam chegando, mas sem som e sem voz até você voltar ao app.
+  congelar o CronoBox. As notificações continuam chegando, mas sem som e sem voz até você voltar ao app.
 - **Android:** alguns fabricantes (Xiaomi, Samsung com economia de bateria agressiva) atrasam
-  notificações. Se acontecer, tire o CrossTimer da otimização de bateria nas configurações do sistema.
+  notificações. Se acontecer, tire o CronoBox da otimização de bateria nas configurações do sistema.
 - **Lanterna:** só pisca com o app aberto (o sistema exige a câmera ativa).

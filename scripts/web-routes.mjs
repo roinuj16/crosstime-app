@@ -2,7 +2,7 @@
 /**
  * Depois do `expo export -p web`: copia o index.html para a pasta de cada tela
  * (dist/tv/index.html, dist/settings/index.html…). Assim um link direto como
- * crosstimer.../tv abre em qualquer hospedagem estática, mesmo sem "fallback" para o index.
+ * cronobox.../tv abre em qualquer hospedagem estática, mesmo sem "fallback" para o index.
  */
 import { copyFileSync, existsSync, mkdirSync, readdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';

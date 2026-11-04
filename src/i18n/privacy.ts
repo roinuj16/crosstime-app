@@ -13,7 +13,7 @@ export const POLICY: Record<'pt' | 'en', { updated: string; sections: PolicySect
       { title: 'Estatísticas de uso (opcional)', body: 'Se você aceitar, usamos o Google Analytics para contar o uso: telas abertas, treinos iniciados e concluídos (modo e duração), uso do modo TV e do pareamento, e erros do app. O Google recebe também dados técnicos, como tipo de aparelho, navegador e região aproximada. Não enviamos nome, e-mail, nome do box, WOD nem nada do que você digita.' },
       { title: 'Como recusar ou mudar de ideia', body: 'Você pode recusar no aviso ou desligar a qualquer momento em Ajustes → Estatísticas de uso. Recusando, nenhum script do Google Analytics é carregado.' },
       { title: 'Por quanto tempo', body: 'Os dados das estatísticas ficam no Google Analytics pelo prazo de retenção configurado no projeto (padrão de 2 meses). As salas de pareamento guardam só o último estado do timer de cada TV.' },
-      { title: 'Seus direitos (LGPD)', body: 'Você pode pedir informações, correção ou exclusão de dados ligados ao seu uso pelos canais de contato do CrossTimer.' },
+      { title: 'Seus direitos (LGPD)', body: 'Você pode pedir informações, correção ou exclusão de dados ligados ao seu uso pelos canais de contato do CronoBox.' },
     ],
   },
   en: {
@@ -24,7 +24,7 @@ export const POLICY: Record<'pt' | 'en', { updated: string; sections: PolicySect
       { title: 'Usage statistics (optional)', body: 'If you accept, we use Google Analytics to count usage: screens opened, workouts started and completed (mode and duration), TV mode and pairing use, and app errors. Google also receives technical data such as device type, browser and approximate region. We never send your name, email, box name, WOD or anything you type.' },
       { title: 'How to decline or change your mind', body: 'Decline in the notice or turn it off anytime in Settings → Usage statistics. If you decline, no Google Analytics script is loaded.' },
       { title: 'How long', body: 'Statistics stay in Google Analytics for the retention period set in the project (2 months by default). Pairing rooms keep only the latest timer state of each TV.' },
-      { title: 'Your rights', body: 'You can ask for information, correction or deletion of data related to your use through CrossTimer\'s contact channels.' },
+      { title: 'Your rights', body: 'You can ask for information, correction or deletion of data related to your use through CronoBox\'s contact channels.' },
     ],
   },
 };

@@ -147,7 +147,7 @@ export default function TvScreen() {
     return (
       <TvTemplate
         divider
-        header={<TvHeader logo={S.tvLogo || undefined} title={box || 'CrossTimer'} strong right={clockNode} u={u} />}
+        header={<TvHeader logo={S.tvLogo || undefined} title={box || 'CronoBox'} strong right={clockNode} u={u} />}
         main={
           <View style={{ flex: 1, paddingVertical: 40 * u, paddingLeft: 48 * u, paddingRight: 40 * u }}>
             <TvIdle

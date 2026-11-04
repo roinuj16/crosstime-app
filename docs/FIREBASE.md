@@ -19,7 +19,7 @@ Nenhum dado pessoal é guardado: só o estado do timer, o treino escolhido e a m
 Sem esse passo, o app funciona normalmente e só o pareamento fica escondido.
 
 7. **Authentication → Configurações → Domínios autorizados → Adicionar domínio**: o endereço do
-   web app (ex.: `crosstimer.expo.app`). Sem isso, o login anônimo é recusado no site publicado
+   web app (ex.: `cronobox.expo.app`). Sem isso, o login anônimo é recusado no site publicado
    e o pareamento não conecta (no `localhost` já funciona).
 
 Projeto atual: **Cronobox** (`cronobox-ba0cc`), configurado em `src/config/firebase.ts`.

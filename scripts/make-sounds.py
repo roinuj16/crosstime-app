@@ -1,4 +1,4 @@
-"""Gera os sons do CrossTimer (WAV mono 16 bits, 22,05 kHz) em assets/sounds/.
+"""Gera os sons do CronoBox (WAV mono 16 bits, 22,05 kHz) em assets/sounds/.
 
 Todos os sons são sintetizados aqui — nenhum arquivo de terceiros.
 Rodar de novo: python3 scripts/make-sounds.py

@@ -1,6 +1,6 @@
 {
-  "name": "CrossTimer",
-  "short_name": "CrossTimer",
+  "name": "CronoBox",
+  "short_name": "CronoBox",
   "description": "Timer de intervalos para cross training: Tabata, EMOM, AMRAP, For Time e cronômetro.",
   "lang": "pt-BR",
   "start_url": "/",

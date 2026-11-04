@@ -65,7 +65,7 @@ export async function scheduleAlerts(alerts: Alert[]) {
           title: a.title,
           body: a.body,
           sound: withSound ? (a.kind === 'done' ? 'done.wav' : 'phase_beep.wav') : false,
-          data: { crosstimer: true },
+          data: { cronobox: true },
         },
         trigger: { type: Notifications.SchedulableTriggerInputTypes.DATE, date: a.at, channelId: CHANNEL },
       });

@@ -1,4 +1,4 @@
-"""Ícones provisórios do CrossTimer no estilo placar de LED (app, web app e favicon).
+"""Ícones provisórios do CronoBox no estilo placar de LED (app, web app e favicon).
 
 Rodar de novo: python3 scripts/make-icons.py   (precisa de Pillow)
 O ícone final entra na fase de publicação; este serve para instalar e testar.
@@ -12,11 +12,11 @@ BG, GREEN, AMBER = (11, 11, 11), (49, 242, 107), (255, 176, 0)
 
 
 def art(size, scale=1.0, bg=True, color=GREEN):
-    """Desenha 'CT' em LED verde com brilho e uma barra âmbar; scale < 1 deixa margem (ícone adaptável)."""
+    """Desenha 'CB' (CronoBox) em LED verde com brilho e uma barra âmbar; scale < 1 deixa margem (ícone adaptável)."""
     img = Image.new('RGBA', (size, size), BG + (255,) if bg else (0, 0, 0, 0))
     s = size * scale
     font = ImageFont.truetype(FONT, int(s * 0.62))
-    text = 'CT'
+    text = 'CB'
     box = font.getbbox(text)
     w, h = box[2] - box[0], box[3] - box[1]
     x = (size - w) / 2 - box[0]

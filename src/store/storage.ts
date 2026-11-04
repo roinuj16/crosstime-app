@@ -5,6 +5,7 @@ import Storage from 'expo-sqlite/kv-store';
  * Leitura síncrona na inicialização, para a tela já abrir com os dados do usuário;
  * escrita adiada (debounce) para não gravar a cada décimo de segundo.
  */
+// Chave mantida do nome antigo (CrossTimer) para não perder treinos e ajustes de quem já usa.
 const KEY = 'crosstimer.state.v1';
 
 export function loadJSON<T>(): T | null {

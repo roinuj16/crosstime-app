@@ -1,4 +1,4 @@
-# CrossTimer
+# CronoBox
 
 Timer de intervalos para cross training — **Tabata, Rounds, EMOM, AMRAP, For Time e Cronômetro**
 (com *time lap*) — no visual de placar de LED do box. React Native + Expo (SDK 58) + TypeScript.

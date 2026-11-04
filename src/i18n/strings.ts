@@ -220,14 +220,14 @@ const pt: Strings = {
     install: 'Instalar na tela de início',
     installIos: 'No Safari: toque em Compartilhar e depois em "Adicionar à Tela de Início". Abre em tela cheia e funciona sem internet.',
     installAndroid: 'No Chrome: toque no menu ⋮ e depois em "Instalar app". Abre em tela cheia e funciona sem internet.',
-    webNote: 'No navegador, deixe o CrossTimer aberto e a tela acesa durante o treino: com a tela bloqueada, o navegador pausa o timer.',
+    webNote: 'No navegador, deixe o CronoBox aberto e a tela acesa durante o treino: com a tela bloqueada, o navegador pausa o timer.',
     voiceSource: 'Tipo de voz',
     voiceRecorded: 'Coach (gravada)',
     voiceSystem: 'Do sistema',
     voiceSourceHint: 'A gravada soa igual em qualquer celular',
     voiceCount: 'Falar a contagem 3-2-1',
     voiceCountHint: 'No lugar dos bipes do fim de cada fase',
-    flashDenied: 'Sem acesso à câmera, a lanterna não pode piscar. Libere em Ajustes do sistema → CrossTimer → Câmera.',
+    flashDenied: 'Sem acesso à câmera, a lanterna não pode piscar. Libere em Ajustes do sistema → CronoBox → Câmera.',
   },
   voices: {
     title: 'Vozes',
@@ -240,7 +240,7 @@ const pt: Strings = {
   privacy: {
     banner: 'Usamos o Google Analytics para saber quais recursos são usados e corrigir erros. Sem nome, sem e-mail e sem o que você digita.',
     accept: 'Aceitar', decline: 'Recusar', policy: 'Política de privacidade',
-    toggle: 'Estatísticas de uso', toggleHint: 'Google Analytics, sem dados pessoais. Ajuda a melhorar o CrossTimer.',
+    toggle: 'Estatísticas de uso', toggleHint: 'Google Analytics, sem dados pessoais. Ajuda a melhorar o CronoBox.',
     title: 'Privacidade',
   },
   tv: {
@@ -259,7 +259,7 @@ const pt: Strings = {
     customize: 'Personalizar modo TV', customizeHint: 'Nome do box, logo e o treino do dia (WOD) na TV',
     setupCard: 'Deixe a TV com a cara do box', setupCardHint: 'Coloque o nome, o logo e o WOD do dia em Ajustes → Personalizar modo TV.',
     pair: {
-      title: 'Controle pelo celular', hint: 'Abra o CrossTimer no celular e aponte a câmera, ou digite o código',
+      title: 'Controle pelo celular', hint: 'Abra o CronoBox no celular e aponte a câmera, ou digite o código',
       connected: 'Celular do coach conectado', linked: 'conectada', section: 'TV do box', waiting: 'Aguardando a TV', offline: 'Sem conexão com a TV',
       tvOf: (code) => `TV ${code}`, connect: 'Conectar à TV', connectHint: 'Digite o código que aparece na TV do box',
       codeLabel: 'Código da TV', disconnect: 'Desconectar', invalid: 'Código inválido: são 6 letras e números, como K7Q-4M2',
@@ -422,14 +422,14 @@ const en: Strings = {
     install: 'Add to Home Screen',
     installIos: 'In Safari: tap Share, then "Add to Home Screen". It opens full screen and works offline.',
     installAndroid: 'In Chrome: tap the ⋮ menu, then "Install app". It opens full screen and works offline.',
-    webNote: 'In the browser, keep CrossTimer open and the screen on while you train: with the screen locked, the browser pauses the timer.',
+    webNote: 'In the browser, keep CronoBox open and the screen on while you train: with the screen locked, the browser pauses the timer.',
     voiceSource: 'Voice type',
     voiceRecorded: 'Coach (recorded)',
     voiceSystem: 'System',
     voiceSourceHint: 'The recorded voice sounds the same on every phone',
     voiceCount: 'Say the 3-2-1 countdown',
     voiceCountHint: 'Instead of the beeps at the end of each phase',
-    flashDenied: 'Without camera access the flashlight can’t blink. Allow it in system Settings → CrossTimer → Camera.',
+    flashDenied: 'Without camera access the flashlight can’t blink. Allow it in system Settings → CronoBox → Camera.',
   },
   voices: {
     title: 'Voices',
@@ -442,7 +442,7 @@ const en: Strings = {
   privacy: {
     banner: 'We use Google Analytics to learn which features are used and to fix errors. No name, no email and nothing you type.',
     accept: 'Accept', decline: 'Decline', policy: 'Privacy policy',
-    toggle: 'Usage statistics', toggleHint: 'Google Analytics, no personal data. Helps improve CrossTimer.',
+    toggle: 'Usage statistics', toggleHint: 'Google Analytics, no personal data. Helps improve CronoBox.',
     title: 'Privacy',
   },
   tv: {
@@ -461,7 +461,7 @@ const en: Strings = {
     customize: 'Customize TV mode', customizeHint: 'Box name, logo and the workout of the day (WOD) on the TV',
     setupCard: 'Make the TV look like your box', setupCardHint: 'Add the name, logo and today\'s WOD in Settings → Customize TV mode.',
     pair: {
-      title: 'Control from your phone', hint: 'Open CrossTimer on your phone and point the camera, or type the code',
+      title: 'Control from your phone', hint: 'Open CronoBox on your phone and point the camera, or type the code',
       connected: 'Coach phone connected', linked: 'connected', section: 'Box TV', waiting: 'Waiting for the TV', offline: 'No connection to the TV',
       tvOf: (code) => `TV ${code}`, connect: 'Connect to a TV', connectHint: 'Type the code shown on the box TV',
       codeLabel: 'TV code', disconnect: 'Disconnect', invalid: 'Invalid code: 6 letters and numbers, like K7Q-4M2',

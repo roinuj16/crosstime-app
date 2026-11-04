@@ -1,5 +1,5 @@
 /**
- * CrossTimer — motor do timer.
+ * CronoBox — motor do timer.
  *
  * Só cálculo: sem React, sem áudio, sem armazenamento. Portado do protótipo web.
  *

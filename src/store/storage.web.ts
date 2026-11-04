@@ -2,6 +2,7 @@
  * Versão web do armazenamento: usa o localStorage do navegador.
  * (No celular vale storage.ts, com SQLite.) Útil para pré-visualizar o app no navegador.
  */
+// Chave mantida do nome antigo (CrossTimer) para não perder treinos e ajustes de quem já usa.
 const KEY = 'crosstimer.state.v1';
 
 export function loadJSON<T>(): T | null {

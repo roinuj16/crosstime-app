@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Gera a voz gravada do CrossTimer na ElevenLabs.
+ * Gera a voz gravada do CronoBox na ElevenLabs.
  *
  *   ELEVENLABS_API_KEY=sua_chave npm run voices -- --list            # lista as vozes da sua conta
  *   ELEVENLABS_API_KEY=sua_chave npm run voices -- --voice ID --sample   # 3 frases de teste em voice-samples/

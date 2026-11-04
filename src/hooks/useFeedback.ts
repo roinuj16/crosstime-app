@@ -10,7 +10,7 @@ import { useRemote } from '@/services/remote';
 import { listVoices } from '@/services/voices';
 import { useApp } from '@/store/useApp';
 
-const KEEP_AWAKE_TAG = 'crosstimer-workout';
+const KEEP_AWAKE_TAG = 'cronobox-workout';
 
 /**
  * Liga o timer ao aparelho: configura o áudio, mantém a tela acesa durante o treino
