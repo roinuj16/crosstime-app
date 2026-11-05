@@ -1,52 +1,6 @@
-import { router } from 'expo-router';
-import { StyleSheet, View } from 'react-native';
-import { BoxLogo, Button, Hint } from '@/components/atoms';
-import { LinkRow, Row, TextField, Toggle } from '@/components/molecules';
-import { SheetTemplate } from '@/components/templates';
-import { useStrings } from '@/hooks/useStrings';
-import { analyticsAvailable } from '@/services/analytics';
-import { isWeb, pickImage } from '@/services/webApp';
-import { useApp } from '@/store/useApp';
+import { Redirect } from 'expo-router';
 
-/** Página de personalização do modo TV: nome do box, logo e o WOD do dia. */
-export default function TvSetupScreen() {
-  const { t } = useStrings();
-  const S = t.tv.setup;
-  const st = useApp((s) => s.settings);
-  const set = useApp((s) => s.setSetting);
-  const choose = async () => { const uri = await pickImage(); if (uri) set('tvLogo', uri); };
-
-  return (
-    <SheetTemplate title={S.title} onBack={() => router.back()} right={<Button label={t.settings.done} kind="primary" onPress={() => router.back()} />} keyboard>
-      <TextField label={S.boxName} value={st.tvBoxName} onChange={(v) => set('tvBoxName', v)} placeholder={S.boxNamePh} maxLength={40} />
-      {isWeb && (
-        <Row
-          label={S.logo} hint={S.logoHint}
-          right={
-            <View style={s.logo}>
-              {!!st.tvLogo && <BoxLogo uri={st.tvLogo} size={44} />}
-              <Button label={S.logoPick} onPress={choose} />
-              {!!st.tvLogo && <Button label={S.logoRemove} kind="danger" onPress={() => set('tvLogo', '')} />}
-            </View>
-          }
-        />
-      )}
-      <TextField label={S.wod} hint={S.wodHint} value={st.tvWod} onChange={(v) => set('tvWod', v)} placeholder={S.wodPh} multiline maxLength={400} />
-      {analyticsAvailable && (
-        <>
-          <Toggle label={t.privacy.toggle} hint={t.privacy.toggleHint} value={st.analyticsConsent === 'granted'} onChange={(v) => set('analyticsConsent', v ? 'granted' : 'denied')} />
-          <LinkRow label={t.privacy.policy} onPress={() => router.push('/privacy')} />
-        </>
-      )}
-      <View style={s.open}>
-        <Button label={S.open} kind="primary" onPress={() => router.push('/tv')} />
-      </View>
-      <Hint small style={{ marginTop: 10 }}>{t.tv.openHint}</Hint>
-    </SheetTemplate>
-  );
+/** Endereço antigo da personalização da TV: agora fica na tela Coach. */
+export default function TvSetupRedirect() {
+  return <Redirect href="/coach" />;
 }
-
-const s = StyleSheet.create({
-  logo: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  open: { flexDirection: 'row', marginTop: 20 },
-});

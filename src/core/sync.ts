@@ -19,12 +19,12 @@ export interface SyncSession {
 export interface SyncWorkout { id: string; name: string; mode: Mode; config: AnyConfig; example?: boolean }
 
 export interface TimerSnapshot { v: 1; mode: Mode; activeName: string | null; configs: ModeConfigs; saved: SyncWorkout[]; session: SyncSession | null }
-export interface BrandSnapshot { v: 1; boxName: string; logo: string; wod: string; colors: ColorScheme; timeFormat: TimeFormat }
+export interface BrandSnapshot { v: 1; boxName: string; logo: string; wod: string; coach: string; colors: ColorScheme; timeFormat: TimeFormat }
 
 /** O pedaço do estado do app que participa da sincronização. */
 export interface SyncSource {
   mode: Mode; activeName: string | null; configs: ModeConfigs; saved: SyncWorkout[]; session: SyncSession | null;
-  colors: ColorScheme; settings: { tvBoxName: string; tvLogo: string; tvWod: string; timeFormat: TimeFormat };
+  colors: ColorScheme; settings: { tvBoxName: string; tvLogo: string; tvWod: string; tvCoachName: string; timeFormat: TimeFormat };
 }
 
 const shift = (t: number | null, d: number) => (t == null ? null : Math.round(t + d));
@@ -42,8 +42,36 @@ export function timerSnapshot(s: SyncSource, offset: number): TimerSnapshot {
 }
 
 export function brandSnapshot(s: SyncSource): BrandSnapshot {
-  return clean({ v: 1, boxName: s.settings.tvBoxName, logo: s.settings.tvLogo, wod: s.settings.tvWod, colors: s.colors, timeFormat: s.settings.timeFormat });
+  return clean({ v: 1, boxName: s.settings.tvBoxName, logo: s.settings.tvLogo, wod: s.settings.tvWod, coach: s.settings.tvCoachName ?? '', colors: s.colors, timeFormat: s.settings.timeFormat });
 }
+
+/** O que muda no app ao receber a marca da sala (nome do box, logo, WOD, coach, cores). */
+export function applyBrand(b: Partial<BrandSnapshot>, s: SyncSource): Pick<SyncSource, 'colors' | 'settings'> {
+  return {
+    colors: b.colors ?? s.colors,
+    settings: {
+      ...s.settings, tvBoxName: b.boxName ?? '', tvLogo: b.logo ?? '', tvWod: b.wod ?? '', tvCoachName: b.coach ?? '',
+      timeFormat: b.timeFormat ?? s.settings.timeFormat,
+    },
+  };
+}
+
+/**
+ * Quando o coach entra numa sala que já tem marca (ex.: o WOD foi escrito na própria TV):
+ * o que o celular tem preenchido vale; o que está vazio no celular fica como estava na TV.
+ * Assim conectar não apaga o WOD, o nome do box nem o logo da TV.
+ */
+export function mergeBrand(mine: BrandSnapshot, room: Partial<BrandSnapshot> | null): BrandSnapshot {
+  if (!room) return mine;
+  const pick = (a: string, b: string | undefined) => (a.trim() ? a : b ?? '');
+  return { ...mine, boxName: pick(mine.boxName, room.boxName), logo: pick(mine.logo, room.logo), wod: pick(mine.wod, room.wod), coach: pick(mine.coach, room.coach) };
+}
+
+/** O coach dá sinal de vida a cada HEARTBEAT_MS; a TV o considera fora depois de COACH_STALE_MS sem sinal. */
+export const HEARTBEAT_MS = 20_000;
+export const COACH_STALE_MS = 50_000;
+/** `at` do coach (relógio do servidor) ainda é recente? */
+export const coachAlive = (at: number | null | undefined, serverNow: number) => typeof at === 'number' && serverNow - at < COACH_STALE_MS;
 
 /** O que muda no app ao receber o timer da sala. O Firebase some com nulos e listas vazias: aqui voltam. */
 export function applyTimer(snap: TimerSnapshot, offset: number): Pick<SyncSource, 'mode' | 'activeName' | 'configs' | 'saved' | 'session'> {

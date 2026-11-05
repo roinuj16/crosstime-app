@@ -34,6 +34,8 @@ export interface Settings {
   tvBoxName: string;
   tvLogo: string;
   tvWod: string;
+  /** nome do coach (opcional): aparece no topo da TV, ao lado da hora */
+  tvCoachName: string;
   /** pareamento: código da sala desta TV, e a TV a que este celular está ligado ('' = nenhuma) */
   tvRoomCode: string;
   pairedCode: string;
@@ -62,7 +64,7 @@ export const DEFAULT_SETTINGS: Settings = {
   language: 'auto', sound: true, soundScheme: 'beep', volume: 0.75, countdown: true, tick: false,
   voice: true, voiceLang: 'en', voiceId: '', voiceRate: 1, voiceSource: 'recorded', voiceCount: false, sayRound: true,
   vibrate: true, keepAwake: true, flash: false, duckOthers: false, backgroundAlerts: true, timeFormat: '00:00',
-  tvBoxName: '', tvLogo: '', tvWod: '', tvRoomCode: '', pairedCode: '', analyticsConsent: 'unknown',
+  tvBoxName: '', tvLogo: '', tvWod: '', tvCoachName: '', tvRoomCode: '', pairedCode: '', analyticsConsent: 'unknown',
 };
 
 const EXAMPLES: SavedWorkout[] = [

@@ -1,12 +1,12 @@
 /// <reference types="jest" />
 import * as Engine from '../src/core/engine';
-import { applyTimer, brandKey, brandSnapshot, formatRoomCode, newRoomCode, parseRoomCode, timerKey, timerSnapshot, type SyncSource } from '../src/core/sync';
+import { applyTimer, brandKey, brandSnapshot, coachAlive, formatRoomCode, mergeBrand, newRoomCode, parseRoomCode, timerKey, timerSnapshot, type SyncSource } from '../src/core/sync';
 import { DEFAULT_COLORS } from '../src/theme/palette';
 
 const base: SyncSource = {
   mode: 'tabata', activeName: 'Tabata 20/10 × 8', configs: Engine.DEFAULTS, saved: [],
   session: { mode: 'tabata', name: 'Tabata 20/10 × 8', config: Engine.DEFAULTS.tabata, startedAt: 1_000_000, rounds: 0, state: { status: 'running', elapsedBase: 12, runningSince: 1_005_000 } },
-  colors: DEFAULT_COLORS, settings: { tvBoxName: 'Box Fortaleza', tvLogo: '', tvWod: '10 Thrusters', timeFormat: '00:00' },
+  colors: DEFAULT_COLORS, settings: { tvBoxName: 'Box Fortaleza', tvLogo: '', tvWod: '10 Thrusters', tvCoachName: '', timeFormat: '00:00' },
 };
 
 describe('sincronização TV ↔ celular', () => {
@@ -69,5 +69,22 @@ describe('leitor de QR da TV', () => {
     expect(codeFromScan('WIFI:S:Box;T:WPA;P:12345678;;')).toBeNull();
     expect(codeFromScan('https://x.com/pair?code=K7Q4M')).toBeNull();
     expect(codeFromScan('K7Q-4M1')).toBeNull(); // 1 não existe no alfabeto do código
+  });
+});
+
+describe('marca e presença do coach', () => {
+  it('ao conectar, campo vazio no celular não apaga o que a TV já tem', () => {
+    const phone = brandSnapshot({ ...base, settings: { ...base.settings, tvBoxName: '', tvWod: '', tvCoachName: 'Ana' } });
+    const room = brandSnapshot({ ...base, settings: { ...base.settings, tvBoxName: 'Box da TV', tvWod: '21-15-9 Thrusters', tvCoachName: '' } });
+    expect(mergeBrand(phone, room)).toMatchObject({ boxName: 'Box da TV', wod: '21-15-9 Thrusters', coach: 'Ana' });
+    // preenchido no celular vale
+    const phone2 = brandSnapshot({ ...base, settings: { ...base.settings, tvWod: 'AMRAP 12' } });
+    expect(mergeBrand(phone2, room).wod).toBe('AMRAP 12');
+    expect(mergeBrand(phone, null)).toBe(phone);
+  });
+  it('coach sem sinal de vida há 50 s conta como desconectado', () => {
+    expect(coachAlive(100_000, 120_000)).toBe(true);
+    expect(coachAlive(100_000, 151_000)).toBe(false);
+    expect(coachAlive(null, 0)).toBe(false);
   });
 });

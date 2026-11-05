@@ -2,7 +2,7 @@
  * O laço da sincronização, sem React: envia o que muda aqui e aplica o que chega da sala.
  * Separado do hook para poder testar duas "telas" conversando (veja __tests__/sync-loop-test.ts).
  */
-import { applyTimer, brandKey, brandSnapshot, timerKey, timerSnapshot, type BrandSnapshot, type SyncSource, type TimerSnapshot } from '@/core/sync';
+import { applyBrand, applyTimer, brandKey, brandSnapshot, mergeBrand, timerKey, timerSnapshot, type BrandSnapshot, type SyncSource, type TimerSnapshot } from '@/core/sync';
 import type { RemoteRole, Room, RoomHandlers } from './remote';
 
 export interface SyncStore {
@@ -50,10 +50,7 @@ export function startSync(store: SyncStore, open: OpenRoom, role: RemoteRole, co
     onBrand: (snap) => {
       const b = strip(snap) as BrandSnapshot;
       const st = source();
-      const next = {
-        colors: b.colors ?? st.colors,
-        settings: { ...st.settings, tvBoxName: b.boxName ?? '', tvLogo: b.logo ?? '', tvWod: b.wod ?? '', timeFormat: b.timeFormat ?? st.settings.timeFormat },
-      };
+      const next = applyBrand(b, st);
       // a chave sai do estado que vai ficar aqui (não do que veio), para não devolver o mesmo para a sala
       lastBrand = brandKey(brandSnapshot({ ...st, ...next } as SyncSource));
       store.setState(next);
@@ -61,8 +58,14 @@ export function startSync(store: SyncStore, open: OpenRoom, role: RemoteRole, co
   }).then((r) => {
     if (closed) { r.close(); return; }
     room = r;
-    // o coach chega mandando o que tem no celular; a TV só manda o que mudar depois
-    if (role === 'coach') publish();
+    // o coach chega mandando o que tem no celular (a marca junta com a que a TV já tem);
+    // a TV só manda o que mudar depois
+    if (role === 'coach') {
+      const st = source();
+      const merged = mergeBrand(brandSnapshot(st), r.initialBrand ? strip(r.initialBrand) as BrandSnapshot : null);
+      if (brandKey(merged) !== brandKey(brandSnapshot(st))) store.setState(applyBrand(merged, st));
+      publish();
+    }
     else { lastTimer = timerKey(timerSnapshot(source(), r.offset())); lastBrand = brandKey(brandSnapshot(source())); }
   }).catch((e) => { if (!closed) onError?.(e); });
 

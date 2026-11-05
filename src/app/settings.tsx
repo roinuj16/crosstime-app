@@ -35,7 +35,8 @@ export default function SettingsScreen() {
 
   const remote = useRemote();
   const P = t.tv.pair;
-  const tvHint = !st.pairedCode ? t.tv.connect.step2 : remote.status === 'error' ? P.error : remote.peer ? t.tv.connect.statusOn(formatRoomCode(st.pairedCode)) : `${P.tvOf(formatRoomCode(st.pairedCode))} · ${P.waiting}`;
+  const tvStatus = !st.pairedCode ? '' : remote.status === 'error' ? P.error : remote.peer ? t.tv.connect.statusOn(formatRoomCode(st.pairedCode)) : `${P.tvOf(formatRoomCode(st.pairedCode))} · ${P.waiting}`;
+  const coachHint = [st.tvCoachName.trim() && t.coach.onTv(st.tvCoachName.trim()), tvStatus].filter(Boolean).join(' · ') || t.coach.hint;
 
   const recorded = hasRecordedVoice(st.voiceLang);
   const systemVoice = !recorded || st.voiceSource === 'system';
@@ -67,9 +68,7 @@ export default function SettingsScreen() {
         dots={(['prepare', 'work', 'rest', 'cooldown'] as ColorRole[]).map((r) => hex(colors[r]))}
       />
 
-      <SectionTitle title={P.section} />
-      <LinkRow label={t.tv.connect.title} hint={tvHint} onPress={() => router.push('/connect')} />
-      {isWeb && <LinkRow label={t.tv.customize} hint={t.tv.customizeHint} onPress={() => router.push('/tv-setup')} />}
+      <LinkRow label={t.coach.title} hint={coachHint} onPress={() => router.push('/coach')} />
       {isWeb && <Note>{S.webNote}</Note>}
       {isWeb && !isInstalled() && (
         <Field label={S.install} hint={isIOSBrowser() ? S.installIos : S.installAndroid}>{null}</Field>

@@ -5,17 +5,19 @@
  * Sala: rooms/<código>/
  *   tv        { uid, at }        dona da sala (a TV que mostrou o código)
  *   tvOnline  true               some sozinho quando a TV cai (onDisconnect)
- *   coach     { uid, at }        o celular conectado; some sozinho quando ele cai
+ *   coach     { uid, at }        o celular conectado; some sozinho quando ele cai. `at` é renovado a
+ *                                cada 20 s: sem isso a TV não percebia um celular que só sumiu
+ *                                (aba fechada, iPhone guardado no bolso) e não voltava ao QR code
  *   timer     TimerSnapshot      modo, treino, configurações, treinos salvos, sessão
  *   brand     BrandSnapshot      nome do box, logo, WOD, cores
  */
 import { getApps, initializeApp, type FirebaseApp } from 'firebase/app';
 import { getAuth, inMemoryPersistence, initializeAuth, signInAnonymously, type Auth } from 'firebase/auth';
-import { getDatabase, onDisconnect, onValue, ref, remove, serverTimestamp, set, type Database } from 'firebase/database';
+import { get, getDatabase, onDisconnect, onValue, ref, remove, serverTimestamp, set, type Database } from 'firebase/database';
 import { Platform } from 'react-native';
 import { create } from 'zustand';
 import { FIREBASE_CONFIG } from '@/config/firebase';
-import type { BrandSnapshot, TimerSnapshot } from '@/core/sync';
+import { coachAlive, HEARTBEAT_MS, type BrandSnapshot, type TimerSnapshot } from '@/core/sync';
 
 export const remoteAvailable = FIREBASE_CONFIG != null;
 
@@ -54,6 +56,8 @@ export interface Room {
   offset: () => number;
   publishTimer: (s: TimerSnapshot) => void;
   publishBrand: (s: BrandSnapshot) => void;
+  /** a marca que já estava na sala ao entrar (o coach junta com a dele, sem apagar o WOD da TV) */
+  initialBrand: (BrandSnapshot & { by?: string }) | null;
   close: () => void;
 }
 
@@ -72,6 +76,7 @@ export async function openRoom(code: string, role: RemoteRole, h: RoomHandlers):
     const base = `rooms/${code}`;
     let offset = 0;
     let closed = false;
+    let connected = true;
     const subs: (() => void)[] = [];
     subs.push(onValue(ref(db, '.info/serverTimeOffset'), (s) => { offset = Number(s.val()) || 0; }));
 
@@ -96,7 +101,8 @@ export async function openRoom(code: string, role: RemoteRole, h: RoomHandlers):
 
     subs.push(onValue(ref(db, '.info/connected'), (s) => {
       if (closed) return;
-      if (s.val() !== true) { useRemote.setState({ status: 'connecting' }); return; }
+      connected = s.val() === true;
+      if (!connected) { useRemote.setState({ status: 'connecting' }); return; }
       claim()
         .then(() => {
           if (closed) return;
@@ -106,14 +112,27 @@ export async function openRoom(code: string, role: RemoteRole, h: RoomHandlers):
         .catch(() => { if (!closed) useRemote.setState({ status: 'error' }); });
     }));
 
-    if (role === 'tv') subs.push(onValue(ref(db, `${base}/coach`), (s) => useRemote.setState({ peer: s.exists() })));
-    else subs.push(onValue(ref(db, `${base}/tvOnline`), (s) => useRemote.setState({ peer: s.val() === true })));
+    if (role === 'tv') {
+      // coach presente = nó existe e deu sinal de vida há pouco (relógio do servidor)
+      let coachAt: number | null = null;
+      const check = () => { if (!closed) useRemote.setState({ peer: coachAlive(coachAt, Date.now() + offset) }); };
+      subs.push(onValue(ref(db, `${base}/coach`), (s) => { const v = s.val(); coachAt = v ? Number(v.at) || null : null; check(); }));
+      const id = setInterval(check, 5_000);
+      subs.push(() => clearInterval(id));
+    } else {
+      // sinal de vida do coach
+      const id = setInterval(() => { if (connected) set(presence, { uid, at: serverTimestamp() }).catch(() => {}); }, HEARTBEAT_MS);
+      subs.push(() => clearInterval(id));
+    }
+    if (role === 'coach') subs.push(onValue(ref(db, `${base}/tvOnline`), (s) => useRemote.setState({ peer: s.val() === true })));
     subs.push(onValue(ref(db, `${base}/timer`), (s) => { const v = s.val(); if (v && v.by !== uid) h.onTimer(v); }));
     subs.push(onValue(ref(db, `${base}/brand`), (s) => { const v = s.val(); if (v && v.by !== uid) h.onBrand(v); }));
+    const initialBrand = role === 'coach' ? ((await get(ref(db, `${base}/brand`)).catch(() => null))?.val() ?? null) : null;
     useRemote.setState({ status: 'online' });
 
     return {
       uid,
+      initialBrand,
       offset: () => offset,
       publishTimer: (s) => write('timer', s),
       publishBrand: (s) => write('brand', s),

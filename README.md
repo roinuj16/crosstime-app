@@ -150,6 +150,9 @@ cortam a borda. A primeira tecla ou toque ativa o som e a tela cheia. Controle r
 | ↑ ↓ | — | +1 / −1 round (AMRAP, For Time) |
 | Voltar / Esc / R | — | zera (aperte duas vezes em 3 s) |
 
+**Tela Coach** (Ajustes → Coach): nome do coach (opcional, aparece no topo da TV ao lado da hora),
+conexão com a TV, nome do box, logo e WOD.
+
 **Controle pelo celular do coach:** ícone de TV no topo do timer → Conectar à TV. A TV abre
 `<endereço>/tv` e mostra um QR code e um código; o celular lê (botão Escanear, dentro do app) ou digita e passa a
 comandar a TV (treino, play, pausa, rounds, nome do box, logo, WOD). Configuração do Firebase em

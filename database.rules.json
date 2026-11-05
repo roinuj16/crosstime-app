@@ -15,7 +15,7 @@
           ".validate": "newData.isBoolean()"
         },
         "coach": {
-          ".write": "auth != null && (!data.exists() || data.child('uid').val() === auth.uid)",
+          ".write": "auth != null && (!data.exists() || data.child('uid').val() === auth.uid || data.child('at').val() < now - 60000)",
           ".validate": "newData.child('uid').val() === auth.uid"
         },
         "timer": {

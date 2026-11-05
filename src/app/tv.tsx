@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Platform, useWindowDimensions, View } from 'react-native';
 import {
-  TvClock, TvDone, TvHeader, TvHelp, TvIdle, TvLapsAside, TvLinkStatus, TvOverlay, TvPairCard, TvPhase, TvRoundsAside, TvSetupCard, TvWodAside, type TvHelpItem,
+  TvClock, TvCoach, TvDone, TvHeader, TvHelp, TvIdle, TvLapsAside, TvLinkStatus, TvOverlay, TvPairCard, TvPairStrip, TvPhase, TvRoundsAside, TvSetupCard, TvWodAside, type TvHelpItem,
 } from '@/components/organisms';
 import { TvTemplate } from '@/components/templates';
 import * as Engine from '@/core/engine';
@@ -119,12 +119,15 @@ export default function TvScreen() {
   const T = t.tv, K = T.keys;
   const box = S.tvBoxName.trim();
   const hh = String(clock.getHours()).padStart(2, '0'), mm = String(clock.getMinutes()).padStart(2, '0');
-  const clockNode = coach ? (
-    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 28 * u }}>
-      <TvLinkStatus label={T.pair.connected} u={u} />
+  // à esquerda da hora: o nome do coach (se ele cadastrou) ou o aviso de celular conectado
+  const coachName = S.tvCoachName.trim();
+  const beforeClock = coachName ? <TvCoach name={t.coach.onTv(coachName)} online={coach} u={u} /> : coach ? <TvLinkStatus label={T.pair.connected} u={u} /> : null;
+  const clockNode = (
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 28 * u, flexShrink: 1 }}>
+      {beforeClock}
       <TvClock time={`${hh}:${mm}`} u={u} />
     </View>
-  ) : <TvClock time={`${hh}:${mm}`} u={u} />;
+  );
   const pairUrl = typeof window !== 'undefined' && room ? `${window.location.origin}/pair?code=${room}` : '';
   const headerTitle = (workout: string) => (box ? `${box} · ${workout}` : workout);
 
@@ -159,9 +162,15 @@ export default function TvScreen() {
         }
         side={
           <View style={{ flex: 1, paddingVertical: 40 * u, paddingRight: 48 * u }}>
-            {remoteAvailable && room && !coach
-              ? <TvPairCard title={T.pair.title} hint={T.pair.hint} url={pairUrl} code={formatRoomCode(room)} u={u} />
-              : <TvSetupCard title={b.wod.length ? T.wod : T.setupCard} lines={b.wod} hint={T.setupCardHint} u={u} />}
+            {/* sem celular conectado: QR grande; com WOD cadastrado, o WOD e um QR pequeno embaixo */}
+            {remoteAvailable && room && !coach && !b.wod.length ? (
+              <TvPairCard title={T.pair.title} hint={T.pair.hint} url={pairUrl} code={formatRoomCode(room)} u={u} />
+            ) : (
+              <View style={{ flex: 1, gap: 16 * u }}>
+                <TvSetupCard title={b.wod.length ? T.wod : T.setupCard} lines={b.wod} hint={T.setupCardHint} u={u} />
+                {remoteAvailable && room && !coach && <TvPairStrip title={T.pair.title} url={pairUrl} code={formatRoomCode(room)} u={u} />}
+              </View>
+            )}
           </View>
         }
         sideWidth={408}

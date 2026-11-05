@@ -35,14 +35,14 @@ function fakeServer() {
       r[kind] = snap;
       for (const s of r.subs) if (s.uid !== uid) queueMicrotask(() => (kind === 'timer' ? s.h.onTimer(snap as never) : s.h.onBrand(snap as never)));
     };
-    return { uid, offset: () => offset, publishTimer: (s) => send('timer', s), publishBrand: (s) => send('brand', s), close: () => {} };
+    return { uid, offset: () => offset, initialBrand: (r.brand as never) ?? null, publishTimer: (s) => send('timer', s), publishBrand: (s) => send('brand', s), close: () => {} };
   };
   return { open, writes: () => writes };
 }
 
 const initial = () => ({
   mode: 'tabata' as Engine.Mode, activeName: null as string | null, configs: Engine.DEFAULTS, saved: [] as unknown[], session: null as unknown,
-  colors: DEFAULT_COLORS, settings: { tvBoxName: '', tvLogo: '', tvWod: '', timeFormat: '00:00' as const, pairedCode: '', tvRoomCode: '' },
+  colors: DEFAULT_COLORS, settings: { tvBoxName: '', tvLogo: '', tvWod: '', tvCoachName: '', timeFormat: '00:00' as const, pairedCode: '', tvRoomCode: '' },
 });
 
 const flush = async () => { for (let i = 0; i < 5; i++) { jest.advanceTimersByTime(100); await Promise.resolve(); await new Promise((r) => jest.requireActual('timers').setImmediate(r)); } };
@@ -108,6 +108,21 @@ describe('TV e celular sincronizando', () => {
     const w = server.writes();
     await flush(); await flush();
     expect(server.writes()).toBe(w);
+    stopTv(); stopPhone();
+  });
+
+  it('WOD escrito na TV continua lá quando o coach conecta com o WOD vazio', async () => {
+    const server = fakeServer();
+    const tv = createStore(initial), phone = createStore(initial);
+    const stopTv = startSync(tv, server.open(0, 'tv') as never, 'tv', 'K7Q4M2', undefined, 50);
+    await flush();
+    tv.setState({ settings: { ...tv.getState().settings, tvWod: '21-15-9 Thrusters', tvBoxName: 'Box da TV' } });
+    await flush();
+    phone.setState({ settings: { ...phone.getState().settings, tvCoachName: 'Ana' } });
+    const stopPhone = startSync(phone, server.open(0, 'phone') as never, 'coach', 'K7Q4M2', undefined, 50);
+    await flush();
+    expect(tv.getState().settings).toMatchObject({ tvWod: '21-15-9 Thrusters', tvBoxName: 'Box da TV', tvCoachName: 'Ana' });
+    expect(phone.getState().settings).toMatchObject({ tvWod: '21-15-9 Thrusters', tvBoxName: 'Box da TV', tvCoachName: 'Ana' });
     stopTv(); stopPhone();
   });
 });

@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { BoxLogo, LedText } from '@/components/atoms';
-import { UI } from '@/theme/palette';
+import { LED, UI } from '@/theme/palette';
 
 /** Topo da TV: logo e nome do box (ou "box · treino") à esquerda; à direita, a hora ou um aviso. */
 export function TvHeader({ logo, title, right, u, strong }: { logo?: string; title: string; right?: ReactNode; u: number; strong?: boolean }) {
@@ -21,7 +21,18 @@ export function TvClock({ time, u }: { time: string; u: number }) {
   return <LedText size={34 * u} variant="display" tabular trim="digits" color={UI.muted}>{time}</LedText>;
 }
 
+/** Nome do coach no topo, à esquerda da hora. A bolinha verde aparece com o celular dele conectado. */
+export function TvCoach({ name, online, u }: { name: string; online: boolean; u: number }) {
+  return (
+    <View style={[s.coach, { gap: 10 * u }]}>
+      {online && <View style={{ width: 10 * u, height: 10 * u, borderRadius: 5 * u, backgroundColor: LED.verde }} />}
+      <LedText size={28 * u} variant="label" trim="label" tracking={u} color={UI.text} numberOfLines={1}>{name.toUpperCase()}</LedText>
+    </View>
+  );
+}
+
 const s = StyleSheet.create({
+  coach: { flexDirection: 'row', alignItems: 'center', flexShrink: 1 },
   bar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', flex: 1 },
   left: { flexDirection: 'row', alignItems: 'center', flex: 1, minWidth: 0 },
   title: { flexShrink: 1 },

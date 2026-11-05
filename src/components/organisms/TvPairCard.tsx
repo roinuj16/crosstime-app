@@ -16,6 +16,19 @@ export function TvPairCard({ title, hint, url, code, u }: { title: string; hint:
   );
 }
 
+/** Faixa compacta de pareamento (QR pequeno e código), embaixo do WOD quando ainda não há celular conectado. */
+export function TvPairStrip({ title, url, code, u }: { title: string; url: string; code: string; u: number }) {
+  return (
+    <View style={[s.strip, { borderRadius: 16 * u, padding: 16 * u, gap: 18 * u, borderWidth: Math.max(1, u) }]}>
+      <QrCode value={url} size={104 * u} label={`${title}: ${code}`} />
+      <View style={{ flex: 1, gap: 8 * u }}>
+        <Text style={{ color: TV.soft, fontSize: 16 * u, lineHeight: 21 * u }}>{title}</Text>
+        <LedText size={38 * u} variant="display" tabular trim="digits" tracking={4 * u} color={LED.verde}>{code}</LedText>
+      </View>
+    </View>
+  );
+}
+
 /** Aviso no topo da TV: bolinha verde e "Celular do coach conectado". */
 export function TvLinkStatus({ label, u }: { label: string; u: number }) {
   return (
@@ -30,4 +43,5 @@ const s = StyleSheet.create({
   card: { flex: 1, backgroundColor: TV.panel, borderColor: TV.line, alignItems: 'center' },
   hint: { color: TV.soft, textAlign: 'center' },
   status: { flexDirection: 'row', alignItems: 'center' },
+  strip: { flexDirection: 'row', alignItems: 'center', backgroundColor: TV.panel, borderColor: TV.line },
 });

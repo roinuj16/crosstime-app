@@ -63,6 +63,8 @@ export interface Strings {
   };
   voices: { title: string; auto: string; enhanced: string; empty: string; help: string; listen: string };
   /** estatísticas de uso (Google Analytics) e privacidade */
+  /** tela Coach (nome do coach e o que aparece na TV) */
+  coach: { title: string; hint: string; name: string; nameHint: string; namePh: string; tv: string; onTv: (name: string) => string };
   privacy: { banner: string; accept: string; decline: string; policy: string; toggle: string; toggleHint: string; title: string };
   /** modo TV (placar em tela cheia para a TV do box) */
   tv: {
@@ -243,6 +245,11 @@ const pt: Strings = {
     empty: 'Nenhuma voz nesse idioma foi encontrada no aparelho.',
     help: 'Vozes "Premium" ou "Aprimorada" soam bem mais naturais e são gratuitas. iPhone: Ajustes → Acessibilidade → Conteúdo Falado → Vozes. Android: Configurações → Sistema → Idiomas → Conversão de texto em voz. Depois, volte aqui.',
     listen: 'Toque numa voz para ouvir e escolher.',
+  },
+  coach: {
+    title: 'Coach', hint: 'Seu nome, a conexão com a TV e o que aparece nela (box, logo e WOD)',
+    name: 'Seu nome', nameHint: 'Opcional. Aparece no topo da TV, ao lado da hora.', namePh: 'Ex.: Ana',
+    tv: 'Modo TV', onTv: (name) => `Coach ${name}`,
   },
   privacy: {
     banner: 'Usamos o Google Analytics para saber quais recursos são usados e corrigir erros. Sem nome, sem e-mail e sem o que você digita.',
@@ -460,6 +467,11 @@ const en: Strings = {
     empty: 'No voices in this language were found on the device.',
     help: '"Premium" or "Enhanced" voices sound much more natural and are free. iPhone: Settings → Accessibility → Spoken Content → Voices. Android: Settings → System → Languages → Text-to-speech output. Then come back here.',
     listen: 'Tap a voice to hear it and choose it.',
+  },
+  coach: {
+    title: 'Coach', hint: 'Your name, the TV connection and what shows on it (box, logo and WOD)',
+    name: 'Your name', nameHint: 'Optional. Shows at the top of the TV, next to the time.', namePh: 'e.g. Ana',
+    tv: 'TV mode', onTv: (name) => `Coach ${name}`,
   },
   privacy: {
     banner: 'We use Google Analytics to learn which features are used and to fix errors. No name, no email and nothing you type.',

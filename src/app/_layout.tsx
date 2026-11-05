@@ -24,6 +24,7 @@ export default function RootLayout() {
         <Stack.Screen name="workouts" options={{ presentation: 'modal' }} />
         <Stack.Screen name="tv" options={{ animation: 'fade' }} />
         <Stack.Screen name="tv-setup" />
+        <Stack.Screen name="coach" />
         <Stack.Screen name="pair" options={{ animation: 'fade' }} />
         <Stack.Screen name="privacy" />
         <Stack.Screen name="connect" options={{ presentation: 'modal' }} />
