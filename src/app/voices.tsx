@@ -8,6 +8,7 @@ import { STRINGS } from '@/i18n/strings';
 import { speak } from '@/services/feedback';
 import { forgetVoices, listVoices, voiceScore, type VoiceInfo } from '@/services/voices';
 import { useApp } from '@/store/useApp';
+import { goBack } from '@/services/nav';
 
 /** Página de vozes do sistema: lista as vozes instaladas e toca uma amostra ao escolher. */
 export default function VoicesScreen() {
@@ -30,7 +31,7 @@ export default function VoicesScreen() {
   const badge = t.voices.enhanced.toUpperCase();
 
   return (
-    <SheetTemplate title={t.voices.title} onBack={() => router.back()} right={<Button label={t.settings.done} kind="primary" onPress={() => router.back()} />}>
+    <SheetTemplate title={t.voices.title} onBack={() => goBack('/settings')} right={<Button label={t.settings.done} kind="primary" onPress={() => goBack('/settings')} />}>
       <Hint style={{ marginBottom: 6 }}>{t.voices.listen}</Hint>
       <VoiceOption title={t.voices.auto} sub={voices?.[0]?.name ?? '—'} selected={st.voiceId === ''} onPress={() => choose('')} />
       {voices?.length === 0 && <Hint style={{ paddingVertical: 12 }}>{t.voices.empty}</Hint>}

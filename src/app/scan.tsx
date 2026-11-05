@@ -1,7 +1,6 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { CameraView, useCameraPermissions, type BarcodeScanningResult } from 'expo-camera';
 import * as Haptics from 'expo-haptics';
-import { router } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -11,6 +10,7 @@ import { startQrCamera, type QrCameraError } from '@/services/qrCamera';
 import { useStrings } from '@/hooks/useStrings';
 import { useApp } from '@/store/useApp';
 import { LED, UI } from '@/theme/palette';
+import { goBack } from '@/services/nav';
 
 /**
  * Leitor do QR code da TV, dentro do app. Aceita o link da TV (…/pair?code=…) ou só o código.
@@ -47,7 +47,7 @@ export default function ScanScreen() {
     done.current = true;
     if (!isWeb) Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
     useApp.getState().setSetting('pairedCode', code);
-    router.back();
+    goBack('/connect');
     return true;
   };
   const onScan = ({ data }: BarcodeScanningResult) => { handle(data); };
@@ -77,7 +77,7 @@ export default function ScanScreen() {
       )}
       <SafeAreaView style={s.overlay} pointerEvents="box-none" edges={['top', 'bottom', 'left', 'right']}>
         <View style={s.top}>
-          <Pressable onPress={() => router.back()} hitSlop={10} accessibilityRole="button" accessibilityLabel={t.cancel} style={s.close}>
+          <Pressable onPress={() => goBack('/connect')} hitSlop={10} accessibilityRole="button" accessibilityLabel={t.cancel} style={s.close}>
             <Ionicons name="close" size={26} color={UI.text} />
           </Pressable>
           <LedText size={22} trim="label" color={UI.text} tracking={1}>{C.scanTitle.toUpperCase()}</LedText>
@@ -89,7 +89,7 @@ export default function ScanScreen() {
         <View style={s.bottom}>
           {message ? <Text style={s.msg}>{message}</Text> : <Text style={[s.msg, wrong && { color: LED.vermelho }]}>{wrong ? C.scanWrong : C.scanAim}</Text>}
           {askButton && <Button label={C.scanAllow} kind="primary" onPress={request} />}
-          {!!message && <Button label={C.typeCode} onPress={() => router.back()} />}
+          {!!message && <Button label={C.typeCode} onPress={() => goBack('/connect')} />}
         </View>
       </SafeAreaView>
     </View>

@@ -85,4 +85,21 @@ describe('voz só em inglês', () => {
     });
     mockMem.clear();
   });
+
+  it('treino salvo leva o WOD do modo e traz de volta ao carregar', () => {
+    const st = useApp.getState();
+    st.setMode('emom');
+    st.setSetting('tvWods', { emom: '10 Sit-ups\n15 Air squats' });
+    useApp.getState().saveWorkout('EMOM do dia');
+    const saved = useApp.getState().saved[0];
+    expect(saved.wod).toBe('10 Sit-ups\n15 Air squats');
+    useApp.getState().setSetting('tvWods', { emom: 'outro' });
+    useApp.getState().loadWorkout(saved);
+    expect(useApp.getState().settings.tvWods.emom).toBe('10 Sit-ups\n15 Air squats');
+    // exemplo sem WOD não apaga o WOD atual
+    const ex = useApp.getState().saved.find((w) => w.example && w.mode === 'emom')!;
+    useApp.getState().loadWorkout(ex);
+    expect(useApp.getState().settings.tvWods.emom).toBe('10 Sit-ups\n15 Air squats');
+  });
 });
+

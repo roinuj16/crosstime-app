@@ -44,7 +44,7 @@ export interface Settings {
   analyticsConsent: 'unknown' | 'granted' | 'denied';
 }
 
-export interface SavedWorkout { id: string; name: string; mode: Mode; config: AnyConfig; example?: boolean }
+export interface SavedWorkout { id: string; name: string; mode: Mode; config: AnyConfig; example?: boolean; /** exercícios (WOD) salvos junto */ wod?: string }
 export interface HistoryEntry { at: number; mode: Mode; name: string | null; planned: number | null; done: number; completed: boolean; rounds?: number }
 /** rounds = contador manual do AMRAP / For Time */
 export interface ActiveSession { mode: Mode; name: string | null; config: AnyConfig; startedAt: number; state: SessionState; rounds: number }
@@ -169,11 +169,16 @@ export const useApp = create<AppState>()((set, get) => {
     setSetting: (key, value) => set((st) => ({ settings: { ...st.settings, [key]: value } })),
 
     saveWorkout: (name) => set((st) => {
-      const w: SavedWorkout = { id: 'w' + Date.now(), name, mode: st.mode, config: clone(st.configs[st.mode]) };
+      const wod = isWodMode(st.mode) ? (st.settings.tvWods?.[st.mode] ?? '').trim() : '';
+      const w: SavedWorkout = { id: 'w' + Date.now(), name, mode: st.mode, config: clone(st.configs[st.mode]), ...(wod ? { wod } : {}) };
       return { saved: [w, ...st.saved], activeName: name };
     }),
     deleteWorkout: (id) => set((st) => ({ saved: st.saved.filter((w) => w.id !== id) })),
-    loadWorkout: (w) => set((st) => ({ mode: w.mode, configs: { ...st.configs, [w.mode]: clone(w.config) }, activeName: w.name, session: null })),
+    // treino salvo com WOD: os exercícios voltam junto (os de exemplo não têm e mantêm o WOD atual)
+    loadWorkout: (w) => set((st) => ({
+      mode: w.mode, configs: { ...st.configs, [w.mode]: clone(w.config) }, activeName: w.name, session: null,
+      ...(w.wod && isWodMode(w.mode) ? { settings: { ...st.settings, tvWods: { ...st.settings.tvWods, [w.mode]: w.wod } } } : {}),
+    })),
     clearHistory: () => set({ history: [] }),
 
     toggle: (now = Date.now()) => {

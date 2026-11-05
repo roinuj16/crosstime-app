@@ -1,4 +1,3 @@
-import { router } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
 import { Button, Hint, SectionTitle } from '@/components/atoms';
 import { HistoryRow } from '@/components/molecules';
@@ -10,6 +9,7 @@ import { useStrings } from '@/hooks/useStrings';
 import { confirmAction } from '@/services/dialog';
 import { useApp, type SavedWorkout } from '@/store/useApp';
 import { hex } from '@/theme/palette';
+import { goBack } from '@/services/nav';
 
 /** Página de treinos: os salvos (com os exemplos) e o histórico do que foi feito. */
 export default function WorkoutsScreen() {
@@ -23,7 +23,7 @@ export default function WorkoutsScreen() {
 
   const use = (w: SavedWorkout) => {
     const st = useApp.getState();
-    const go = () => { useApp.getState().loadWorkout(w); router.back(); };
+    const go = () => { useApp.getState().loadWorkout(w); goBack(); };
     const status = st.session?.state.status;
     if (status === 'running' || status === 'paused') {
       confirmAction(t.switchTitle, t.resetText, t.reset, t.cancel).then((ok) => { if (ok) { useApp.getState().reset(); go(); } });
@@ -41,7 +41,7 @@ export default function WorkoutsScreen() {
   };
 
   return (
-    <SheetTemplate title={W.title} right={<Button label={t.settings.done} kind="primary" onPress={() => router.back()} />}>
+    <SheetTemplate title={W.title} right={<Button label={t.settings.done} kind="primary" onPress={() => goBack()} />}>
       <SectionTitle title={W.mine} />
       {saved.length === 0 && <Hint style={s.empty}>{W.empty}</Hint>}
       {saved.map((w) => {

@@ -17,7 +17,7 @@ export interface SyncSession {
   mode: Mode; name: string | null; config: AnyConfig; startedAt: number; rounds: number;
   state: { status: 'idle' | 'running' | 'paused' | 'done'; elapsedBase: number; runningSince: number | null };
 }
-export interface SyncWorkout { id: string; name: string; mode: Mode; config: AnyConfig; example?: boolean }
+export interface SyncWorkout { id: string; name: string; mode: Mode; config: AnyConfig; example?: boolean; wod?: string }
 
 export interface TimerSnapshot { v: 1; mode: Mode; activeName: string | null; configs: ModeConfigs; saved: SyncWorkout[]; session: SyncSession | null }
 export interface BrandSnapshot { v: 1; boxName: string; logo: string; wods: Wods; coach: string; colors: ColorScheme; timeFormat: TimeFormat }

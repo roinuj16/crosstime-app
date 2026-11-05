@@ -1,16 +1,17 @@
-import { router } from 'expo-router';
 import { useState } from 'react';
 import { View } from 'react-native';
 import { Button, Hint, Note } from '@/components/atoms';
-import { Row, SaveBar, StepValue, Stepper } from '@/components/molecules';
+import { Row, SaveBar, StepValue, Stepper, TextField } from '@/components/molecules';
 import { SheetTemplate } from '@/components/templates';
 import * as Engine from '@/core/engine';
 import type { Mode } from '@/core/engine';
+import { isWodMode } from '@/core/wod';
 import { useStrings } from '@/hooks/useStrings';
 import type { FieldKey } from '@/i18n/strings';
 import { notify } from '@/services/dialog';
 import { useApp } from '@/store/useApp';
 import { UI } from '@/theme/palette';
+import { goBack } from '@/services/nav';
 
 type Kind = 'time' | 'count';
 const FIELDS: Record<Mode, [FieldKey, Kind][]> = {
@@ -46,6 +47,11 @@ export default function EditScreen() {
   const status = useApp((s) => s.session?.state.status ?? 'idle');
   const fmt = useApp((s) => s.settings.timeFormat);
   const locked = status === 'running' || status === 'paused';
+  const wod = useApp((s) => (isWodMode(s.mode) ? s.settings.tvWods?.[s.mode] ?? '' : ''));
+  const setWod = (text: string) => {
+    const st = useApp.getState();
+    if (isWodMode(st.mode)) st.setSetting('tvWods', { ...st.settings.tvWods, [st.mode]: text });
+  };
   const [name, setName] = useState('');
 
   const total = Engine.totalDuration(Engine.buildSegments(mode, config as never));
@@ -80,7 +86,7 @@ export default function EditScreen() {
       right={
         <>
           {mode !== 'stopwatch' && total > 0 && <StepValue color={UI.muted} size={26}>{Engine.format(total, fmt)}</StepValue>}
-          <Button label={t.settings.done} kind="primary" onPress={() => router.back()} />
+          <Button label={t.settings.done} kind="primary" onPress={() => goBack()} />
         </>
       }
     >
@@ -101,6 +107,10 @@ export default function EditScreen() {
           }
         />
       ))}
+      {isWodMode(mode) && (
+        // o WOD pode ser corrigido com o treino valendo (só os tempos ficam travados)
+        <TextField label={t.edit.wod} hint={t.edit.wodHint} value={wod} onChange={setWod} placeholder={t.tv.setup.wodPh} multiline maxLength={400} />
+      )}
       <SaveBar value={name} onChange={setName} placeholder={t.edit.savePlaceholder} label={t.edit.save} onSave={save} />
       <View style={{ flexDirection: 'row', marginTop: 12 }}>
         <Button label={t.edit.restore} onPress={() => useApp.getState().resetConfig(mode)} disabled={locked} />

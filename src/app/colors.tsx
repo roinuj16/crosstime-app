@@ -1,4 +1,3 @@
-import { router } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
 import { Button, SectionTitle } from '@/components/atoms';
 import { ColorRow, PresetCard } from '@/components/molecules';
@@ -7,6 +6,7 @@ import { SheetTemplate } from '@/components/templates';
 import { useStrings } from '@/hooks/useStrings';
 import { useApp } from '@/store/useApp';
 import { DEFAULT_COLORS, hex, LED_KEYS, LED_NAMES, PRESETS, type ColorRole, type ColorScheme } from '@/theme/palette';
+import { goBack } from '@/services/nav';
 
 const ROLES: ColorRole[] = ['prepare', 'work', 'rest', 'restBC', 'cooldown', 'run', 'lap', 'rounds', 'cycles'];
 const PREVIEW_ROLES: ColorRole[] = ['prepare', 'work', 'rest', 'cooldown'];
@@ -21,7 +21,7 @@ export default function ColorsScreen() {
   const options = LED_KEYS.map((k) => ({ key: k, hex: hex(k), name: LED_NAMES[k][lang] }));
 
   return (
-    <SheetTemplate title={t.colors.title} onBack={() => router.back()} right={<Button label={t.settings.done} kind="primary" onPress={() => router.back()} />}>
+    <SheetTemplate title={t.colors.title} onBack={() => goBack('/settings')} right={<Button label={t.settings.done} kind="primary" onPress={() => goBack('/settings')} />}>
       <ColorPreview colors={colors} workLabel={t.phases.work} restLabel={t.phases.rest} accessibilityLabel={t.colors.preview} />
 
       <SectionTitle title={t.colors.presets} />

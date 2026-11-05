@@ -12,6 +12,7 @@ import { remoteAvailable, useRemote } from '@/services/remote';
 import { cameraAvailable, shareLink } from '@/services/share';
 import { isIOSBrowser, isWeb } from '@/services/webApp';
 import { useApp } from '@/store/useApp';
+import { goBack } from '@/services/nav';
 
 /**
  * Conectar à TV do box: passo a passo (abrir o endereço na TV, ler o QR ou digitar o código),
@@ -40,7 +41,7 @@ export default function ConnectScreen() {
   const statusHint = remote.status === 'error' ? P.error : linked ? undefined : P.waiting;
 
   return (
-    <SheetTemplate title={C.title} keyboard onBack={() => router.back()} right={<Button label={t.settings.done} kind="primary" onPress={() => router.back()} />}>
+    <SheetTemplate title={C.title} keyboard onBack={() => goBack('/settings')} right={<Button label={t.settings.done} kind="primary" onPress={() => goBack('/settings')} />}>
       {!remoteAvailable && <Note>{C.unavailable}</Note>}
 
       {remoteAvailable && !!paired && (

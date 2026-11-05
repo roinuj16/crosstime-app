@@ -19,6 +19,7 @@ import { pickVoice } from '@/services/voices';
 import { isInstalled, isIOSBrowser, isWeb } from '@/services/webApp';
 import { useApp, type Settings } from '@/store/useApp';
 import { hex, type ColorRole } from '@/theme/palette';
+import { goBack } from '@/services/nav';
 
 const VOLUMES = [0.25, 0.5, 0.75, 1];
 
@@ -62,7 +63,7 @@ export default function SettingsScreen() {
     perform(cues, { lang: st.voiceLang, voiceId: st.voiceId, rate: st.voiceRate, volume: st.volume, source: st.voiceSource });
   };
   return (
-    <SheetTemplate title={S.title} right={<Button label={S.done} kind="primary" onPress={() => router.back()} />}>
+    <SheetTemplate title={S.title} right={<Button label={S.done} kind="primary" onPress={() => goBack()} />}>
       <LinkRow
         label={S.colors} hint={S.colorsHint} onPress={() => router.push('/colors')}
         dots={(['prepare', 'work', 'rest', 'cooldown'] as ColorRole[]).map((r) => hex(colors[r]))}

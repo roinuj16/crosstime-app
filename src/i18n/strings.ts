@@ -42,6 +42,7 @@ export interface Strings {
   edit: {
     title: string; total: string; locked: string; savePlaceholder: string; save: string; saved: string; restore: string;
     tapToType: string; ok: string; typeValue: (label: string) => string;
+    wod: string; wodHint: string;
     fields: Record<FieldKey, { label: string; hint: string }>;
   };
   workouts: {
@@ -64,7 +65,7 @@ export interface Strings {
   voices: { title: string; auto: string; enhanced: string; empty: string; help: string; listen: string };
   /** estatísticas de uso (Google Analytics) e privacidade */
   /** tela Coach (nome do coach e o que aparece na TV) */
-  coach: { title: string; hint: string; name: string; nameHint: string; namePh: string; tv: string; onTv: (name: string) => string; wodHint: string; wodFor: (mode: string) => string; wodSaved: (modes: string) => string };
+  coach: { title: string; hint: string; name: string; nameHint: string; namePh: string; tv: string; onTv: (name: string) => string; wodMoved: string };
   privacy: { banner: string; accept: string; decline: string; policy: string; toggle: string; toggleHint: string; title: string };
   /** modo TV (placar em tela cheia para a TV do box) */
   tv: {
@@ -152,6 +153,7 @@ const pt: Strings = {
     saved: 'Salvo em Meus treinos',
     restore: 'Restaurar padrão',
     tapToType: 'Toque em um valor para digitar. Ex.: 1 3 0 = 01:30.',
+    wod: 'Treino do dia (WOD)', wodHint: 'Os exercícios deste modo, um por linha. Aparecem na TV antes e durante o treino. Ao salvar o treino, o WOD vai junto.',
     ok: 'OK',
     typeValue: (label) => `Digite: ${label}`,
     fields: {
@@ -250,8 +252,7 @@ const pt: Strings = {
     title: 'Coach', hint: 'Seu nome, a conexão com a TV e o que aparece nela (box, logo e WOD)',
     name: 'Seu nome', nameHint: 'Opcional. Aparece no topo da TV, ao lado da hora.', namePh: 'Ex.: Ana',
     tv: 'Modo TV', onTv: (name) => `Coach ${name}`,
-    wodHint: 'Escolha o modo e escreva os exercícios, um por linha. A TV mostra o WOD do modo que estiver na tela: dá para deixar pronto um Tabata de aquecimento, um EMOM e um AMRAP.',
-    wodFor: (mode) => `Exercícios do ${mode}`, wodSaved: (modes) => `Com WOD: ${modes}`,
+    wodMoved: 'Os exercícios ficam na tela de cada modo (ícone ⏱ no topo do timer), junto com os tempos. Toque aqui para abrir a do modo atual.',
   },
   privacy: {
     banner: 'Usamos o Google Analytics para saber quais recursos são usados e corrigir erros. Sem nome, sem e-mail e sem o que você digita.',
@@ -376,6 +377,7 @@ const en: Strings = {
     saved: 'Saved to My workouts',
     restore: 'Restore defaults',
     tapToType: 'Tap a value to type it. E.g. 1 3 0 = 01:30.',
+    wod: 'Workout of the day (WOD)', wodHint: 'This mode\'s movements, one per line. They show on the TV before and during the workout. Saving the workout keeps the WOD with it.',
     ok: 'OK',
     typeValue: (label) => `Type: ${label}`,
     fields: {
@@ -474,8 +476,7 @@ const en: Strings = {
     title: 'Coach', hint: 'Your name, the TV connection and what shows on it (box, logo and WOD)',
     name: 'Your name', nameHint: 'Optional. Shows at the top of the TV, next to the time.', namePh: 'e.g. Ana',
     tv: 'TV mode', onTv: (name) => `Coach ${name}`,
-    wodHint: 'Pick the mode and write the movements, one per line. The TV shows the WOD of the mode on screen: you can have a warm-up Tabata, an EMOM and an AMRAP ready.',
-    wodFor: (mode) => `${mode} movements`, wodSaved: (modes) => `With WOD: ${modes}`,
+    wodMoved: 'The movements live in each mode\'s screen (⏱ icon at the top of the timer), next to the times. Tap here to open the current mode.',
   },
   privacy: {
     banner: 'We use Google Analytics to learn which features are used and to fix errors. No name, no email and nothing you type.',
