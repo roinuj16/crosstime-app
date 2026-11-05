@@ -22,6 +22,6 @@ export function TextField({ label, hint, value, onChange, placeholder, multiline
 const s = StyleSheet.create({
   field: { paddingVertical: 13, gap: 6, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: UI.line },
   hint: { color: UI.muted, fontSize: 12.5 },
-  input: { backgroundColor: UI.bg, borderWidth: 1, borderColor: UI.line, borderRadius: 10, paddingHorizontal: 12, paddingVertical: 10, color: UI.text, fontSize: 15 },
+  input: { backgroundColor: UI.bg, borderWidth: 1, borderColor: UI.line, borderRadius: 10, paddingHorizontal: 12, paddingVertical: 10, color: UI.text, fontSize: 16 },
   multi: { minHeight: 120 },
 });

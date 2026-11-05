@@ -3,8 +3,10 @@
   <head>
     <meta charset="utf-8" />
     <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
-    <!-- viewport-fit=cover: usa a tela toda no iPhone (o app respeita as bordas seguras) -->
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <!-- viewport-fit=cover: usa a tela toda no iPhone (o app respeita as bordas seguras).
+         maximum-scale=1: o Safari do iPhone não dá zoom sozinho ao tocar num campo de texto
+         (o zoom ficava e a tela aparecia cortada à direita). O zoom com dois dedos continua funcionando. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
     <title>%WEB_TITLE%</title>
     <!-- web app instalável (tela de início) -->
     <link rel="manifest" href="/manifest.json" />

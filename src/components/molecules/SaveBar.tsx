@@ -17,5 +17,5 @@ export function SaveBar({ value, onChange, placeholder, label, onSave }: { value
 
 const s = StyleSheet.create({
   bar: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 20, alignItems: 'center' },
-  input: { flexGrow: 1, flexBasis: 180, minWidth: 0, backgroundColor: UI.bg, borderWidth: 1, borderColor: UI.line, borderRadius: 10, paddingHorizontal: 12, paddingVertical: 10, color: UI.text, fontSize: 15 },
+  input: { flexGrow: 1, flexBasis: 180, minWidth: 0, backgroundColor: UI.bg, borderWidth: 1, borderColor: UI.line, borderRadius: 10, paddingHorizontal: 12, paddingVertical: 10, color: UI.text, fontSize: 16 },
 });
