@@ -151,7 +151,8 @@ cortam a borda. A primeira tecla ou toque ativa o som e a tela cheia. Controle r
 | Voltar / Esc / R | — | zera (aperte duas vezes em 3 s) |
 
 **Tela Coach** (Ajustes → Coach): nome do coach (opcional, aparece no topo da TV ao lado da hora),
-conexão com a TV, nome do box, logo e WOD.
+conexão com a TV, nome do box, logo e um WOD para cada modo (Tabata, Rounds, EMOM, AMRAP,
+For Time); a TV mostra o WOD do modo que está na tela.
 
 **Controle pelo celular do coach:** ícone de TV no topo do timer → Conectar à TV. A TV abre
 `<endereço>/tv` e mostra um QR code e um código; o celular lê (botão Escanear, dentro do app) ou digita e passa a

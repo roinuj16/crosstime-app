@@ -3,7 +3,7 @@
  *
  * A sala tem duas partes, enviadas separadamente para não reenviar o logo a cada play:
  *  - timer: modo, treino escolhido, configurações, treinos salvos e a sessão (play/pausa);
- *  - brand: nome do box, logo, WOD, cores e formato do tempo.
+ *  - brand: nome do box, logo, WOD de cada modo, nome do coach, cores e formato do tempo.
  *
  * O motor conta o tempo a partir de horários ("começou às 10:02:15"), então basta mandar a
  * sessão: cada tela calcula o próprio relógio. Os horários viajam no relógio do servidor
@@ -11,6 +11,7 @@
  */
 import type { AnyConfig, Mode, ModeConfigs, TimeFormat } from './engine';
 import type { ColorScheme } from '@/theme/palette';
+import { compactWods, WOD_MODES, type Wods } from './wod';
 
 export interface SyncSession {
   mode: Mode; name: string | null; config: AnyConfig; startedAt: number; rounds: number;
@@ -19,12 +20,12 @@ export interface SyncSession {
 export interface SyncWorkout { id: string; name: string; mode: Mode; config: AnyConfig; example?: boolean }
 
 export interface TimerSnapshot { v: 1; mode: Mode; activeName: string | null; configs: ModeConfigs; saved: SyncWorkout[]; session: SyncSession | null }
-export interface BrandSnapshot { v: 1; boxName: string; logo: string; wod: string; coach: string; colors: ColorScheme; timeFormat: TimeFormat }
+export interface BrandSnapshot { v: 1; boxName: string; logo: string; wods: Wods; coach: string; colors: ColorScheme; timeFormat: TimeFormat }
 
 /** O pedaço do estado do app que participa da sincronização. */
 export interface SyncSource {
   mode: Mode; activeName: string | null; configs: ModeConfigs; saved: SyncWorkout[]; session: SyncSession | null;
-  colors: ColorScheme; settings: { tvBoxName: string; tvLogo: string; tvWod: string; tvCoachName: string; timeFormat: TimeFormat };
+  colors: ColorScheme; settings: { tvBoxName: string; tvLogo: string; tvWods: Wods; tvCoachName: string; timeFormat: TimeFormat };
 }
 
 const shift = (t: number | null, d: number) => (t == null ? null : Math.round(t + d));
@@ -42,7 +43,7 @@ export function timerSnapshot(s: SyncSource, offset: number): TimerSnapshot {
 }
 
 export function brandSnapshot(s: SyncSource): BrandSnapshot {
-  return clean({ v: 1, boxName: s.settings.tvBoxName, logo: s.settings.tvLogo, wod: s.settings.tvWod, coach: s.settings.tvCoachName ?? '', colors: s.colors, timeFormat: s.settings.timeFormat });
+  return clean({ v: 1, boxName: s.settings.tvBoxName, logo: s.settings.tvLogo, wods: compactWods(s.settings.tvWods), coach: s.settings.tvCoachName ?? '', colors: s.colors, timeFormat: s.settings.timeFormat });
 }
 
 /** O que muda no app ao receber a marca da sala (nome do box, logo, WOD, coach, cores). */
@@ -50,7 +51,7 @@ export function applyBrand(b: Partial<BrandSnapshot>, s: SyncSource): Pick<SyncS
   return {
     colors: b.colors ?? s.colors,
     settings: {
-      ...s.settings, tvBoxName: b.boxName ?? '', tvLogo: b.logo ?? '', tvWod: b.wod ?? '', tvCoachName: b.coach ?? '',
+      ...s.settings, tvBoxName: b.boxName ?? '', tvLogo: b.logo ?? '', tvWods: compactWods(b.wods), tvCoachName: b.coach ?? '',
       timeFormat: b.timeFormat ?? s.settings.timeFormat,
     },
   };
@@ -64,7 +65,9 @@ export function applyBrand(b: Partial<BrandSnapshot>, s: SyncSource): Pick<SyncS
 export function mergeBrand(mine: BrandSnapshot, room: Partial<BrandSnapshot> | null): BrandSnapshot {
   if (!room) return mine;
   const pick = (a: string, b: string | undefined) => (a.trim() ? a : b ?? '');
-  return { ...mine, boxName: pick(mine.boxName, room.boxName), logo: pick(mine.logo, room.logo), wod: pick(mine.wod, room.wod), coach: pick(mine.coach, room.coach) };
+  const wods: Wods = {};
+  for (const m of WOD_MODES) { const w = pick(mine.wods?.[m] ?? '', room.wods?.[m]); if (w) wods[m] = w; }
+  return { ...mine, boxName: pick(mine.boxName, room.boxName), logo: pick(mine.logo, room.logo), wods, coach: pick(mine.coach, room.coach) };
 }
 
 /** O coach dá sinal de vida a cada HEARTBEAT_MS; a TV o considera fora depois de COACH_STALE_MS sem sinal. */

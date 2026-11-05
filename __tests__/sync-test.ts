@@ -6,7 +6,7 @@ import { DEFAULT_COLORS } from '../src/theme/palette';
 const base: SyncSource = {
   mode: 'tabata', activeName: 'Tabata 20/10 × 8', configs: Engine.DEFAULTS, saved: [],
   session: { mode: 'tabata', name: 'Tabata 20/10 × 8', config: Engine.DEFAULTS.tabata, startedAt: 1_000_000, rounds: 0, state: { status: 'running', elapsedBase: 12, runningSince: 1_005_000 } },
-  colors: DEFAULT_COLORS, settings: { tvBoxName: 'Box Fortaleza', tvLogo: '', tvWod: '10 Thrusters', tvCoachName: '', timeFormat: '00:00' },
+  colors: DEFAULT_COLORS, settings: { tvBoxName: 'Box Fortaleza', tvLogo: '', tvWods: { amrap: '10 Thrusters' }, tvCoachName: '', timeFormat: '00:00' },
 };
 
 describe('sincronização TV ↔ celular', () => {
@@ -40,7 +40,7 @@ describe('sincronização TV ↔ celular', () => {
 
   it('a marca (nome, logo, WOD, cores) vai separada do timer', () => {
     const b = brandSnapshot(base);
-    expect(b).toMatchObject({ boxName: 'Box Fortaleza', wod: '10 Thrusters', timeFormat: '00:00' });
+    expect(b).toMatchObject({ boxName: 'Box Fortaleza', wods: { amrap: '10 Thrusters' }, timeFormat: '00:00' });
     expect(brandKey(b)).toBe(brandKey(brandSnapshot({ ...base, session: null })));
   });
 
@@ -74,17 +74,28 @@ describe('leitor de QR da TV', () => {
 
 describe('marca e presença do coach', () => {
   it('ao conectar, campo vazio no celular não apaga o que a TV já tem', () => {
-    const phone = brandSnapshot({ ...base, settings: { ...base.settings, tvBoxName: '', tvWod: '', tvCoachName: 'Ana' } });
-    const room = brandSnapshot({ ...base, settings: { ...base.settings, tvBoxName: 'Box da TV', tvWod: '21-15-9 Thrusters', tvCoachName: '' } });
-    expect(mergeBrand(phone, room)).toMatchObject({ boxName: 'Box da TV', wod: '21-15-9 Thrusters', coach: 'Ana' });
+    const phone = brandSnapshot({ ...base, settings: { ...base.settings, tvBoxName: '', tvWods: { tabata: 'Aquecimento' }, tvCoachName: 'Ana' } });
+    const room = brandSnapshot({ ...base, settings: { ...base.settings, tvBoxName: 'Box da TV', tvWods: { amrap: '21-15-9 Thrusters' }, tvCoachName: '' } });
+    expect(mergeBrand(phone, room)).toMatchObject({ boxName: 'Box da TV', wods: { tabata: 'Aquecimento', amrap: '21-15-9 Thrusters' }, coach: 'Ana' });
     // preenchido no celular vale
-    const phone2 = brandSnapshot({ ...base, settings: { ...base.settings, tvWod: 'AMRAP 12' } });
-    expect(mergeBrand(phone2, room).wod).toBe('AMRAP 12');
+    const phone2 = brandSnapshot({ ...base, settings: { ...base.settings, tvWods: { amrap: 'AMRAP 12' } } });
+    expect(mergeBrand(phone2, room).wods.amrap).toBe('AMRAP 12');
     expect(mergeBrand(phone, null)).toBe(phone);
   });
   it('coach sem sinal de vida há 50 s conta como desconectado', () => {
     expect(coachAlive(100_000, 120_000)).toBe(true);
     expect(coachAlive(100_000, 151_000)).toBe(false);
     expect(coachAlive(null, 0)).toBe(false);
+  });
+});
+
+describe('WOD por modo', () => {
+  const { wodFor, compactWods } = require('../src/core/wod') as typeof import('../src/core/wod');
+  it('a TV pega o WOD do modo que está na tela', () => {
+    const wods = { tabata: 'Aquecimento', emom: '10 Sit-ups', amrap: '' };
+    expect(wodFor(wods, 'emom')).toBe('10 Sit-ups');
+    expect(wodFor(wods, 'amrap')).toBe('');
+    expect(wodFor(wods, 'stopwatch')).toBe('');
+    expect(compactWods(wods)).toEqual({ tabata: 'Aquecimento', emom: '10 Sit-ups' });
   });
 });

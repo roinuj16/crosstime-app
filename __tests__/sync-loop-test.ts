@@ -42,7 +42,7 @@ function fakeServer() {
 
 const initial = () => ({
   mode: 'tabata' as Engine.Mode, activeName: null as string | null, configs: Engine.DEFAULTS, saved: [] as unknown[], session: null as unknown,
-  colors: DEFAULT_COLORS, settings: { tvBoxName: '', tvLogo: '', tvWod: '', tvCoachName: '', timeFormat: '00:00' as const, pairedCode: '', tvRoomCode: '' },
+  colors: DEFAULT_COLORS, settings: { tvBoxName: '', tvLogo: '', tvWods: {} as Record<string, string>, tvCoachName: '', timeFormat: '00:00' as const, pairedCode: '', tvRoomCode: '' },
 });
 
 const flush = async () => { for (let i = 0; i < 5; i++) { jest.advanceTimersByTime(100); await Promise.resolve(); await new Promise((r) => jest.requireActual('timers').setImmediate(r)); } };
@@ -54,7 +54,7 @@ describe('TV e celular sincronizando', () => {
   it('o coach entra, muda o treino e dá play; a TV acompanha e ninguém fica reenviando', async () => {
     const server = fakeServer();
     const tv = createStore(initial), phone = createStore(initial);
-    phone.setState({ activeName: 'EMOM 10 min', mode: 'emom', settings: { ...phone.getState().settings, tvBoxName: 'Box Fortaleza', tvWod: '10 burpees' } });
+    phone.setState({ activeName: 'EMOM 10 min', mode: 'emom', settings: { ...phone.getState().settings, tvBoxName: 'Box Fortaleza', tvWods: { emom: '10 burpees' } } });
 
     // relógios: celular 2 s atrás do servidor, TV 3 s à frente
     const stopTv = startSync(tv, server.open(-3000, 'tv') as never, 'tv', 'K7Q4M2', undefined, 50);
@@ -64,7 +64,7 @@ describe('TV e celular sincronizando', () => {
 
     expect(tv.getState().mode).toBe('emom');
     expect(tv.getState().activeName).toBe('EMOM 10 min');
-    expect(tv.getState().settings).toMatchObject({ tvBoxName: 'Box Fortaleza', tvWod: '10 burpees', tvRoomCode: '' });
+    expect(tv.getState().settings).toMatchObject({ tvBoxName: 'Box Fortaleza', tvWods: { emom: '10 burpees' }, tvRoomCode: '' });
 
     // play no celular
     const now = 1_000_000;
@@ -116,13 +116,13 @@ describe('TV e celular sincronizando', () => {
     const tv = createStore(initial), phone = createStore(initial);
     const stopTv = startSync(tv, server.open(0, 'tv') as never, 'tv', 'K7Q4M2', undefined, 50);
     await flush();
-    tv.setState({ settings: { ...tv.getState().settings, tvWod: '21-15-9 Thrusters', tvBoxName: 'Box da TV' } });
+    tv.setState({ settings: { ...tv.getState().settings, tvWods: { amrap: '21-15-9 Thrusters' }, tvBoxName: 'Box da TV' } });
     await flush();
     phone.setState({ settings: { ...phone.getState().settings, tvCoachName: 'Ana' } });
     const stopPhone = startSync(phone, server.open(0, 'phone') as never, 'coach', 'K7Q4M2', undefined, 50);
     await flush();
-    expect(tv.getState().settings).toMatchObject({ tvWod: '21-15-9 Thrusters', tvBoxName: 'Box da TV', tvCoachName: 'Ana' });
-    expect(phone.getState().settings).toMatchObject({ tvWod: '21-15-9 Thrusters', tvBoxName: 'Box da TV', tvCoachName: 'Ana' });
+    expect(tv.getState().settings).toMatchObject({ tvWods: { amrap: '21-15-9 Thrusters' }, tvBoxName: 'Box da TV', tvCoachName: 'Ana' });
+    expect(phone.getState().settings).toMatchObject({ tvWods: { amrap: '21-15-9 Thrusters' }, tvBoxName: 'Box da TV', tvCoachName: 'Ana' });
     stopTv(); stopPhone();
   });
 });

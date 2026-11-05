@@ -8,6 +8,7 @@ import * as Engine from '@/core/engine';
 import { MODES } from '@/core/engine';
 import { formatRoomCode, newRoomCode } from '@/core/sync';
 import { tvBoard } from '@/core/tvBoard';
+import { wodFor } from '@/core/wod';
 import { cycleMode, tvAction } from '@/core/tvKeys';
 import { useFeedback } from '@/hooks/useFeedback';
 import { useRemoteSync } from '@/hooks/useRemoteSync';
@@ -112,7 +113,7 @@ export default function TvScreen() {
   const S = app.settings;
   const b = tvBoard({
     mode, config: app.currentConfig(), status, elapsed: el, doneAt: app.session?.state.elapsedBase ?? 0,
-    rounds: app.session?.rounds ?? 0, name: app.session?.name ?? app.activeName, wod: S.tvWod, t, fmt: S.timeFormat,
+    rounds: app.session?.rounds ?? 0, name: app.session?.name ?? app.activeName, wod: wodFor(S.tvWods, mode), t, fmt: S.timeFormat,
   });
   const color = (role: ColorRole | null) => (role ? hex(app.colors[role]) : UI.muted);
   const glowOf = (role: ColorRole | null, a = 0.45) => (role ? glow(app.colors[role], a) : 'transparent');

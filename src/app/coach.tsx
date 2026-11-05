@@ -1,9 +1,11 @@
 import { router } from 'expo-router';
+import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { BoxLogo, Button, Hint, SectionTitle } from '@/components/atoms';
-import { LinkRow, Row, TextField } from '@/components/molecules';
+import { Field, LinkRow, Row, Segmented, TextField } from '@/components/molecules';
 import { SheetTemplate } from '@/components/templates';
 import { formatRoomCode } from '@/core/sync';
+import { compactWods, isWodMode, WOD_MODES, type WodMode } from '@/core/wod';
 import { useStrings } from '@/hooks/useStrings';
 import { useRemote } from '@/services/remote';
 import { isWeb, pickImage } from '@/services/webApp';
@@ -22,6 +24,11 @@ export default function CoachScreen() {
   const st = useApp((s) => s.settings);
   const set = useApp((s) => s.setSetting);
   const remote = useRemote();
+  // modo do WOD em edição: começa no modo que está no timer
+  const [wodMode, setWodMode] = useState<WodMode>(() => { const m = useApp.getState().mode; return isWodMode(m) ? m : 'tabata'; });
+  const wods = st.tvWods ?? {};
+  const setWod = (text: string) => set('tvWods', { ...wods, [wodMode]: text });
+  const filled = Object.keys(compactWods(wods)) as WodMode[];
   const choose = async () => { const uri = await pickImage(); if (uri) set('tvLogo', uri); };
 
   const tvHint = !st.pairedCode ? t.tv.connect.step2
@@ -48,7 +55,13 @@ export default function CoachScreen() {
           }
         />
       )}
-      <TextField label={S.wod} hint={S.wodHint} value={st.tvWod} onChange={(v) => set('tvWod', v)} placeholder={S.wodPh} multiline maxLength={400} />
+      <Field label={S.wod} hint={filled.length ? `${C.wodHint}\n${C.wodSaved(filled.map((m) => t.modes[m]).join(', '))}` : C.wodHint}>
+        <Segmented
+          value={wodMode} onChange={setWodMode}
+          options={WOD_MODES.map((m) => ({ value: m, label: filled.includes(m) ? `${t.modes[m]} •` : t.modes[m] }))}
+        />
+      </Field>
+      <TextField label={C.wodFor(t.modes[wodMode])} value={wods[wodMode] ?? ''} onChange={setWod} placeholder={S.wodPh} multiline maxLength={400} />
 
       <View style={s.open}>
         <Button label={S.open} onPress={() => router.push('/tv')} />

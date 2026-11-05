@@ -4,6 +4,7 @@ import type { AnyConfig, Mode, ModeConfigs, SessionState, TimeFormat } from '@/c
 import type { LangSetting } from '@/i18n';
 import { DEFAULT_COLORS, type ColorRole, type ColorScheme, type LedColor } from '@/theme/palette';
 import { loadJSON, saveJSON } from './storage';
+import { isWodMode, type Wods } from '@/core/wod';
 
 export interface Settings {
   language: LangSetting;
@@ -30,10 +31,10 @@ export interface Settings {
   /** notificação a cada troca de fase com o app fora da tela */
   backgroundAlerts: boolean;
   timeFormat: TimeFormat;
-  /** modo TV: nome do box, logo (imagem em data URL, já reduzida) e o WOD do dia */
+  /** modo TV: nome do box, logo (imagem em data URL, já reduzida) e o WOD de cada modo */
   tvBoxName: string;
   tvLogo: string;
-  tvWod: string;
+  tvWods: Wods;
   /** nome do coach (opcional): aparece no topo da TV, ao lado da hora */
   tvCoachName: string;
   /** pareamento: código da sala desta TV, e a TV a que este celular está ligado ('' = nenhuma) */
@@ -64,7 +65,7 @@ export const DEFAULT_SETTINGS: Settings = {
   language: 'auto', sound: true, soundScheme: 'beep', volume: 0.75, countdown: true, tick: false,
   voice: true, voiceLang: 'en', voiceId: '', voiceRate: 1, voiceSource: 'recorded', voiceCount: false, sayRound: true,
   vibrate: true, keepAwake: true, flash: false, duckOthers: false, backgroundAlerts: true, timeFormat: '00:00',
-  tvBoxName: '', tvLogo: '', tvWod: '', tvCoachName: '', tvRoomCode: '', pairedCode: '', analyticsConsent: 'unknown',
+  tvBoxName: '', tvLogo: '', tvWods: {}, tvCoachName: '', tvRoomCode: '', pairedCode: '', analyticsConsent: 'unknown',
 };
 
 const EXAMPLES: SavedWorkout[] = [
@@ -86,6 +87,11 @@ function initial(): Persisted {
   const settings: Settings = { ...base.settings, ...d.settings };
   // A voz em português saiu do app (soava mal): quem tinha escolhido volta para o inglês.
   if (settings.voiceLang !== 'en') { settings.voiceLang = 'en'; settings.voiceId = ''; }
+  // Antes havia um WOD só; agora é um por modo. O antigo vai para o modo que estava na tela.
+  const legacy = (d.settings as { tvWod?: string } | undefined)?.tvWod;
+  delete (settings as { tvWod?: string }).tvWod;
+  settings.tvWods = { ...(settings.tvWods ?? {}) };
+  if (legacy?.trim() && !Object.keys(settings.tvWods).length) settings.tvWods[d.mode && isWodMode(d.mode) ? d.mode : 'amrap'] = legacy;
   return {
     ...base, ...d,
     configs: { ...base.configs, ...d.configs },
