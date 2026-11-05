@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
-import { BoxLogo, Button, Hint, SectionTitle } from '@/components/atoms';
+import { BoxLogo, Button, SectionTitle } from '@/components/atoms';
 import { LinkRow, Row, TextField } from '@/components/molecules';
 import { SheetTemplate } from '@/components/templates';
 import { formatRoomCode } from '@/core/sync';
@@ -49,17 +49,10 @@ export default function CoachScreen() {
           }
         />
       )}
-      <LinkRow label={S.wod} hint={C.wodMoved} onPress={() => router.push('/edit')} />
-
-      <View style={s.open}>
-        <Button label={S.open} onPress={() => router.push('/tv')} />
-      </View>
-      <Hint small style={{ marginTop: 10 }}>{t.tv.connect.thisDeviceHint}</Hint>
     </SheetTemplate>
   );
 }
 
 const s = StyleSheet.create({
   logo: { flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap', justifyContent: 'flex-end', flexShrink: 1 },
-  open: { flexDirection: 'row', marginTop: 20 },
 });
