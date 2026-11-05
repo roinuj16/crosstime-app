@@ -3,7 +3,8 @@
  * Três cenas, como no design aprovado:
  *  - idle: "Próximo treino" com o resumo (duração, rounds, trabalho/descanso) e o WOD;
  *  - live: fase e relógio gigantes, barra de progresso e a coluna da direita
- *          (round, próxima fase e quanto falta — ou o WOD com o contador de rounds);
+ *          (round, próxima fase e quanto falta, com os exercícios do WOD quando houver;
+ *          no AMRAP/For Time, o WOD com o contador de rounds);
  *  - done: "Treino concluído", o tempo e "Mandou bem!".
  */
 import * as Engine from './engine';
@@ -18,10 +19,10 @@ export interface SummaryItem { label: string; value: Piece[] }
 export interface WodLine { main: string; note: string }
 
 export type TvAside =
-  | { kind: 'rounds'; round: { n: number; of: number } | null; cycle: { n: number; of: number } | null; next: { label: string; time: string; role: ColorRole | null } | null; remaining: string | null }
+  | { kind: 'rounds'; round: { n: number; of: number } | null; cycle: { n: number; of: number } | null; next: { label: string; time: string; role: ColorRole | null } | null; remaining: string | null; lines: WodLine[] }
   | { kind: 'wod'; lines: WodLine[]; rounds: number }
   | { kind: 'counter'; rounds: number }
-  | { kind: 'laps'; lap: number; completed: number; next: { label: string; time: string } };
+  | { kind: 'laps'; lap: number; completed: number; next: { label: string; time: string }; lines: WodLine[] };
 
 export type TvBoard =
   | { scene: 'idle'; title: string; accent: ColorRole; summary: SummaryItem[]; wod: WodLine[] }
@@ -92,7 +93,7 @@ export function tvBoard(i: TvInput): TvBoard {
   let aside: TvAside;
   if (mode === 'stopwatch' && seg.phase === 'run') {
     const L = Engine.lapInfo(seg, i.elapsed);
-    aside = { kind: 'laps', lap: L.n, completed: L.completed, next: { label: v.next.label, time: v.next.time } };
+    aside = { kind: 'laps', lap: L.n, completed: L.completed, next: { label: v.next.label, time: v.next.time }, lines: wod };
   } else if (Engine.tapsRounds(mode)) {
     aside = wod.length ? { kind: 'wod', lines: wod, rounds: i.rounds } : { kind: 'counter', rounds: i.rounds };
   } else {
@@ -103,6 +104,7 @@ export function tvBoard(i: TvInput): TvBoard {
       cycle: seg.cycles && seg.cycles > 1 && seg.cycle ? { n: seg.cycle, of: seg.cycles } : null,
       next: loc.next ? { label: v.next.label, time: v.next.time, role: v.next.role } : null,
       remaining,
+      lines: wod, // os exercícios do WOD também aparecem com o treino valendo (EMOM, Tabata, Rounds)
     };
   }
   return {

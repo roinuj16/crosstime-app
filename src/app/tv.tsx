@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Platform, useWindowDimensions, View } from 'react-native';
 import {
-  TvClock, TvCoach, TvDone, TvHeader, TvHelp, TvIdle, TvLapsAside, TvLinkStatus, TvOverlay, TvPairCard, TvPairStrip, TvPhase, TvRoundsAside, TvSetupCard, TvWodAside, type TvHelpItem,
+  TvClock, TvCoach, TvComboAside, TvDone, TvHeader, TvHelp, TvIdle, TvLapsAside, TvLinkStatus, TvOverlay, TvPairCard, TvPairStrip, TvPhase, TvRoundsAside, TvSetupCard, TvWodAside, type TvHelpItem,
 } from '@/components/organisms';
 import { TvTemplate } from '@/components/templates';
 import * as Engine from '@/core/engine';
@@ -18,7 +18,7 @@ import { unlockAudio } from '@/services/feedback';
 import { remoteAvailable, useRemote } from '@/services/remote';
 import { autoHideCursor, enterFullscreen, keepScreenOn } from '@/services/webApp';
 import { useApp } from '@/store/useApp';
-import { glow, hex, UI, type ColorRole } from '@/theme/palette';
+import { glow, hex, LED, UI, type ColorRole } from '@/theme/palette';
 import { tvUnit } from '@/theme/tv';
 
 const RESET_WINDOW_MS = 3000;
@@ -193,7 +193,9 @@ export default function TvScreen() {
 
   // ao vivo: o relógio diminui se não couber (ex.: 1:05:00) na coluna grande
   const aside = b.aside;
-  const sideWidth = aside.kind === 'wod' ? 380 : 330;
+  // com WOD cadastrado, a coluna da direita mostra os exercícios junto com os números do treino
+  const combo = (aside.kind === 'rounds' || aside.kind === 'laps') && aside.lines.length > 0;
+  const sideWidth = combo ? 420 : aside.kind === 'wod' ? 380 : 330;
   const mainW = width * 0.96 - sideWidth * u - 64 * u;
   const clockSize = Math.min(360 * u, mainW / (b.time.length * 0.5));
   return (
@@ -207,7 +209,25 @@ export default function TvScreen() {
         />
       }
       side={
-        aside.kind === 'rounds' ? (
+        combo && aside.kind === 'rounds' ? (
+          <TvComboAside
+            stats={[
+              ...(aside.round ? [{ value: String(aside.round.n), of: aside.round.of, label: T.round, color: LED.ambar }] : []),
+              ...(aside.cycle ? [{ value: String(aside.cycle.n), of: aside.cycle.of, label: T.cycle, color: hex(app.colors.cycles) }] : []),
+              ...(aside.remaining ? [{ value: aside.remaining, label: t.remaining, color: UI.muted }] : []),
+            ]}
+            lines={aside.lines} wodLabel={T.wod}
+            next={aside.next ? { label: `${T.next} · ${aside.next.label}`, time: aside.next.time, color: color(aside.next.role) } : null}
+            u={u}
+          />
+        ) : combo && aside.kind === 'laps' ? (
+          <TvComboAside
+            stats={[{ value: String(aside.lap), label: T.lap, color: LED.ambar }, { value: String(aside.completed), label: T.laps, color: UI.muted }]}
+            lines={aside.lines} wodLabel={T.wod}
+            next={{ label: aside.next.label, time: aside.next.time, color: color('lap') }}
+            u={u}
+          />
+        ) : aside.kind === 'rounds' ? (
           <TvRoundsAside
             round={aside.round} cycle={aside.cycle} remaining={aside.remaining}
             next={aside.next ? { ...aside.next, color: color(aside.next.role) } : null}

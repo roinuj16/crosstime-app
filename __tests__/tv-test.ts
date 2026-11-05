@@ -74,6 +74,15 @@ describe('cenas da TV', () => {
     expect(b.paused).toBe(true);
   });
 
+  it('EMOM valendo com WOD: os exercícios aparecem junto com o round', () => {
+    const b = board({ mode: 'emom', config: D.emom, status: 'running', elapsed: D.emom.prepare + 6, wod: '10 Sit-ups\n15 Air squats\n10 Push-ups' });
+    if (b.scene !== 'live' || b.aside.kind !== 'rounds') throw new Error('cena errada');
+    expect(b.aside.round).toEqual({ n: 1, of: D.emom.rounds });
+    expect(b.aside.lines.map((l) => l.main)).toEqual(['10 SIT-UPS', '15 AIR SQUATS', '10 PUSH-UPS']);
+    const c = board({ mode: 'emom', config: D.emom, status: 'running', elapsed: D.emom.prepare + 6 });
+    expect(c.scene === 'live' && c.aside.kind === 'rounds' && c.aside.lines).toEqual([]);
+  });
+
   it('borda acesa na cor da próxima fase nos 3 segundos finais', () => {
     expect((board({ status: 'running', elapsed: 5 + 28 }) as { frame: unknown }).frame).toBe('rest');
     expect((board({ status: 'running', elapsed: 5 + 20 }) as { frame: unknown }).frame).toBeNull();

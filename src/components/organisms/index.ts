@@ -8,7 +8,7 @@ export { TimerHeader, type TimerHeaderProps } from './TimerHeader';
 export { WorkoutCard, type WorkoutCardProps } from './WorkoutCard';
 export { TvHelp, type TvHelpItem } from './TvHelp';
 export { TvOverlay } from './TvOverlay';
-export { TvLapsAside, TvRoundsAside, TvWodAside } from './TvAside';
+export { TvComboAside, TvLapsAside, TvRoundsAside, TvWodAside } from './TvAside';
 export { TvDone } from './TvDone';
 export { TvClock, TvCoach, TvHeader } from './TvHeader';
 export { TvIdle } from './TvIdle';
