@@ -17,7 +17,15 @@ const strip = <T extends object>(snap: T): T => {
   return rest as T;
 };
 
-export function startSync(store: SyncStore, open: OpenRoom, role: RemoteRole, code: string, onError?: (e: unknown) => void, debounceMs = 80): () => void {
+/**
+ * `langOf`: resolve o idioma escolhido ('auto' → idioma do aparelho). O celular manda o idioma
+ * dele e a TV passa a mostrar os textos no mesmo idioma.
+ */
+export function startSync(
+  store: SyncStore, open: OpenRoom, role: RemoteRole, code: string, onError?: (e: unknown) => void, debounceMs = 80,
+  langOf: (setting: 'auto' | 'pt' | 'en' | undefined) => 'pt' | 'en' | undefined = (x) => (x === 'pt' || x === 'en' ? x : undefined),
+): () => void {
+  const brandOf = (st: SyncSource) => brandSnapshot(st, langOf(st.settings.language));
   let room: Room | null = null;
   let closed = false;
   let lastTimer = '', lastBrand = '';
@@ -33,7 +41,7 @@ export function startSync(store: SyncStore, open: OpenRoom, role: RemoteRole, co
   };
   const publishBrand = () => {
     if (!room) return;
-    const b = brandSnapshot(source());
+    const b = brandOf(source());
     const bk = brandKey(b);
     if (bk !== lastBrand) { lastBrand = bk; room.publishBrand(b); }
   };
@@ -50,9 +58,9 @@ export function startSync(store: SyncStore, open: OpenRoom, role: RemoteRole, co
     onBrand: (snap) => {
       const b = strip(snap) as BrandSnapshot;
       const st = source();
-      const next = applyBrand(b, st);
+      const next = applyBrand(b, st, role === 'tv');
       // a chave sai do estado que vai ficar aqui (não do que veio), para não devolver o mesmo para a sala
-      lastBrand = brandKey(brandSnapshot({ ...st, ...next } as SyncSource));
+      lastBrand = brandKey(brandOf({ ...st, ...next } as SyncSource));
       store.setState(next);
     },
   }).then((r) => {
@@ -62,11 +70,11 @@ export function startSync(store: SyncStore, open: OpenRoom, role: RemoteRole, co
     // a TV só manda o que mudar depois
     if (role === 'coach') {
       const st = source();
-      const merged = mergeBrand(brandSnapshot(st), r.initialBrand ? strip(r.initialBrand) as BrandSnapshot : null);
-      if (brandKey(merged) !== brandKey(brandSnapshot(st))) store.setState(applyBrand(merged, st));
+      const merged = mergeBrand(brandOf(st), r.initialBrand ? strip(r.initialBrand) as BrandSnapshot : null);
+      if (brandKey(merged) !== brandKey(brandOf(st))) store.setState(applyBrand(merged, st));
       publish();
     }
-    else { lastTimer = timerKey(timerSnapshot(source(), r.offset())); lastBrand = brandKey(brandSnapshot(source())); }
+    else { lastTimer = timerKey(timerSnapshot(source(), r.offset())); lastBrand = brandKey(brandOf(source())); }
   }).catch((e) => { if (!closed) onError?.(e); });
 
   // junta mudanças seguidas (ex.: segurar o +). A marca leva o logo, então espera a pessoa

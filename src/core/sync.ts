@@ -20,12 +20,12 @@ export interface SyncSession {
 export interface SyncWorkout { id: string; name: string; mode: Mode; config: AnyConfig; example?: boolean; wod?: string }
 
 export interface TimerSnapshot { v: 1; mode: Mode; activeName: string | null; configs: ModeConfigs; saved: SyncWorkout[]; session: SyncSession | null }
-export interface BrandSnapshot { v: 1; boxName: string; logo: string; wods: Wods; coach: string; colors: ColorScheme; timeFormat: TimeFormat }
+export interface BrandSnapshot { v: 1; boxName: string; logo: string; wods: Wods; coach: string; colors: ColorScheme; timeFormat: TimeFormat; /** idioma do celular do coach (a TV usa o mesmo) */ lang?: 'pt' | 'en' }
 
 /** O pedaço do estado do app que participa da sincronização. */
 export interface SyncSource {
   mode: Mode; activeName: string | null; configs: ModeConfigs; saved: SyncWorkout[]; session: SyncSession | null;
-  colors: ColorScheme; settings: { tvBoxName: string; tvLogo: string; tvWods: Wods; tvCoachName: string; timeFormat: TimeFormat };
+  colors: ColorScheme; settings: { tvBoxName: string; tvLogo: string; tvWods: Wods; tvCoachName: string; timeFormat: TimeFormat; language?: 'auto' | 'pt' | 'en' };
 }
 
 const shift = (t: number | null, d: number) => (t == null ? null : Math.round(t + d));
@@ -42,16 +42,21 @@ export function timerSnapshot(s: SyncSource, offset: number): TimerSnapshot {
   return clean({ v: 1, mode: s.mode, activeName: s.activeName ?? null, configs: s.configs, saved: s.saved, session: session ?? null });
 }
 
-export function brandSnapshot(s: SyncSource): BrandSnapshot {
-  return clean({ v: 1, boxName: s.settings.tvBoxName, logo: s.settings.tvLogo, wods: compactWods(s.settings.tvWods), coach: s.settings.tvCoachName ?? '', colors: s.colors, timeFormat: s.settings.timeFormat });
+/** `lang`: o idioma que este aparelho está mostrando (o 'auto' já resolvido pelo idioma do aparelho). */
+export function brandSnapshot(s: SyncSource, lang?: 'pt' | 'en'): BrandSnapshot {
+  return clean({ v: 1, lang, boxName: s.settings.tvBoxName, logo: s.settings.tvLogo, wods: compactWods(s.settings.tvWods), coach: s.settings.tvCoachName ?? '', colors: s.colors, timeFormat: s.settings.timeFormat });
 }
 
-/** O que muda no app ao receber a marca da sala (nome do box, logo, WOD, coach, cores). */
-export function applyBrand(b: Partial<BrandSnapshot>, s: SyncSource): Pick<SyncSource, 'colors' | 'settings'> {
+/**
+ * O que muda no app ao receber a marca da sala (nome do box, logo, WOD, coach, cores).
+ * `withLang`: só a TV segue o idioma que veio (o do coach); o celular mantém o dele.
+ */
+export function applyBrand(b: Partial<BrandSnapshot>, s: SyncSource, withLang = false): Pick<SyncSource, 'colors' | 'settings'> {
   return {
     colors: b.colors ?? s.colors,
     settings: {
-      ...s.settings, tvBoxName: b.boxName ?? '', tvLogo: b.logo ?? '', tvWods: compactWods(b.wods), tvCoachName: b.coach ?? '',
+      ...s.settings,
+      ...(withLang && b.lang ? { language: b.lang } : {}), tvBoxName: b.boxName ?? '', tvLogo: b.logo ?? '', tvWods: compactWods(b.wods), tvCoachName: b.coach ?? '',
       timeFormat: b.timeFormat ?? s.settings.timeFormat,
     },
   };

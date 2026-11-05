@@ -125,4 +125,26 @@ describe('TV e celular sincronizando', () => {
     expect(phone.getState().settings).toMatchObject({ tvWods: { amrap: '21-15-9 Thrusters' }, tvBoxName: 'Box da TV', tvCoachName: 'Ana' });
     stopTv(); stopPhone();
   });
+
+  it('a TV passa a mostrar o idioma do celular do coach', async () => {
+    const server = fakeServer();
+    const tv = createStore(() => ({ ...initial(), settings: { ...initial().settings, language: 'auto' as 'auto' | 'pt' | 'en' } }));
+    const phone = createStore(() => ({ ...initial(), settings: { ...initial().settings, language: 'auto' as 'auto' | 'pt' | 'en' } }));
+    // TV com navegador em inglês, celular em português
+    const stopTv = startSync(tv, server.open(0, 'tv') as never, 'tv', 'K7Q4M2', undefined, 50, (x) => (x === 'auto' ? 'en' : x));
+    await flush();
+    const stopPhone = startSync(phone, server.open(0, 'phone') as never, 'coach', 'K7Q4M2', undefined, 50, (x) => (x === 'auto' ? 'pt' : x));
+    await flush();
+    expect(tv.getState().settings.language).toBe('pt');
+    expect(phone.getState().settings.language).toBe('auto'); // o celular não muda
+    // o coach troca para inglês: a TV acompanha
+    phone.setState({ settings: { ...phone.getState().settings, language: 'en' } });
+    await flush();
+    expect(tv.getState().settings.language).toBe('en');
+    const w = server.writes();
+    await flush(); await flush();
+    expect(server.writes()).toBe(w);
+    stopTv(); stopPhone();
+  });
 });
+
