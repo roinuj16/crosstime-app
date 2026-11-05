@@ -13,14 +13,16 @@ export function TvRoundsAside({ round, cycle, next, remaining, labels, u }: {
   labels: { round: string; cycle: string; next: string; remaining: string }; u: number;
 }) {
   const blocks = [];
+  // só o round (EMOM): número maior, sozinho no meio da coluna
+  const k = !next && !remaining ? 1.5 : 1;
   if (round) {
     blocks.push(
       <View key="r" style={s.center}>
         <View style={s.fraction}>
-          <LedText size={120 * u} variant="display" tabular trim="digits" color={LED.ambar}>{String(round.n)}</LedText>
-          <LedText size={60 * u} variant="display" tabular trim="digits" color={UI.muted}>/{round.of}</LedText>
+          <LedText size={120 * k * u} variant="display" tabular trim="digits" color={LED.ambar}>{String(round.n)}</LedText>
+          <LedText size={60 * k * u} variant="display" tabular trim="digits" color={UI.muted}>/{round.of}</LedText>
         </View>
-        <LedText size={28 * u} tracking={2 * u} color={UI.text}>{labels.round.toUpperCase()}{cycle ? `  ·  ${labels.cycle.toUpperCase()} ${cycle.n}/${cycle.of}` : ''}</LedText>
+        <LedText size={28 * k * u} tracking={2 * u} color={UI.text}>{labels.round.toUpperCase()}{cycle ? `  ·  ${labels.cycle.toUpperCase()} ${cycle.n}/${cycle.of}` : ''}</LedText>
       </View>,
     );
   }
@@ -81,6 +83,7 @@ export function TvComboAside({ stats, lines, next, wodLabel, u }: {
   wodLabel: string; u: number;
 }) {
   const wodSize = Math.max(26, Math.min(44, 330 / (lines.length * 1.35))) * u;
+  const k = stats.length === 1 ? 1.4 : 1; // um número só (EMOM): maior
   const line = { height: Math.max(1, u), backgroundColor: TV.line, alignSelf: 'stretch' as const };
   return (
     <View style={[s.wodAside, { padding: 24 * u, paddingHorizontal: 28 * u, gap: 16 * u }]}>
@@ -89,10 +92,10 @@ export function TvComboAside({ stats, lines, next, wodLabel, u }: {
           {stats.map((st, i) => (
             <View key={i} style={s.center}>
               <View style={s.fraction}>
-                <LedText size={(st.value.length > 3 ? 54 : 68) * u} variant="display" tabular trim="digits" color={st.color}>{st.value}</LedText>
-                {st.of != null && <LedText size={36 * u} variant="display" tabular trim="digits" color={UI.muted}>/{st.of}</LedText>}
+                <LedText size={(st.value.length > 3 ? 54 : 68) * k * u} variant="display" tabular trim="digits" color={st.color}>{st.value}</LedText>
+                {st.of != null && <LedText size={36 * k * u} variant="display" tabular trim="digits" color={UI.muted}>/{st.of}</LedText>}
               </View>
-              <LedText size={20 * u} tracking={1.5 * u} color={UI.muted} numberOfLines={1}>{st.label.toUpperCase()}</LedText>
+              <LedText size={20 * k * u} tracking={1.5 * u} color={UI.muted} numberOfLines={1}>{st.label.toUpperCase()}</LedText>
             </View>
           ))}
         </View>

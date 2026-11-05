@@ -97,12 +97,15 @@ export function tvBoard(i: TvInput): TvBoard {
   } else if (Engine.tapsRounds(mode)) {
     aside = wod.length ? { kind: 'wod', lines: wod, rounds: i.rounds } : { kind: 'counter', rounds: i.rounds };
   } else {
-    const remaining = Number.isFinite(loc.totalRemaining) ? Engine.format(loc.totalRemaining, i.fmt) : null;
+    // EMOM: todo round é igual, então "próximo round" e "falta no treino" só confundiam;
+    // a coluna mostra só o round atual (ex.: 1/10), centralizado
+    const emom = mode === 'emom';
+    const remaining = !emom && Number.isFinite(loc.totalRemaining) ? Engine.format(loc.totalRemaining, i.fmt) : null;
     aside = {
       kind: 'rounds',
       round: seg.round && seg.rounds ? { n: seg.round, of: seg.rounds } : null,
       cycle: seg.cycles && seg.cycles > 1 && seg.cycle ? { n: seg.cycle, of: seg.cycles } : null,
-      next: loc.next ? { label: v.next.label, time: v.next.time, role: v.next.role } : null,
+      next: loc.next && !emom ? { label: v.next.label, time: v.next.time, role: v.next.role } : null,
       remaining,
       lines: wod, // os exercícios do WOD também aparecem com o treino valendo (EMOM, Tabata, Rounds)
     };

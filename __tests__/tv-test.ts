@@ -79,6 +79,9 @@ describe('cenas da TV', () => {
     if (b.scene !== 'live' || b.aside.kind !== 'rounds') throw new Error('cena errada');
     expect(b.aside.round).toEqual({ n: 1, of: D.emom.rounds });
     expect(b.aside.lines.map((l) => l.main)).toEqual(['10 SIT-UPS', '15 AIR SQUATS', '10 PUSH-UPS']);
+    // EMOM: só o round atual (sem próximo round e sem o que falta no treino)
+    expect(b.aside.next).toBeNull();
+    expect(b.aside.remaining).toBeNull();
     const c = board({ mode: 'emom', config: D.emom, status: 'running', elapsed: D.emom.prepare + 6 });
     expect(c.scene === 'live' && c.aside.kind === 'rounds' && c.aside.lines).toEqual([]);
   });
