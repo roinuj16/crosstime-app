@@ -47,7 +47,7 @@ describe('controle remoto do modo TV', () => {
 });
 
 import * as Engine from '../src/core/engine';
-import { parseWod, tvBoard, type TvInput } from '../src/core/tvBoard';
+import { fitWod, parseWod, tvBoard, type TvInput } from '../src/core/tvBoard';
 import { STRINGS } from '../src/i18n/strings';
 
 describe('cenas da TV', () => {
@@ -106,5 +106,27 @@ describe('cenas da TV', () => {
 
   it('WOD: linhas vazias somem e o peso vira detalhe', () => {
     expect(parseWod('  \n21-15-9\nRow 500 m\n')).toEqual([{ main: '21-15-9', note: '' }, { main: 'ROW', note: '500 m' }]);
+  });
+});
+
+describe('WOD cabe na caixa', () => {
+  const wod = (n: number) => Array.from({ length: n }, (_, i) => ({ main: `${i + 1}- DUAL DB SNATCH`, note: '' }));
+  it('poucos exercícios: letra no máximo', () => {
+    expect(fitWod(wod(3), { w: 380, h: 420 }, 36, 20)).toEqual({ size: 36, columns: 1 });
+  });
+  it('muitos exercícios: letra menor e a lista inteira cabe na altura', () => {
+    const f = fitWod(wod(10), { w: 380, h: 420 }, 36, 20);
+    expect(f.columns).toBe(1);
+    expect(f.size).toBeLessThan(36);
+    expect(f.size * 1.45 * 10).toBeLessThanOrEqual(420);
+  });
+  it('lista enorme: duas colunas', () => {
+    const f = fitWod(wod(20).map((l) => ({ ...l, main: 'SIT UP' })), { w: 600, h: 300 }, 36, 20);
+    expect(f.columns).toBe(2);
+    expect(f.size * 1.45 * 10).toBeLessThanOrEqual(300);
+  });
+  it('linha comprida diminui a letra para caber na largura', () => {
+    const f = fitWod([{ main: 'X'.repeat(40), note: '' }], { w: 380, h: 420 }, 36, 20);
+    expect(f.size * 0.42 * 40).toBeLessThanOrEqual(380);
   });
 });

@@ -42,6 +42,29 @@ export function parseWod(text: string): WodLine[] {
   });
 }
 
+/**
+ * Tamanho da letra do WOD para caber na caixa (altura × largura), com limite máximo e mínimo.
+ * Lista longa: diminui a letra; se ainda não couber no mínimo, divide em duas colunas.
+ * Conta aproximada da fonte da TV (Teko): cada linha ocupa ~1,45 × o tamanho (com o espaço
+ * entre linhas) e cada letra maiúscula ~0,42 × o tamanho de largura. A lista ainda mede o
+ * resultado e encolhe se passar (WodList).
+ */
+export function fitWod(lines: WodLine[], box: { w: number; h: number }, max: number, min: number): { size: number; columns: 1 | 2 } {
+  const n = Math.max(1, lines.length);
+  const chars = Math.max(1, ...lines.map((l) => l.main.length + (l.note ? l.note.length * 0.68 + 1 : 0)));
+  const fit = (cols: number) => {
+    const rows = Math.ceil(n / cols);
+    const colW = (box.w - (cols - 1) * box.w * 0.06) / cols;
+    return Math.min(max, box.h / (rows * LINE), colW / (chars * CHAR));
+  };
+  const one = fit(1);
+  if (one >= min || n < 6) return { size: one, columns: 1 };
+  const two = fit(2);
+  return two > one ? { size: two, columns: 2 } : { size: one, columns: 1 };
+}
+const LINE = 1.45;
+const CHAR = 0.42;
+
 /** Segundos curtos como "20s"; acima de 1 minuto, "1:30". */
 const short = (s: number, fmt: TimeFormat) => (s < 60 ? `${s}s` : Engine.format(s, fmt));
 

@@ -9,7 +9,7 @@ export function TvSetupCard({ title, lines, hint, u }: { title: string; lines: W
   return (
     <View style={[s.card, { borderRadius: 20 * u, padding: 28 * u, gap: 18 * u, borderWidth: Math.max(1, u) }]}>
       <LedText size={30 * u} variant="display" trim="label" tracking={1.5 * u} color={UI.text}>{title.toUpperCase()}</LedText>
-      {lines.length ? <WodList lines={lines} size={36 * u} u={u} /> : <Text style={{ fontSize: 17 * u, lineHeight: 24 * u, color: TV.soft }}>{hint}</Text>}
+      {lines.length ? <WodList lines={lines} max={36 * u} u={u} /> : <Text style={{ fontSize: 17 * u, lineHeight: 24 * u, color: TV.soft }}>{hint}</Text>}
     </View>
   );
 }

@@ -64,7 +64,7 @@ export function TvWodAside({ lines, rounds, labels, u }: { lines: WodItem[]; rou
   return (
     <View style={[s.wodAside, { padding: 28 * u, paddingHorizontal: 32 * u, gap: 18 * u }]}>
       <LedText size={28 * u} tracking={2 * u} color={UI.muted}>{labels.wod.toUpperCase()}</LedText>
-      <View style={s.fill}><WodList lines={lines} size={44 * u} u={u} /></View>
+      <WodList lines={lines} max={44 * u} u={u} />
       <View style={{ height: Math.max(1, u), backgroundColor: TV.line }} />
       {counter}
     </View>
@@ -82,7 +82,6 @@ export function TvComboAside({ stats, lines, next, wodLabel, u }: {
   next: { label: string; time: string; color: string } | null;
   wodLabel: string; u: number;
 }) {
-  const wodSize = Math.max(26, Math.min(44, 330 / (lines.length * 1.35))) * u;
   const k = stats.length === 1 ? 1.4 : 1; // um número só (EMOM): maior
   const line = { height: Math.max(1, u), backgroundColor: TV.line, alignSelf: 'stretch' as const };
   return (
@@ -102,7 +101,7 @@ export function TvComboAside({ stats, lines, next, wodLabel, u }: {
       )}
       <View style={line} />
       <LedText size={24 * u} tracking={2 * u} color={UI.muted}>{wodLabel.toUpperCase()}</LedText>
-      <View style={[s.fill, { overflow: 'hidden' }]}><WodList lines={lines} size={wodSize} u={u} /></View>
+      <WodList lines={lines} max={44 * u} u={u} />
       {next && (
         <>
           <View style={line} />

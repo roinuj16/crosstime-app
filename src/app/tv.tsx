@@ -174,7 +174,7 @@ export default function TvScreen() {
             )}
           </View>
         }
-        sideWidth={408}
+        sideWidth={b.wod.length > 6 ? 560 : 408} // WOD comprido: coluna mais larga para a letra não ficar pequena
         footer={footer}
         overlay={overlay}
       />
