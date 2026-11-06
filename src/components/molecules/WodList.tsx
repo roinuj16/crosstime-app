@@ -31,12 +31,12 @@ export function WodList({ lines, max, min = 18, u }: { lines: WodItem[]; max: nu
   const perCol = Math.ceil(lines.length / cols);
   const columns = cols === 2 ? [lines.slice(0, perCol), lines.slice(perCol)] : [lines];
   return (
-    <View style={[s.box, { opacity: fit ? 1 : 0 }]} onLayout={onLayout}>
+    <View style={[s.box, { opacity: fit ? 1 : 0 }]} onLayout={onLayout} testID="wod-list">
       <View style={[s.cols, { gap: size * 0.8 }]} onLayout={onContent}>
         {columns.map((col, c) => (
           <View key={c} style={[s.col, { gap: size * 0.3 }]}>
             {col.map((l, i) => (
-              <View key={i} style={s.line}>
+              <View key={i} style={s.line} testID="wod-line">
                 <LedText size={size} trim="label" color={UI.text} numberOfLines={1} style={s.shrink}>{l.main}</LedText>
                 {!!l.note && <LedText size={size * 0.68} trim="label" color={UI.muted} numberOfLines={1} style={{ marginLeft: size * 0.25 }}>{l.note}</LedText>}
               </View>
