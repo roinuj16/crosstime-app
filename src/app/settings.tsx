@@ -13,6 +13,7 @@ import { formatRoomCode } from '@/core/sync';
 import { notify } from '@/services/dialog';
 import { analyticsAvailable } from '@/services/analytics';
 import { useRemote } from '@/services/remote';
+import { accountAvailable, useAccount } from '@/services/account';
 import { configureAudio, perform, unlockAudio } from '@/services/feedback';
 import { hasRecordedVoice } from '@/services/voiceClips';
 import { pickVoice } from '@/services/voices';
@@ -35,6 +36,7 @@ export default function SettingsScreen() {
   useEffect(() => { pickVoice(st.voiceLang, st.voiceId).then((v) => setVoiceName(v?.name ?? '')); }, [st.voiceLang, st.voiceId]);
 
   const remote = useRemote();
+  const account = useAccount();
   const P = t.tv.pair;
   const tvStatus = !st.pairedCode ? '' : remote.status === 'error' ? P.error : remote.peer ? t.tv.connect.statusOn(formatRoomCode(st.pairedCode)) : `${P.tvOf(formatRoomCode(st.pairedCode))} · ${P.waiting}`;
   const coachHint = [st.tvCoachName.trim() && t.coach.onTv(st.tvCoachName.trim()), tvStatus].filter(Boolean).join(' · ') || t.coach.hint;
@@ -64,6 +66,12 @@ export default function SettingsScreen() {
   };
   return (
     <SheetTemplate title={S.title} right={<Button label={S.done} kind="primary" onPress={() => goBack()} />}>
+      {accountAvailable && account.profile && (
+        <>
+          <LinkRow label={t.profile.accountTitle} hint={`${account.profile.name} · ${account.email ?? ''}`} onPress={() => router.push('/account')} />
+          <LinkRow label={t.feedback.settingsRow} hint={t.feedback.settingsHint} onPress={() => router.push({ pathname: '/feedback', params: { from: 'settings' } })} />
+        </>
+      )}
       <LinkRow
         label={S.colors} hint={S.colorsHint} onPress={() => router.push('/colors')}
         dots={(['prepare', 'work', 'rest', 'cooldown'] as ColorRole[]).map((r) => hex(colors[r]))}

@@ -42,6 +42,8 @@ export interface Settings {
   pairedCode: string;
   /** estatísticas de uso (Google Analytics, só na web): a pessoa ainda não respondeu, aceitou ou recusou */
   analyticsConsent: 'unknown' | 'granted' | 'denied';
+  /** última vez que o convite "Como foi?" apareceu depois de um treino (ms) */
+  feedbackPromptAt: number;
 }
 
 export interface SavedWorkout { id: string; name: string; mode: Mode; config: AnyConfig; example?: boolean; /** exercícios (WOD) salvos junto */ wod?: string }
@@ -65,7 +67,7 @@ export const DEFAULT_SETTINGS: Settings = {
   language: 'auto', sound: true, soundScheme: 'beep', volume: 0.75, countdown: true, tick: false,
   voice: true, voiceLang: 'en', voiceId: '', voiceRate: 1, voiceSource: 'recorded', voiceCount: false, sayRound: true,
   vibrate: true, keepAwake: true, flash: false, duckOthers: false, backgroundAlerts: true, timeFormat: '00:00',
-  tvBoxName: '', tvLogo: '', tvWods: {}, tvCoachName: '', tvRoomCode: '', pairedCode: '', analyticsConsent: 'unknown',
+  tvBoxName: '', tvLogo: '', tvWods: {}, tvCoachName: '', tvRoomCode: '', pairedCode: '', analyticsConsent: 'unknown', feedbackPromptAt: 0,
 };
 
 const EXAMPLES: SavedWorkout[] = [

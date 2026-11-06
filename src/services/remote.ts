@@ -11,12 +11,10 @@
  *   timer     TimerSnapshot      modo, treino, configurações, treinos salvos, sessão
  *   brand     BrandSnapshot      nome do box, logo, WOD, cores
  */
-import { getApps, initializeApp, type FirebaseApp } from 'firebase/app';
-import { getAuth, inMemoryPersistence, initializeAuth, signInAnonymously, type Auth } from 'firebase/auth';
 import { get, getDatabase, onDisconnect, onValue, ref, remove, serverTimestamp, set, type Database } from 'firebase/database';
-import { Platform } from 'react-native';
 import { create } from 'zustand';
 import { FIREBASE_CONFIG } from '@/config/firebase';
+import { currentUser, firebaseApp, firebaseAuth } from './firebase';
 import { coachAlive, HEARTBEAT_MS, type BrandSnapshot, type TimerSnapshot } from '@/core/sync';
 
 export const remoteAvailable = FIREBASE_CONFIG != null;
@@ -31,19 +29,21 @@ export const useRemote = create<{ status: RemoteStatus; peer: boolean; role: Rem
 
 let ready: Promise<{ db: Database; uid: string }> | null = null;
 
+/** Conecta ao banco das salas com quem está usando (a conta, ou um anônimo na TV). */
 function connect(): Promise<{ db: Database; uid: string }> {
   if (!FIREBASE_CONFIG) return Promise.reject(new Error('Firebase não configurado'));
-  if (!ready) {
+  const uid = firebaseAuth().currentUser?.uid;
+  // trocou de usuário (entrou ou saiu da conta): reconecta com o novo
+  if (!ready || (uid && readyUid && uid !== readyUid)) {
     ready = (async () => {
-      const app: FirebaseApp = getApps()[0] ?? initializeApp(FIREBASE_CONFIG);
-      // no celular, sem guardar a sessão: cada abertura entra como um anônimo novo (a sala é pelo código)
-      const auth: Auth = Platform.OS === 'web' ? getAuth(app) : initializeAuth(app, { persistence: inMemoryPersistence });
-      const cred = await signInAnonymously(auth);
-      return { db: getDatabase(app), uid: cred.user.uid };
+      const user = await currentUser();
+      readyUid = user.uid;
+      return { db: getDatabase(firebaseApp()), uid: user.uid };
     })().catch((e) => { ready = null; throw e; });
   }
   return ready;
 }
+let readyUid: string | null = null;
 
 export interface RoomHandlers {
   onTimer: (snap: TimerSnapshot & { by: string }) => void;

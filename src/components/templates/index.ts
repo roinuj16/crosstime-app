@@ -2,3 +2,4 @@
 export { SheetTemplate } from './SheetTemplate';
 export { TvTemplate } from './TvTemplate';
 export { TimerTemplate } from './TimerTemplate';
+export { AuthTemplate } from './AuthTemplate';

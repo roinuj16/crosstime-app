@@ -1,0 +1,75 @@
+rules_version = '2';
+
+// Regras do Firestore do CronoBox (conta, dados na conta, sugestões).
+// Colar em Firebase → Firestore Database → Regras → Publicar.
+// As salas da TV continuam no Realtime Database (database.rules.json).
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() { return request.auth != null; }
+    // entrou com o link do e-mail (não anônimo)
+    function member() {
+      return signedIn() && request.auth.token.email != null && request.auth.token.email_verified == true;
+    }
+    function own(uid) { return member() && request.auth.uid == uid; }
+    function str(v, max) { return v is string && v.size() <= max; }
+
+    // ---------- cadastro ----------
+    function validProfile(d) {
+      return d.keys().hasOnly(['name', 'email', 'phone', 'whatsapp', 'role', 'box', 'city', 'marketing', 'lang', 'createdAt', 'updatedAt'])
+        && str(d.name, 60) && d.name.size() >= 2
+        && d.email == request.auth.token.email
+        && str(d.phone, 13) && d.phone.matches('^[0-9]*$')
+        && d.whatsapp is bool && d.marketing is bool
+        && d.role in ['aluno', 'coach']
+        && str(d.box, 60) && (d.role != 'coach' || d.box.size() > 0)
+        && str(d.city, 60)
+        && d.lang in ['pt', 'en'];
+    }
+    match /users/{uid} {
+      allow get, delete: if own(uid);
+      allow create, update: if own(uid) && validProfile(request.resource.data);
+    }
+
+    // ---------- dados na conta (treinos, tempos, WOD, preferências) ----------
+    match /userData/{uid} {
+      allow get, delete: if own(uid);
+      allow create, update: if own(uid)
+        && request.resource.data.keys().hasOnly(['v', 'configs', 'colors', 'settings', 'saved', 'updatedAt', 'device'])
+        && request.resource.data.saved is list && request.resource.data.saved.size() <= 300;
+    }
+
+    // ---------- pedido de entrada com link no e-mail ----------
+    // O id (rid) é secreto: só vai no link do e-mail. Quem pediu lê; a página do link,
+    // aberta em qualquer navegador, só pode gravar o link uma vez.
+    match /loginRequests/{rid} {
+      allow create: if signedIn() && rid.size() >= 20
+        && request.resource.data.keys().hasOnly(['uid', 'email', 'device', 'link', 'createdAt'])
+        && request.resource.data.uid == request.auth.uid
+        && str(request.resource.data.email, 254)
+        && str(request.resource.data.device, 80)
+        && request.resource.data.link == null
+        && request.resource.data.createdAt == request.time;
+      allow get: if signedIn();
+      allow update: if signedIn() && resource.data.link == null
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['link'])
+        && str(request.resource.data.link, 2000);
+      allow delete: if signedIn() && (resource.data.uid == request.auth.uid || resource.data.email == request.auth.token.email);
+    }
+
+    // ---------- avaliações e sugestões (só enviar; ninguém lê pelo app) ----------
+    match /feedback/{id} {
+      allow create: if member()
+        && request.resource.data.keys().hasOnly(['uid', 'rating', 'type', 'message', 'route', 'appVersion', 'platform', 'device', 'mode', 'lang', 'createdAt'])
+        && request.resource.data.uid == request.auth.uid
+        && (request.resource.data.rating == null || (request.resource.data.rating is int && request.resource.data.rating >= 1 && request.resource.data.rating <= 5))
+        && request.resource.data.type in ['suggestion', 'problem', 'praise']
+        && str(request.resource.data.message, 2000)
+        && (request.resource.data.message.size() > 0 || request.resource.data.rating != null)
+        && str(request.resource.data.route, 60) && str(request.resource.data.appVersion, 20)
+        && str(request.resource.data.device, 60) && str(request.resource.data.mode, 20) && str(request.resource.data.lang, 5)
+        && request.resource.data.platform in ['web', 'ios', 'android']
+        && request.resource.data.createdAt == request.time;
+    }
+  }
+}

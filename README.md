@@ -150,6 +150,11 @@ cortam a borda. A primeira tecla ou toque ativa o som e a tela cheia. Controle r
 | ↑ ↓ | — | +1 / −1 round (AMRAP, For Time) |
 | Voltar / Esc / R | — | zera (aperte duas vezes em 3 s) |
 
+**Conta (web app)**: entrada com link no e-mail (sem senha) e cadastro rápido; o app só abre
+depois disso (modo TV continua aberto). Ajustes → Minha conta (editar, sair, excluir) e
+Avaliar e sugerir. Treinos, WOD, tempos e preferências ficam guardados na conta.
+Configuração no Firebase: docs/FIREBASE.md → "Conta".
+
 **Tela Coach** (Ajustes → Coach): nome do coach (opcional, aparece no topo da TV ao lado da hora),
 conexão com a TV, nome do box e logo. O **WOD** fica na tela de edição de cada modo (⏱), junto com
 os tempos; a TV mostra o WOD do modo que está na tela e ele vai junto ao salvar em Meus treinos.

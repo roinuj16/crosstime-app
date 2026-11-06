@@ -1,8 +1,10 @@
+import '@/services/landing'; // primeiro: guarda o link de entrada do e-mail antes de o endereço mudar
 import { Teko_500Medium, Teko_600SemiBold, useFonts } from '@expo-google-fonts/teko';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { AccountGate } from '@/components/system/AccountGate';
 import { AnalyticsObserver } from '@/components/system/AnalyticsObserver';
 import { CoachLink } from '@/components/system/CoachLink';
 import { UI } from '@/theme/palette';
@@ -29,7 +31,13 @@ export default function RootLayout() {
         <Stack.Screen name="privacy" />
         <Stack.Screen name="connect" options={{ presentation: 'modal' }} />
         <Stack.Screen name="scan" options={{ presentation: 'fullScreenModal', animation: 'fade' }} />
+        <Stack.Screen name="login" options={{ animation: 'fade' }} />
+        <Stack.Screen name="confirm" options={{ animation: 'fade' }} />
+        <Stack.Screen name="signup" options={{ animation: 'fade' }} />
+        <Stack.Screen name="account" />
+        <Stack.Screen name="feedback" />
       </Stack>
+      <AccountGate />
     </SafeAreaProvider>
   );
 }

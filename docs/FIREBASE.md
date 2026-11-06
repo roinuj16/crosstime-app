@@ -47,3 +47,36 @@ aplica, testado com duas telas falsas), `src/services/remote.ts` (Firebase).
 - Política de privacidade em `/privacy` (texto em `src/i18n/privacy.ts`).
 - No app instalado (iPhone/Android), Analytics e **Crashlytics** entram com o `@react-native-firebase`
   num build novo (precisa dos arquivos `google-services.json` e `GoogleService-Info.plist`).
+
+## Conta: entrada com link no e-mail, cadastro e sugestões
+
+O web app só abre para quem entrou com o e-mail (link) e fez o cadastro. O modo TV (`/tv`),
+a conexão pelo QR (`/pair`), a página do link (`/confirm`) e a privacidade continuam abertos.
+
+### 1. Ativar a entrada por link no e-mail
+1. Firebase → **Authentication** → **Método de login** → **Adicionar novo provedor** → **E-mail/senha**.
+2. Ative **E-mail/senha** e, logo abaixo, **Link do e-mail (login sem senha)** → **Salvar**.
+3. Deixe o **Anônimo** ligado (a TV e o pedido de entrada usam).
+4. Em **Authentication** → **Configurações** → **Domínios autorizados**, confira que estão
+   `cronobox.expo.app` e `localhost`.
+
+### 2. Criar o Firestore
+1. Firebase → **Firestore Database** → **Criar banco de dados**.
+2. Edição **Standard**, local **southamerica-east1 (São Paulo)**, **modo de produção**.
+3. Aba **Regras**: apague tudo, cole o conteúdo de `firestore.rules` → **Publicar**.
+
+Fica no plano grátis (Spark). Não precisa de cartão.
+
+### Onde ver os dados
+- **Cadastros**: Firestore → coleção `users` (um documento por pessoa).
+- **Sugestões**: Firestore → coleção `feedback` (nota, tipo, texto, tela, versão, aparelho).
+- **Dados na conta** (treinos, WOD, preferências): coleção `userData`.
+- `loginRequests` são pedidos de entrada; somem depois de usados. Os que ninguém usou podem
+  ser apagados à vontade (opcional: política de TTL no campo `createdAt`).
+
+### Como a entrada funciona (para quem for mexer no código)
+`src/services/account.web.ts`: o app cria `loginRequests/<id>` e o Firebase manda o link
+`/confirm?rid=<id>&oobCode=…`. Aberto no mesmo navegador, entra ali. Aberto em outro (Safari ×
+ícone da tela de início, app do Gmail, computador), a página pergunta "foi você?", mostra o
+código de 2 dígitos que também aparece no app que espera, e grava o link no pedido; o app que
+espera lê e entra com ele. O link só pode ser gravado uma vez e o id só vai no e-mail.

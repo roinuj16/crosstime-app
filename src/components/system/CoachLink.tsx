@@ -1,5 +1,6 @@
 import { usePathname } from 'expo-router';
 import { useRemoteSync } from '@/hooks/useRemoteSync';
+import { useAccount } from '@/services/account';
 import { useApp } from '@/store/useApp';
 
 /**
@@ -9,6 +10,9 @@ import { useApp } from '@/store/useApp';
 export function CoachLink() {
   const code = useApp((s) => s.settings.pairedCode);
   const path = usePathname();
-  useRemoteSync('coach', path === '/tv' ? null : code || null);
+  // com conta (web), só depois de entrar: a sala é aberta com o usuário da conta
+  const status = useAccount((s) => s.status);
+  const allowed = status === 'off' || status === 'ready';
+  useRemoteSync('coach', path === '/tv' || !allowed ? null : code || null);
   return null;
 }

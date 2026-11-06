@@ -64,6 +64,29 @@ export interface Strings {
   };
   voices: { title: string; auto: string; enhanced: string; empty: string; help: string; listen: string };
   /** estatísticas de uso (Google Analytics) e privacidade */
+  /** conta: entrada com link no e-mail, cadastro, minha conta */
+  auth: {
+    tagline: string; email: string; emailPh: string; continue: string; invalidEmail: string; privacy: string;
+    sentTitle: string; sentBody: (email: string) => string; sentCode: string; sentCodeHint: string; resend: string; resendIn: (s: number) => string;
+    otherEmail: string; spam: string; errSend: string; errOffline: string; errTooMany: string; errLink: string;
+  };
+  linkPage: {
+    checking: string; invalid: string; invalidBody: string; used: string; usedBody: string; noRequest: string; noRequestBody: string;
+    askTitle: string; askBody: (device: string) => string; askCode: string; yes: string; no: string; here: string;
+    approved: string; approvedBody: string; denied: string; deniedBody: string; signedIn: string; emailAgain: string; go: string; error: string;
+  };
+  profile: {
+    signupTitle: string; signupIntro: string; accountTitle: string; name: string; namePh: string; email: string;
+    phone: string; phoneHint: string; whatsapp: string; role: string; aluno: string; coach: string;
+    box: string; boxHint: string; boxPh: string; city: string; cityPh: string; marketing: string; marketingHint: string;
+    save: string; saved: string; required: string; phoneInvalid: string; boxRequired: string; privacy: string; error: string;
+    signOut: string; signOutAsk: string; delete: string; deleteHint: string; deleteAsk: string; deleteDone: string; deleteDataOnly: string; optional: string;
+  };
+  feedback: {
+    title: string; settingsRow: string; settingsHint: string; rating: string; type: string; suggestion: string; problem: string; praise: string;
+    message: string; messagePh: string; context: string; send: string; sent: string; sentBody: string; error: string;
+    prompt: string; promptButton: string;
+  };
   /** tela Coach (nome do coach e o que aparece na TV) */
   coach: { title: string; hint: string; name: string; nameHint: string; namePh: string; tv: string; onTv: (name: string) => string };
   privacy: { banner: string; accept: string; decline: string; policy: string; toggle: string; toggleHint: string; title: string };
@@ -248,8 +271,52 @@ const pt: Strings = {
     help: 'Vozes "Premium" ou "Aprimorada" soam bem mais naturais e são gratuitas. iPhone: Ajustes → Acessibilidade → Conteúdo Falado → Vozes. Android: Configurações → Sistema → Idiomas → Conversão de texto em voz. Depois, volte aqui.',
     listen: 'Toque numa voz para ouvir e escolher.',
   },
+  auth: {
+    tagline: 'O timer do seu box, no celular e na TV.', email: 'Seu e-mail', emailPh: 'voce@email.com', continue: 'Continuar',
+    invalidEmail: 'Confira o e-mail: parece que falta alguma coisa.', privacy: 'Como usamos seus dados',
+    sentTitle: 'Confira seu e-mail', sentBody: (email) => `Enviamos um link para ${email}. Toque nele, neste ou em outro aparelho, e volte aqui: você entra sozinho.`,
+    sentCode: 'Código deste pedido', sentCodeHint: 'A página do link vai mostrar o mesmo número.',
+    resend: 'Reenviar o link', resendIn: (s) => `Reenviar em ${s}s`, otherEmail: 'Usar outro e-mail',
+    spam: 'Não chegou? Veja no spam ou em Promoções. O remetente é noreply@cronobox-ba0cc.firebaseapp.com.',
+    errSend: 'Não deu para enviar o link. Tente de novo em instantes.', errOffline: 'Sem internet. Conecte e tente de novo.',
+    errTooMany: 'Muitos pedidos seguidos. Espere alguns minutos e tente de novo.', errLink: 'Esse link não vale mais. Peça um novo.',
+  },
+  linkPage: {
+    checking: 'Conferindo o link…', invalid: 'Link inválido', invalidBody: 'Esse endereço não é um link de entrada do CronoBox. Abra o link do e-mail de novo ou peça um novo no app.',
+    used: 'Link já usado', usedBody: 'Esse link já liberou a entrada. Se precisar, peça um novo no app.',
+    noRequest: 'Entrar neste navegador', noRequestBody: 'Não achamos o pedido que gerou este link (ele vale por cerca de 1 hora). Digite o e-mail para entrar aqui mesmo.',
+    askTitle: 'Entrar no CronoBox?', askBody: (device) => `Alguém pediu para entrar com este e-mail em: ${device || 'outro aparelho'}.`,
+    askCode: 'Confira se é o mesmo número que aparece na tela que está esperando:',
+    yes: 'Sim, sou eu: entrar lá', no: 'Não fui eu', here: 'Prefiro entrar aqui neste navegador',
+    approved: 'E-mail confirmado!', approvedBody: 'Pode voltar para o CronoBox: em alguns segundos você entra sozinho. Esta página já pode ser fechada.',
+    denied: 'Tudo certo', deniedBody: 'Ninguém entrou com o seu e-mail. Pode fechar esta página.',
+    signedIn: 'Entrando…', emailAgain: 'Confirme o e-mail', go: 'Entrar', error: 'Não deu para confirmar. Peça um novo link no app.',
+  },
+  profile: {
+    signupTitle: 'Cadastro', signupIntro: 'Falta pouco. Conte quem você é: assim avisamos das novidades e do lançamento.',
+    accountTitle: 'Minha conta', name: 'Nome', namePh: 'Como quer ser chamado', email: 'E-mail',
+    phone: 'Telefone', phoneHint: 'Com DDD. Opcional.', whatsapp: 'Pode me chamar no WhatsApp', role: 'Você é',
+    aluno: 'Aluno', coach: 'Coach', box: 'Box onde treina', boxHint: 'Obrigatório para coach.', boxPh: 'Ex.: Box Fortaleza',
+    city: 'Cidade', cityPh: 'Ex.: Fortaleza', marketing: 'Quero receber novidades e o aviso de lançamento',
+    marketingHint: 'Por e-mail (e WhatsApp, se você liberou acima). Dá para desligar quando quiser.',
+    save: 'Salvar', saved: 'Salvo', required: 'Preencha este campo', phoneInvalid: 'Telefone com DDD, só números', boxRequired: 'Coach precisa informar o box',
+    privacy: 'Ao continuar, você concorda com a política de privacidade.', error: 'Não deu para salvar. Confira a internet e tente de novo.',
+    signOut: 'Sair', signOutAsk: 'Sair da conta neste aparelho? Seus treinos continuam guardados na conta.',
+    delete: 'Excluir minha conta', deleteHint: 'Apaga o cadastro e os dados guardados na conta. Não dá para desfazer.',
+    deleteAsk: 'Excluir a conta e apagar o cadastro e os dados guardados nela? Não dá para desfazer.',
+    deleteDone: 'Conta excluída.', deleteDataOnly: 'Cadastro e dados apagados. Para remover também o e-mail do login, entre de novo e toque em Excluir logo em seguida.',
+    optional: 'opcional',
+  },
+  feedback: {
+    title: 'Avaliar e sugerir', settingsRow: 'Avaliar e sugerir', settingsHint: 'Nota, ideias, problemas: tudo ajuda a melhorar o CronoBox',
+    rating: 'Sua nota (opcional)', type: 'Sobre o quê?', suggestion: 'Sugestão', problem: 'Problema', praise: 'Elogio',
+    message: 'Conte pra gente', messagePh: 'O que podemos melhorar, o que deu errado ou o que você gostou…',
+    context: 'Vai junto, para ajudar a entender: a tela, a versão do app, o aparelho e o modo do timer. Nada do que você não escreveu aqui.',
+    send: 'Enviar', sent: 'Valeu!', sentBody: 'Recebemos sua mensagem.', error: 'Não deu para enviar. Confira a internet e tente de novo.',
+    prompt: 'Como foi o treino? Conte o que achou do CronoBox.', promptButton: 'Avaliar',
+  },
   coach: {
-    title: 'Coach', hint: 'Seu nome, a conexão com a TV e o que aparece nela (box, logo e WOD)',
+    title: 'Coach', hint: 'Seu nome na TV, a conexão com a TV, o nome do box e o logo',
     name: 'Seu nome', nameHint: 'Opcional. Aparece no topo da TV, ao lado da hora.', namePh: 'Ex.: Ana',
     tv: 'Modo TV', onTv: (name) => `Coach ${name}`,
   },
@@ -471,8 +538,52 @@ const en: Strings = {
     help: '"Premium" or "Enhanced" voices sound much more natural and are free. iPhone: Settings → Accessibility → Spoken Content → Voices. Android: Settings → System → Languages → Text-to-speech output. Then come back here.',
     listen: 'Tap a voice to hear it and choose it.',
   },
+  auth: {
+    tagline: 'Your box timer, on the phone and on the TV.', email: 'Your email', emailPh: 'you@email.com', continue: 'Continue',
+    invalidEmail: 'Check the email: something seems to be missing.', privacy: 'How we use your data',
+    sentTitle: 'Check your email', sentBody: (email) => `We sent a link to ${email}. Tap it, on this or another device, and come back here: you will be signed in automatically.`,
+    sentCode: 'Request code', sentCodeHint: 'The link page will show the same number.',
+    resend: 'Resend link', resendIn: (s) => `Resend in ${s}s`, otherEmail: 'Use another email',
+    spam: 'Nothing yet? Check spam or Promotions. The sender is noreply@cronobox-ba0cc.firebaseapp.com.',
+    errSend: 'Could not send the link. Try again in a moment.', errOffline: 'No internet. Connect and try again.',
+    errTooMany: 'Too many requests. Wait a few minutes and try again.', errLink: 'This link is no longer valid. Request a new one.',
+  },
+  linkPage: {
+    checking: 'Checking the link…', invalid: 'Invalid link', invalidBody: 'This is not a CronoBox sign-in link. Open the email link again or request a new one in the app.',
+    used: 'Link already used', usedBody: 'This link already signed someone in. Request a new one in the app if needed.',
+    noRequest: 'Sign in on this browser', noRequestBody: 'We could not find the request for this link (it lasts about 1 hour). Type the email to sign in right here.',
+    askTitle: 'Sign in to CronoBox?', askBody: (device) => `Someone asked to sign in with this email on: ${device || 'another device'}.`,
+    askCode: 'Check it is the same number shown on the waiting screen:',
+    yes: 'Yes, it is me: sign in there', no: 'It was not me', here: 'Sign in on this browser instead',
+    approved: 'Email confirmed!', approvedBody: 'Go back to CronoBox: you will be signed in within seconds. You can close this page.',
+    denied: 'All good', deniedBody: 'Nobody signed in with your email. You can close this page.',
+    signedIn: 'Signing in…', emailAgain: 'Confirm your email', go: 'Sign in', error: 'Could not confirm. Request a new link in the app.',
+  },
+  profile: {
+    signupTitle: 'Sign up', signupIntro: 'Almost there. Tell us who you are so we can let you know about news and the launch.',
+    accountTitle: 'My account', name: 'Name', namePh: 'What should we call you', email: 'Email',
+    phone: 'Phone', phoneHint: 'With area code. Optional.', whatsapp: 'You can reach me on WhatsApp', role: 'You are',
+    aluno: 'Athlete', coach: 'Coach', box: 'Box where you train', boxHint: 'Required for coaches.', boxPh: 'e.g. Box Fortaleza',
+    city: 'City', cityPh: 'e.g. Fortaleza', marketing: 'Send me news and the launch announcement',
+    marketingHint: 'By email (and WhatsApp, if allowed above). You can turn it off anytime.',
+    save: 'Save', saved: 'Saved', required: 'Fill in this field', phoneInvalid: 'Phone with area code, numbers only', boxRequired: 'Coaches need to tell the box',
+    privacy: 'By continuing you agree with the privacy policy.', error: 'Could not save. Check the internet and try again.',
+    signOut: 'Sign out', signOutAsk: 'Sign out on this device? Your workouts stay saved in the account.',
+    delete: 'Delete my account', deleteHint: 'Deletes your profile and the data saved in the account. This cannot be undone.',
+    deleteAsk: 'Delete the account and erase the profile and data saved in it? This cannot be undone.',
+    deleteDone: 'Account deleted.', deleteDataOnly: 'Profile and data deleted. To also remove the sign-in email, sign in again and tap Delete right away.',
+    optional: 'optional',
+  },
+  feedback: {
+    title: 'Rate and suggest', settingsRow: 'Rate and suggest', settingsHint: 'Ratings, ideas, problems: it all helps improve CronoBox',
+    rating: 'Your rating (optional)', type: 'About what?', suggestion: 'Suggestion', problem: 'Problem', praise: 'Praise',
+    message: 'Tell us', messagePh: 'What we can improve, what went wrong or what you liked…',
+    context: 'Sent along to help us understand: the screen, app version, device and timer mode. Nothing you did not write here.',
+    send: 'Send', sent: 'Thanks!', sentBody: 'We got your message.', error: 'Could not send. Check the internet and try again.',
+    prompt: 'How was the workout? Tell us what you think of CronoBox.', promptButton: 'Rate',
+  },
   coach: {
-    title: 'Coach', hint: 'Your name, the TV connection and what shows on it (box, logo and WOD)',
+    title: 'Coach', hint: 'Your name on the TV, the TV connection, box name and logo',
     name: 'Your name', nameHint: 'Optional. Shows at the top of the TV, next to the time.', namePh: 'e.g. Ana',
     tv: 'TV mode', onTv: (name) => `Coach ${name}`,
   },

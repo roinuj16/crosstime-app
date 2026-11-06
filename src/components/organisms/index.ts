@@ -17,3 +17,5 @@ export { TvSetupCard } from './TvSetupCard';
 export { TvLinkStatus, TvPairCard, TvPairStrip } from './TvPairCard';
 export { RemoteBanner } from './RemoteBanner';
 export { ConsentBanner } from './ConsentBanner';
+export { FormError, ProfileFields, type ProfileLabels, type ProfileValues } from './ProfileFields';
+export { PromptBanner } from './PromptBanner';

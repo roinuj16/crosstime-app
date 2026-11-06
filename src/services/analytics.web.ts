@@ -6,6 +6,7 @@
 import { getApps, initializeApp } from 'firebase/app';
 import { getAnalytics, isSupported, logEvent, setAnalyticsCollectionEnabled, type Analytics } from 'firebase/analytics';
 import { FIREBASE_CONFIG } from '@/config/firebase';
+import { urlHasLoginKey } from './landing';
 
 export type EventParams = Record<string, string | number | boolean>;
 
@@ -22,6 +23,9 @@ export async function setAnalyticsEnabled(on: boolean): Promise<void> {
   if (on && !analytics) {
     starting ??= (async () => {
       if (!(await isSupported())) return;
+      // aberto pelo link do e-mail: espera a página tirar a chave de login do endereço
+      for (let i = 0; i < 40 && urlHasLoginKey(); i++) await new Promise((r) => setTimeout(r, 250));
+      if (urlHasLoginKey()) return;
       analytics = getAnalytics(getApps()[0] ?? initializeApp(FIREBASE_CONFIG!));
       while (queue.length) { const [n, p] = queue.shift()!; logEvent(analytics, n, p); }
     })().catch(() => { starting = null; });

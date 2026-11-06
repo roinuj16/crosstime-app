@@ -1,6 +1,9 @@
 import { router } from 'expo-router';
+import { useEffect, useState } from 'react';
 import { useWindowDimensions } from 'react-native';
-import { ConsentBanner, ControlDeck, CurrentBand, ModeTabs, NextBand, RemoteBanner, TimerHeader } from '@/components/organisms';
+import { ConsentBanner, ControlDeck, CurrentBand, ModeTabs, NextBand, PromptBanner, RemoteBanner, TimerHeader } from '@/components/organisms';
+import { shouldPromptFeedback } from '@/core/account';
+import { useAccount } from '@/services/account';
 import { Torch } from '@/components/system/Torch';
 import { TimerTemplate } from '@/components/templates';
 import { MODES, type Mode } from '@/core/engine';
@@ -28,6 +31,17 @@ export default function TimerScreen() {
   useBackground(); // tela bloqueada: mantém vivo e agenda avisos
 
   const status = app.session?.state.status ?? 'idle';
+  // "Como foi o treino?": ao terminar, no máximo uma vez por semana, só com conta
+  const accountReady = useAccount((s) => s.status === 'ready');
+  const [prompt, setPrompt] = useState(false);
+  useEffect(() => {
+    if (status !== 'done') { setPrompt(false); return; }
+    const st = useApp.getState();
+    if (accountReady && shouldPromptFeedback(st.settings.feedbackPromptAt, Date.now())) {
+      setPrompt(true);
+      st.setSetting('feedbackPromptAt', Date.now());
+    }
+  }, [status, accountReady]);
   const paired = app.settings.pairedCode;
   const remote = useRemote();
   const v = timerView({
@@ -106,6 +120,12 @@ export default function TimerScreen() {
           text={t.privacy.banner} accept={t.privacy.accept} decline={t.privacy.decline} policy={t.privacy.policy}
           onAccept={() => app.setSetting('analyticsConsent', 'granted')} onDecline={() => app.setSetting('analyticsConsent', 'denied')}
           onPolicy={() => router.push('/privacy')}
+        />
+      )}
+      {prompt && app.settings.analyticsConsent !== 'unknown' && (
+        <PromptBanner
+          text={t.feedback.prompt} action={t.feedback.promptButton} close={t.cancel}
+          onAction={() => { setPrompt(false); router.push({ pathname: '/feedback', params: { from: 'workout_done' } }); }} onClose={() => setPrompt(false)}
         />
       )}
       {!!paired && (
