@@ -69,6 +69,7 @@ export default function SettingsScreen() {
       {accountAvailable && account.profile && (
         <>
           <LinkRow label={t.profile.accountTitle} hint={`${account.profile.name} · ${account.email ?? ''}`} onPress={() => router.push('/account')} />
+          <LinkRow label={t.events.settingsRow} hint={t.events.settingsHint} onPress={() => router.push('/events')} />
           <LinkRow label={t.feedback.settingsRow} hint={t.feedback.settingsHint} onPress={() => router.push({ pathname: '/feedback', params: { from: 'settings' } })} />
         </>
       )}

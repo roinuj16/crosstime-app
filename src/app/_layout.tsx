@@ -36,6 +36,10 @@ export default function RootLayout() {
         <Stack.Screen name="signup" options={{ animation: 'fade' }} />
         <Stack.Screen name="account" />
         <Stack.Screen name="feedback" />
+        <Stack.Screen name="events" />
+        <Stack.Screen name="event-new" />
+        <Stack.Screen name="event" />
+        <Stack.Screen name="murph" />
       </Stack>
       <AccountGate />
     </SafeAreaProvider>

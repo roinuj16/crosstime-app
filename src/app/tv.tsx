@@ -1,13 +1,18 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Platform, useWindowDimensions, View } from 'react-native';
 import {
-  TvClock, TvCoach, TvComboAside, TvDone, TvHeader, TvHelp, TvIdle, TvLapsAside, TvLinkStatus, TvOverlay, TvPairCard, TvPairStrip, TvPhase, TvRoundsAside, TvSetupCard, TvWodAside, type TvHelpItem,
+  TvClock, TvCoach, TvComboAside, TvDone, TvEventBoard, TvHeader, TvHelp, TvIdle, TvLapsAside, TvLinkStatus, TvOverlay, TvPairCard, TvPairStrip, TvPhase, TvRoundsAside, TvSetupCard, TvWodAside, type TvHelpItem,
 } from '@/components/organisms';
+import { LedText } from '@/components/atoms';
 import { TvTemplate } from '@/components/templates';
 import * as Engine from '@/core/engine';
 import { MODES } from '@/core/engine';
 import { formatRoomCode, newRoomCode } from '@/core/sync';
 import { tvBoard } from '@/core/tvBoard';
+import { countdown, displayName } from '@/core/event';
+import { eventClock, finished, formatClock, ranked } from '@/core/murph';
+import { useEventData, useNow } from '@/hooks/useEventData';
+import { useEventText } from '@/hooks/useEventText';
 import { wodFor } from '@/core/wod';
 import { cycleMode, tvAction } from '@/core/tvKeys';
 import { useFeedback } from '@/hooks/useFeedback';
@@ -147,6 +152,11 @@ export default function TvScreen() {
   const footer = <TvHelp items={help} warning={armed ? T.pressAgain : null} size={17 * u} />;
   const overlay = ready ? null : <TvOverlay title={T.start} hint={T.startHint} size={30 * u} onStart={start} />;
 
+  // treino especial (Murph) mandado pelo celular do coach
+  if (S.tvEventId) {
+    return <TvEventView id={S.tvEventId} u={u} logo={S.tvLogo} box={box} right={clockNode} overlay={overlay} />;
+  }
+
   if (b.scene === 'idle') {
     return (
       <TvTemplate
@@ -242,6 +252,42 @@ export default function TvScreen() {
       }
       sideWidth={sideWidth}
       footer={status === 'running' && !armed ? null : footer}
+      overlay={overlay}
+    />
+  );
+}
+
+/** TV do treino especial: relógio do evento e todos os alunos ao vivo. */
+function TvEventView({ id, u, logo, box, right, overlay }: { id: string; u: number; logo: string; box: string; right: ReactNode; overlay: ReactNode }) {
+  const { E, statusText, progressOf } = useEventText();
+  const { event, entries, progress } = useEventData(id, { entries: true, progress: true });
+  const now = useNow(500);
+  const clock = event ? eventClock(event.startAt, now) : null;
+  const title = event ? (box ? `${box} · ${event.title}` : event.title) : E.title;
+  const capMs = (event?.timeCapMin ?? 60) * 60_000;
+  const running = event?.status === 'live' && clock != null && clock >= 0;
+  const eventClockNode = event?.status === 'live' && clock != null ? (
+    <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 18 * u }}>
+      <LedText size={18 * u} trim="label" tracking={u} color={UI.muted}>{E.limit(formatClock(capMs)).toUpperCase()}</LedText>
+      <LedText variant="display" size={52 * u} tabular trim="digits" color={running && clock! < capMs ? LED.verde : UI.muted}>{formatClock(Math.min(Math.max(0, clock), capMs))}</LedText>
+    </View>
+  ) : right;
+
+  // quem tem contagem aparece com o progresso; inscritos sem contagem entram zerados
+  const byUid = new Map(progress.map((p) => [p.uid, p]));
+  const waiting = entries.filter((e) => !byUid.has(e.uid)).map((e) => ({ uid: e.uid, name: displayName(e.name), vest: e.vest }));
+  const rows = [
+    ...ranked(progress).map((p, i) => ({ key: p.uid, name: p.name, vest: p.vest, status: statusText(p, capMs), progress: progressOf(p), done: finished(p), pos: event?.status === 'open' ? null : i + 1 })),
+    ...waiting.map((w) => ({ key: w.uid, name: w.name, vest: w.vest, status: event?.status === 'open' ? '' : E.run, progress: 0, done: false, pos: null })),
+  ];
+  const big = event?.status === 'live' && clock != null && clock < 0 ? String(countdown(clock)) : null;
+  const banner = !event ? E.notFound : event.status === 'open' ? `${E.waiting} · ${E.registered(event.count, event.capacity)}` : event.status === 'done' ? E.ranking : null;
+
+  return (
+    <TvTemplate
+      header={<TvHeader logo={logo || undefined} title={title} u={u} strong right={eventClockNode} />}
+      main={<TvEventBoard rows={rows} u={u} big={big} banner={banner} vestLabel={E.withVest} />}
+      footer={<TvHelp items={[{ keys: [], label: event?.status === 'open' ? E.tvWaitingHint : E.murphDesc }]} size={17 * u} />}
       overlay={overlay}
     />
   );

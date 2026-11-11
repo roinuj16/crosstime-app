@@ -20,10 +20,7 @@ import Constants from 'expo-constants';
 import {
   deleteUser, isSignInWithEmailLink, onAuthStateChanged, sendSignInLinkToEmail, signInWithEmailLink, signOut,
 } from 'firebase/auth';
-import {
-  addDoc, collection, deleteDoc, doc, getDoc, initializeFirestore, onSnapshot, persistentLocalCache,
-  persistentMultipleTabManager, serverTimestamp, setDoc, updateDoc, type Firestore,
-} from 'firebase/firestore';
+import { addDoc, collection, deleteDoc, doc, getDoc, onSnapshot, serverTimestamp, setDoc, updateDoc } from 'firebase/firestore';
 import { create } from 'zustand';
 import { FIREBASE_CONFIG } from '@/config/firebase';
 import {
@@ -31,7 +28,8 @@ import {
   type AccountData, type FeedbackType, type Profile,
 } from '@/core/account';
 import { useApp } from '@/store/useApp';
-import { currentUser, firebaseApp, firebaseAuth } from './firebase';
+import { currentUser, firebaseAuth } from './firebase';
+import { db } from './firestore.web';
 
 export type AccountStatus = 'off' | 'loading' | 'signedOut' | 'needsProfile' | 'ready';
 export interface AccountInfo { status: AccountStatus; uid: string | null; email: string | null; profile: Profile | null }
@@ -66,19 +64,6 @@ function deviceLabel(): string {
   const br = /Edg\//.test(ua) ? 'Edge' : /CriOS|Chrome\//.test(ua) ? 'Chrome' : /FxiOS|Firefox\//.test(ua) ? 'Firefox' : /Safari\//.test(ua) ? 'Safari' : '';
   const app = typeof window !== 'undefined' && window.matchMedia?.('(display-mode: standalone)').matches ? 'app na tela de início' : br;
   return [os, app].filter(Boolean).join(' · ');
-}
-
-let fs: Firestore | null = null;
-function db(): Firestore {
-  if (!fs) {
-    try {
-      // cache no aparelho: abre o app sem internet (box com Wi-Fi ruim) com o cadastro e os dados
-      fs = initializeFirestore(firebaseApp(), { localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }) });
-    } catch {
-      fs = initializeFirestore(firebaseApp(), {});
-    }
-  }
-  return fs;
 }
 
 // ---------- estado da conta ----------

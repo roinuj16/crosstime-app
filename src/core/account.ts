@@ -78,7 +78,7 @@ export const firstName = (name: string) => name.trim().split(/\s+/)[0] ?? '';
 // ---------------------------------------------------------------------------------------------
 
 /** Ajustes que são do aparelho, não da pessoa. */
-export const DEVICE_ONLY = ['tvRoomCode', 'pairedCode', 'analyticsConsent', 'feedbackPromptAt'] as const;
+export const DEVICE_ONLY = ['tvRoomCode', 'pairedCode', 'analyticsConsent', 'feedbackPromptAt', 'tvEventId'] as const;
 
 export interface AccountState<S, W extends { id: string }, C> {
   configs: ModeConfigs;

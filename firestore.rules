@@ -57,6 +57,81 @@ service cloud.firestore {
       allow delete: if signedIn() && (resource.data.uid == request.auth.uid || resource.data.email == request.auth.token.email);
     }
 
+    // ---------- treinos especiais (Murph) ----------
+    function boxDoc(boxId) { return get(/databases/$(database)/documents/boxes/$(boxId)).data; }
+    function isCoach(boxId) { return member() && request.auth.uid in boxDoc(boxId).coaches; }
+    function eventPath(id) { return /databases/$(database)/documents/events/$(id); }
+    function entryPath(id, who) { return /databases/$(database)/documents/events/$(id)/entries/$(who); }
+
+    match /boxes/{boxId} {
+      allow get, list: if member();
+      allow create: if member()
+        && request.resource.data.keys().hasOnly(['name', 'city', 'coaches', 'owner', 'createdAt'])
+        && request.resource.data.coaches == [request.auth.uid] && request.resource.data.owner == request.auth.uid
+        && str(request.resource.data.name, 60) && request.resource.data.name.size() > 0 && str(request.resource.data.city, 60);
+      allow update: if member() && request.auth.uid in resource.data.coaches
+        && request.resource.data.owner == resource.data.owner
+        && str(request.resource.data.name, 60) && request.resource.data.name.size() > 0;
+    }
+
+    function validEvent(d) {
+      return d.keys().hasOnly(['boxId', 'boxName', 'title', 'kind', 'date', 'timeCapMin', 'capacity', 'count', 'partition', 'vest',
+                               'status', 'startAt', 'createdBy', 'coachName', 'createdAt'])
+        && d.kind == 'murph' && str(d.title, 60) && str(d.boxName, 60) && str(d.coachName, 60)
+        && d.date is number && d.timeCapMin is int && d.timeCapMin >= 10 && d.timeCapMin <= 180
+        && d.capacity is int && d.capacity >= 1 && d.capacity <= 200
+        && d.count is int && d.count >= 0 && d.count <= d.capacity
+        && d.partition is bool && d.vest is bool
+        && d.status in ['open', 'live', 'done'] && (d.startAt == null || d.startAt is number);
+    }
+    match /events/{eventId} {
+      allow get, list: if signedIn();
+      allow create: if isCoach(request.resource.data.boxId) && validEvent(request.resource.data)
+        && request.resource.data.count == 0 && request.resource.data.status == 'open'
+        && request.resource.data.createdBy == request.auth.uid;
+      allow delete: if isCoach(resource.data.boxId) && resource.data.count == 0;
+      // coach: muda tudo menos o box e o número de inscritos (que só desce quando ele tira alguém)
+      allow update: if (isCoach(resource.data.boxId) && validEvent(request.resource.data)
+          && request.resource.data.boxId == resource.data.boxId
+          && (request.resource.data.count == resource.data.count || request.resource.data.count == resource.data.count - 1))
+        // aluno: só +1 ao se inscrever (com vaga) e −1 ao cancelar, junto com a própria inscrição
+        || (member() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['count'])
+          && ((request.resource.data.count == resource.data.count + 1 && request.resource.data.count <= resource.data.capacity
+               && resource.data.status == 'open'
+               && !exists(entryPath(eventId, request.auth.uid)) && existsAfter(entryPath(eventId, request.auth.uid)))
+            || (request.resource.data.count == resource.data.count - 1 && resource.data.status == 'open'
+               && exists(entryPath(eventId, request.auth.uid)) && !existsAfter(entryPath(eventId, request.auth.uid)))));
+
+      function validEntry(d) {
+        return d.keys().hasOnly(['uid', 'name', 'vest', 'plan']) && d.uid == request.auth.uid
+          && str(d.name, 40) && d.name.size() > 0 && d.vest is bool
+          && (d.vest == false || get(eventPath(eventId)).data.vest == true)
+          && (d.plan == null || (get(eventPath(eventId)).data.partition == true && d.plan is map
+              && d.plan.keys().hasOnly(['pu', 'ps', 'sq'])
+              && d.plan.pu is int && d.plan.pu >= 1 && d.plan.pu <= 100
+              && d.plan.ps is int && d.plan.ps >= 1 && d.plan.ps <= 200
+              && d.plan.sq is int && d.plan.sq >= 1 && d.plan.sq <= 300));
+      }
+      match /entries/{who} {
+        allow get, list: if signedIn();
+        allow create: if own(who) && validEntry(request.resource.data)
+          && getAfter(eventPath(eventId)).data.count == get(eventPath(eventId)).data.count + 1;
+        allow update: if own(who) && validEntry(request.resource.data) && get(eventPath(eventId)).data.status == 'open';
+        allow delete: if (own(who) || isCoach(get(eventPath(eventId)).data.boxId))
+          && getAfter(eventPath(eventId)).data.count == get(eventPath(eventId)).data.count - 1;
+      }
+      match /progress/{who} {
+        allow get, list: if signedIn();
+        allow create, update: if own(who) && exists(entryPath(eventId, who))
+          && get(eventPath(eventId)).data.status in ['live', 'done']
+          && request.resource.data.uid == who && str(request.resource.data.name, 40);
+        allow delete: if isCoach(get(eventPath(eventId)).data.boxId);
+      }
+    }
+    match /users/{uid}/myEvents/{eventId} {
+      allow get, list, create, update, delete: if own(uid);
+    }
+
     // ---------- avaliações e sugestões (só enviar; ninguém lê pelo app) ----------
     match /feedback/{id} {
       allow create: if member()

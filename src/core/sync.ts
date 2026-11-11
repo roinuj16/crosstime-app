@@ -20,12 +20,12 @@ export interface SyncSession {
 export interface SyncWorkout { id: string; name: string; mode: Mode; config: AnyConfig; example?: boolean; wod?: string }
 
 export interface TimerSnapshot { v: 1; mode: Mode; activeName: string | null; configs: ModeConfigs; saved: SyncWorkout[]; session: SyncSession | null }
-export interface BrandSnapshot { v: 1; boxName: string; logo: string; wods: Wods; coach: string; colors: ColorScheme; timeFormat: TimeFormat; /** idioma do celular do coach (a TV usa o mesmo) */ lang?: 'pt' | 'en' }
+export interface BrandSnapshot { v: 1; boxName: string; logo: string; wods: Wods; coach: string; colors: ColorScheme; timeFormat: TimeFormat; /** idioma do celular do coach (a TV usa o mesmo) */ lang?: 'pt' | 'en'; /** treino especial na TV ('' = timer) */ eventId?: string }
 
 /** O pedaço do estado do app que participa da sincronização. */
 export interface SyncSource {
   mode: Mode; activeName: string | null; configs: ModeConfigs; saved: SyncWorkout[]; session: SyncSession | null;
-  colors: ColorScheme; settings: { tvBoxName: string; tvLogo: string; tvWods: Wods; tvCoachName: string; timeFormat: TimeFormat; language?: 'auto' | 'pt' | 'en' };
+  colors: ColorScheme; settings: { tvBoxName: string; tvLogo: string; tvWods: Wods; tvCoachName: string; timeFormat: TimeFormat; language?: 'auto' | 'pt' | 'en'; tvEventId?: string };
 }
 
 const shift = (t: number | null, d: number) => (t == null ? null : Math.round(t + d));
@@ -44,7 +44,7 @@ export function timerSnapshot(s: SyncSource, offset: number): TimerSnapshot {
 
 /** `lang`: o idioma que este aparelho está mostrando (o 'auto' já resolvido pelo idioma do aparelho). */
 export function brandSnapshot(s: SyncSource, lang?: 'pt' | 'en'): BrandSnapshot {
-  return clean({ v: 1, lang, boxName: s.settings.tvBoxName, logo: s.settings.tvLogo, wods: compactWods(s.settings.tvWods), coach: s.settings.tvCoachName ?? '', colors: s.colors, timeFormat: s.settings.timeFormat });
+  return clean({ v: 1, lang, boxName: s.settings.tvBoxName, logo: s.settings.tvLogo, wods: compactWods(s.settings.tvWods), coach: s.settings.tvCoachName ?? '', eventId: s.settings.tvEventId ?? '', colors: s.colors, timeFormat: s.settings.timeFormat });
 }
 
 /**
@@ -56,7 +56,7 @@ export function applyBrand(b: Partial<BrandSnapshot>, s: SyncSource, withLang = 
     colors: b.colors ?? s.colors,
     settings: {
       ...s.settings,
-      ...(withLang && b.lang ? { language: b.lang } : {}), tvBoxName: b.boxName ?? '', tvLogo: b.logo ?? '', tvWods: compactWods(b.wods), tvCoachName: b.coach ?? '',
+      ...(withLang && b.lang ? { language: b.lang } : {}), tvBoxName: b.boxName ?? '', tvLogo: b.logo ?? '', tvWods: compactWods(b.wods), tvCoachName: b.coach ?? '', tvEventId: b.eventId ?? '',
       timeFormat: b.timeFormat ?? s.settings.timeFormat,
     },
   };
@@ -72,7 +72,7 @@ export function mergeBrand(mine: BrandSnapshot, room: Partial<BrandSnapshot> | n
   const pick = (a: string, b: string | undefined) => (a.trim() ? a : b ?? '');
   const wods: Wods = {};
   for (const m of WOD_MODES) { const w = pick(mine.wods?.[m] ?? '', room.wods?.[m]); if (w) wods[m] = w; }
-  return { ...mine, boxName: pick(mine.boxName, room.boxName), logo: pick(mine.logo, room.logo), wods, coach: pick(mine.coach, room.coach) };
+  return { ...mine, boxName: pick(mine.boxName, room.boxName), logo: pick(mine.logo, room.logo), wods, coach: pick(mine.coach, room.coach), eventId: pick(mine.eventId ?? '', room.eventId) };
 }
 
 /** O coach dá sinal de vida a cada HEARTBEAT_MS; a TV o considera fora depois de COACH_STALE_MS sem sinal. */

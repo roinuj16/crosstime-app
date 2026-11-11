@@ -8,6 +8,7 @@ import { isEmail } from '@/core/account';
 import { useStrings } from '@/hooks/useStrings';
 import { approveRemote, readConfirm, signInHere, type ConfirmInfo } from '@/services/account';
 import { landingLink } from '@/services/landing';
+import { takeAfterLogin } from '@/services/nav';
 import { LED, UI } from '@/theme/palette';
 
 type View_ = ConfirmInfo | { kind: 'checking' } | { kind: 'approved' } | { kind: 'denied' } | { kind: 'error' };
@@ -30,7 +31,7 @@ export default function ConfirmScreen() {
 
   useEffect(() => {
     readConfirm(href)
-      .then((info) => { setView(info); if (info.kind === 'signedInHere') router.replace('/'); })
+      .then((info) => { setView(info); if (info.kind === 'signedInHere') router.replace(takeAfterLogin() as never); })
       .catch(() => setView({ kind: 'noRequest' }));
   }, [href]);
 
@@ -38,7 +39,7 @@ export default function ConfirmScreen() {
     setBusy(true);
     fn().then(after).catch(() => setView({ kind: 'error' })).finally(() => setBusy(false));
   };
-  const here = (to: string) => run(() => signInHere(to, href), () => router.replace('/'));
+  const here = (to: string) => run(() => signInHere(to, href), () => router.replace(takeAfterLogin() as never));
 
   const title = (text: string) => <LedText size={30} trim="label" color={UI.text} tracking={1} style={{ textAlign: 'center' }}>{text.toUpperCase()}</LedText>;
   const body = (text: string) => <Text style={s.body}>{text}</Text>;

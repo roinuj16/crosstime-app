@@ -11,7 +11,8 @@ export default function SignupScreen() {
   const { t } = useStrings();
   const P = t.profile;
   const f = useProfileForm();
-  const submit = async () => { if (await f.save()) router.replace('/'); };
+  // salvou: o AccountGate leva para o timer (ou para o link que a pessoa abriu antes de entrar)
+  const submit = async () => { await f.save(); };
   return (
     <SheetTemplate title={P.signupTitle} keyboard right={<Button label={P.save} kind="primary" onPress={submit} disabled={f.busy} />}>
       <Note variant="help">{P.signupIntro}</Note>

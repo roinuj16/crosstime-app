@@ -80,3 +80,17 @@ Fica no plano grátis (Spark). Não precisa de cartão.
 ícone da tela de início, app do Gmail, computador), a página pergunta "foi você?", mostra o
 código de 2 dígitos que também aparece no app que espera, e grava o link no pedido; o app que
 espera lê e entra com ele. O link só pode ser gravado uma vez e o id só vai no e-mail.
+
+## Treinos especiais (Murph)
+
+Ficam no **Firestore**, com as regras de `firestore.rules` (seção "treinos especiais"). Depois
+de atualizar o código, cole o `firestore.rules` inteiro de novo em Firestore → Regras → Publicar.
+
+- `boxes`: o box do coach (criado na primeira vez em Ajustes → Treinos especiais).
+- `events`: cada Murph (data, tempo limite, vagas, quebras, colete, situação, hora do start).
+- `events/<id>/entries`: inscritos (nome na TV, colete, plano de quebras). As vagas são
+  garantidas pelas regras: a inscrição soma 1 em `count` e não passa de `capacity`.
+- `events/<id>/progress`: a contagem de cada aluno, ao vivo (a TV lê daqui).
+- `users/<uid>/myEvents`: atalho para "Minhas inscrições".
+
+Não precisa criar índice. O Realtime Database não muda (o treino vai para a TV junto com a marca).

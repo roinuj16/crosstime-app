@@ -87,6 +87,30 @@ export interface Strings {
     message: string; messagePh: string; context: string; send: string; sent: string; sentBody: string; error: string;
     prompt: string; promptButton: string;
   };
+  /** treinos especiais (Murph): coach cria, aluno se inscreve, conta e a TV mostra todos */
+  events: {
+    title: string; settingsRow: string; settingsHint: string; mine: string; mineEmpty: string; ofBox: string;
+    boxTitle: string; boxIntro: string; boxName: string; boxCity: string; boxCreate: string;
+    newMurph: string; noEvents: string; murphDesc: string; name: string; date: string; datePh: string; time: string; timePh: string;
+    cap: string; capHint: string; spots: string; partition: string; partitionHint: string; vest: string; vestHint: string;
+    create: string; badDate: string; error: string; min: (n: number) => string;
+    status: { open: string; live: string; done: string };
+    registered: (n: number, cap: number) => string; spotsLeft: (n: number) => string; full: string;
+    link: string; share: string; shareMsg: (title: string, url: string) => string; copied: string;
+    entries: string; noEntries: string; remove: string; removeAsk: (name: string) => string;
+    showTv: string; hideTv: string; onTv: string; tvHint: string;
+    start: string; startAsk: string; restart: string; restartAsk: string; end: string; endAsk: string; delete: string; deleteAsk: string;
+    ranking: string; withVest: string; noPartition: string; yesPartition: string;
+    join: string; joinTitle: string; nameOnTv: string; nameOnTvHint: string; vestAsk: string; vestAskHint: string;
+    plan: string; planHint: string; planNone: string; planR20: string; planR10: string; planCustom: string; setOf: string;
+    planSummary: (sets: number, size: number, last: number) => string; planOrder: string; planNoBreak: string;
+    confirm: string; youAreIn: string; youAreInHint: string; editPlan: string; savePlan: string; cancel: string; cancelAsk: string;
+    started: string; notFound: string; closed: string; signupNote: string;
+    my: string; stage: (n: number, of: number) => string; now: string; doneTag: string; run: string; runDone: string;
+    pu: string; ps: string; sq: string; set: string; total: (done: number, of: number) => string; left: (n: number) => string;
+    undo: string; skipTo: (move: string) => string; quit: string; quitAsk: string; finished: string; timeCap: string; quitTag: string;
+    waiting: string; waitingHint: string; tvWaitingHint: string; startsIn: string; limit: (t: string) => string; reps: string; result: string; yourTime: string; yourReps: string;
+  };
   /** tela Coach (nome do coach e o que aparece na TV) */
   coach: { title: string; hint: string; name: string; nameHint: string; namePh: string; tv: string; onTv: (name: string) => string };
   privacy: { banner: string; accept: string; decline: string; policy: string; toggle: string; toggleHint: string; title: string };
@@ -314,6 +338,48 @@ const pt: Strings = {
     context: 'Vai junto, para ajudar a entender: a tela, a versão do app, o aparelho e o modo do timer. Nada do que você não escreveu aqui.',
     send: 'Enviar', sent: 'Valeu!', sentBody: 'Recebemos sua mensagem.', error: 'Não deu para enviar. Confira a internet e tente de novo.',
     prompt: 'Como foi o treino? Conte o que achou do CronoBox.', promptButton: 'Avaliar',
+  },
+  events: {
+    title: 'Treinos especiais', settingsRow: 'Treinos especiais', settingsHint: 'Murph do box: inscrição, contagem e TV ao vivo',
+    mine: 'Minhas inscrições', mineEmpty: 'Quando o coach mandar o link de um treino especial, ele aparece aqui.', ofBox: 'Do seu box',
+    boxTitle: 'Seu box', boxIntro: 'Os treinos especiais ficam no box. Confira o nome e crie o box para começar.',
+    boxName: 'Nome do box', boxCity: 'Cidade', boxCreate: 'Criar o box',
+    newMurph: 'Novo Murph', noEvents: 'Nenhum treino especial ainda.',
+    murphDesc: '1 milha de corrida · 100 pull-ups · 200 push-ups · 300 air squats · 1 milha de corrida.',
+    name: 'Nome do treino', date: 'Data', datePh: 'dd/mm/aaaa', time: 'Hora', timePh: 'hh:mm',
+    cap: 'Tempo limite', capHint: 'Quem não terminar fica com o que fez até aqui.', spots: 'Vagas',
+    partition: 'Permitir quebras', partitionHint: 'O aluno pode dividir pull-ups, push-ups e air squats em séries (ex.: 20 rodadas de 5-10-15).',
+    vest: 'Opção de colete', vestHint: 'O aluno marca na inscrição se vai fazer com colete (20 lb / 9 kg).',
+    create: 'Criar', badDate: 'Confira a data (dd/mm/aaaa) e a hora (hh:mm).', error: 'Não deu certo. Confira a internet e tente de novo.',
+    min: (n) => `${n} min`,
+    status: { open: 'Inscrições abertas', live: 'Valendo', done: 'Encerrado' },
+    registered: (n, cap) => `${n}/${cap} inscritos`, spotsLeft: (n) => (n === 1 ? '1 vaga' : `${n} vagas`), full: 'Esgotado',
+    link: 'Link de inscrição', share: 'Enviar o link', shareMsg: (title, url) => `Inscrição para o ${title}: ${url}`, copied: 'Link copiado',
+    entries: 'Inscritos', noEntries: 'Ninguém inscrito ainda. Envie o link.', remove: 'Tirar', removeAsk: (name) => `Tirar ${name} e liberar a vaga?`,
+    showTv: 'Mostrar na TV', hideTv: 'Voltar a TV para o timer', onTv: 'Na TV agora', tvHint: 'Conecte este celular à TV (ícone de TV no topo do timer) para mostrar o treino lá.',
+    start: 'Iniciar o Murph', startAsk: 'Começar agora? A TV e os celulares dos alunos fazem a contagem de 10 segundos.',
+    restart: 'Recomeçar', restartAsk: 'Voltar para antes do start e apagar a contagem de todos?',
+    end: 'Encerrar o evento', endAsk: 'Encerrar? Quem ainda não terminou fica com o que fez.',
+    delete: 'Excluir o treino', deleteAsk: 'Excluir este treino especial?',
+    ranking: 'Resultado', withVest: 'colete', noPartition: 'Sem quebras', yesPartition: 'Com quebras',
+    join: 'Quero participar', joinTitle: 'Inscrição', nameOnTv: 'Nome na TV', nameOnTvHint: 'Vem do seu cadastro. Aparece para todos na TV e no resultado.',
+    vestAsk: 'Vou fazer com colete', vestAskHint: '20 lb (9 kg), como o Murph oficial.',
+    plan: 'Como você vai fazer', planHint: 'Escolha como dividir pull-ups, push-ups e air squats. Dá para mudar até o start.',
+    planNone: 'Sem quebra', planR20: '20 × 5-10-15', planR10: '10 × 10-20-30', planCustom: 'Personalizado', setOf: 'Série de',
+    planSummary: (sets, size, last) => (sets === 1 ? `de uma vez (${size})` : last === size ? `${sets} séries de ${size}` : `${sets - 1} séries de ${size} e 1 de ${last}`),
+    planOrder: 'O app alterna pull-up → push-up → air squat e passa sozinho para o próximo quando você fecha a série.',
+    planNoBreak: 'Na ordem: 100 pull-ups, depois 200 push-ups, depois 300 air squats.',
+    confirm: 'Confirmar inscrição', youAreIn: 'Você está inscrito!',
+    youAreInHint: 'No dia, abra este link e deixe a tela aberta: quando o coach der o start, a contagem começa aqui.',
+    editPlan: 'Mudar como vou fazer', savePlan: 'Salvar', cancel: 'Cancelar inscrição', cancelAsk: 'Cancelar a inscrição e liberar a vaga?',
+    started: 'O treino já começou. Inscrições encerradas.', notFound: 'Treino não encontrado. Confira o link.', closed: 'Inscrições encerradas.',
+    signupNote: 'Para se inscrever, entre com seu e-mail.',
+    my: 'Meu Murph', stage: (n, of) => `Etapa ${n} de ${of}`, now: 'Agora', doneTag: 'Feito', run: '1 milha', runDone: 'Terminei a corrida',
+    pu: 'Pull-ups', ps: 'Push-ups', sq: 'Air squats', set: 'série', total: (done, of) => `${done}/${of} no total`, left: (n) => `faltam ${n}`,
+    undo: 'Desfazer', skipTo: (move) => `Pular para ${move}`, quit: 'Encerrar meu treino', quitAsk: 'Encerrar agora? Fica registrado o que você fez até aqui.',
+    finished: 'Treino concluído!', timeCap: 'Tempo esgotado', quitTag: 'Encerrou',
+    waiting: 'Aguardando o start', waitingHint: 'O coach dá o start. Deixe esta tela aberta.', tvWaitingHint: 'O coach dá o start pelo celular (Treinos especiais → Iniciar o Murph).', startsIn: 'Começa em',
+    limit: (t) => `limite ${t}`, reps: 'reps', result: 'Seu resultado', yourTime: 'Seu tempo', yourReps: 'Repetições',
   },
   coach: {
     title: 'Coach', hint: 'Seu nome na TV, a conexão com a TV, o nome do box e o logo',
@@ -581,6 +647,48 @@ const en: Strings = {
     context: 'Sent along to help us understand: the screen, app version, device and timer mode. Nothing you did not write here.',
     send: 'Send', sent: 'Thanks!', sentBody: 'We got your message.', error: 'Could not send. Check the internet and try again.',
     prompt: 'How was the workout? Tell us what you think of CronoBox.', promptButton: 'Rate',
+  },
+  events: {
+    title: 'Special workouts', settingsRow: 'Special workouts', settingsHint: 'Box Murph: sign-up, rep counter and live TV',
+    mine: 'My sign-ups', mineEmpty: 'When your coach sends a special workout link, it shows up here.', ofBox: 'Your box',
+    boxTitle: 'Your box', boxIntro: 'Special workouts belong to the box. Check the name and create the box to start.',
+    boxName: 'Box name', boxCity: 'City', boxCreate: 'Create the box',
+    newMurph: 'New Murph', noEvents: 'No special workouts yet.',
+    murphDesc: '1 mile run · 100 pull-ups · 200 push-ups · 300 air squats · 1 mile run.',
+    name: 'Workout name', date: 'Date', datePh: 'dd/mm/yyyy', time: 'Time', timePh: 'hh:mm',
+    cap: 'Time cap', capHint: 'Whoever does not finish keeps what they did.', spots: 'Spots',
+    partition: 'Allow partitioning', partitionHint: 'Athletes may split pull-ups, push-ups and air squats into sets (e.g. 20 rounds of 5-10-15).',
+    vest: 'Vest option', vestHint: 'Athletes tell at sign-up if they will wear a vest (20 lb / 9 kg).',
+    create: 'Create', badDate: 'Check the date (dd/mm/yyyy) and time (hh:mm).', error: 'Something went wrong. Check the internet and try again.',
+    min: (n) => `${n} min`,
+    status: { open: 'Sign-ups open', live: 'Live', done: 'Finished' },
+    registered: (n, cap) => `${n}/${cap} signed up`, spotsLeft: (n) => (n === 1 ? '1 spot' : `${n} spots`), full: 'Sold out',
+    link: 'Sign-up link', share: 'Send the link', shareMsg: (title, url) => `Sign up for ${title}: ${url}`, copied: 'Link copied',
+    entries: 'Athletes', noEntries: 'Nobody signed up yet. Send the link.', remove: 'Remove', removeAsk: (name) => `Remove ${name} and free the spot?`,
+    showTv: 'Show on TV', hideTv: 'Back to the timer on TV', onTv: 'On TV now', tvHint: 'Connect this phone to the TV (TV icon at the top of the timer) to show the workout there.',
+    start: 'Start the Murph', startAsk: 'Start now? The TV and the athletes\' phones count down 10 seconds.',
+    restart: 'Restart', restartAsk: 'Go back to before the start and erase everyone\'s count?',
+    end: 'End the event', endAsk: 'End it? Whoever has not finished keeps what they did.',
+    delete: 'Delete workout', deleteAsk: 'Delete this special workout?',
+    ranking: 'Results', withVest: 'vest', noPartition: 'No partitioning', yesPartition: 'Partitioning allowed',
+    join: 'I want in', joinTitle: 'Sign-up', nameOnTv: 'Name on the TV', nameOnTvHint: 'From your profile. Everyone sees it on the TV and in the results.',
+    vestAsk: 'I will wear a vest', vestAskHint: '20 lb (9 kg), like the official Murph.',
+    plan: 'How you will do it', planHint: 'Choose how to split pull-ups, push-ups and air squats. You can change it until the start.',
+    planNone: 'No partition', planR20: '20 × 5-10-15', planR10: '10 × 10-20-30', planCustom: 'Custom', setOf: 'Set of',
+    planSummary: (sets, size, last) => (sets === 1 ? `all at once (${size})` : last === size ? `${sets} sets of ${size}` : `${sets - 1} sets of ${size} and 1 of ${last}`),
+    planOrder: 'The app rotates pull-up → push-up → air squat and moves on by itself when you finish a set.',
+    planNoBreak: 'In order: 100 pull-ups, then 200 push-ups, then 300 air squats.',
+    confirm: 'Confirm sign-up', youAreIn: 'You are in!',
+    youAreInHint: 'On the day, open this link and keep the screen on: when the coach starts, counting begins here.',
+    editPlan: 'Change how I will do it', savePlan: 'Save', cancel: 'Cancel sign-up', cancelAsk: 'Cancel the sign-up and free your spot?',
+    started: 'The workout has started. Sign-ups closed.', notFound: 'Workout not found. Check the link.', closed: 'Sign-ups closed.',
+    signupNote: 'Sign in with your email to sign up.',
+    my: 'My Murph', stage: (n, of) => `Stage ${n} of ${of}`, now: 'Now', doneTag: 'Done', run: '1 mile', runDone: 'I finished the run',
+    pu: 'Pull-ups', ps: 'Push-ups', sq: 'Air squats', set: 'set', total: (done, of) => `${done}/${of} total`, left: (n) => `${n} left`,
+    undo: 'Undo', skipTo: (move) => `Skip to ${move}`, quit: 'End my workout', quitAsk: 'End now? What you did so far is recorded.',
+    finished: 'Workout complete!', timeCap: 'Time cap', quitTag: 'Ended',
+    waiting: 'Waiting for the start', waitingHint: 'The coach starts it. Keep this screen on.', tvWaitingHint: 'The coach starts it from the phone (Special workouts → Start the Murph).', startsIn: 'Starts in',
+    limit: (t) => `cap ${t}`, reps: 'reps', result: 'Your result', yourTime: 'Your time', yourReps: 'Reps',
   },
   coach: {
     title: 'Coach', hint: 'Your name on the TV, the TV connection, box name and logo',

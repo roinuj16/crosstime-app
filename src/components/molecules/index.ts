@@ -22,3 +22,4 @@ export { QrCode } from './QrCode';
 export { StepList } from './StepList';
 export { AddressBox } from './AddressBox';
 export { Stars } from './Stars';
+export { EventCard } from './EventCard';

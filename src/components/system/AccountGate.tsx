@@ -2,6 +2,7 @@ import { router, usePathname } from 'expo-router';
 import { useEffect } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { startAccount, useAccount } from '@/services/account';
+import { rememberAfterLogin, takeAfterLogin } from '@/services/nav';
 import { LED, UI } from '@/theme/palette';
 
 /** Telas abertas sem conta: a TV do box (e o que ela usa), a página do link e a privacidade. */
@@ -24,9 +25,9 @@ export function AccountGate() {
 
   useEffect(() => {
     if (status === 'off' || status === 'loading' || open) return;
-    if (status === 'signedOut' && path !== '/login') router.replace('/login');
-    else if (status === 'needsProfile' && path !== '/signup') router.replace('/signup');
-    else if (status === 'ready' && flow) router.replace('/');
+    if (status === 'signedOut' && path !== '/login') { if (!flow) rememberAfterLogin(); router.replace('/login'); }
+    else if (status === 'needsProfile' && path !== '/signup') { if (!flow) rememberAfterLogin(); router.replace('/signup'); }
+    else if (status === 'ready' && flow) router.replace(takeAfterLogin() as never);
   }, [status, path, open, flow]);
 
   const cover = !open && status !== 'off' && (
