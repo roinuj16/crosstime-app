@@ -114,3 +114,22 @@ describe('resultado e ranking', () => {
     expect(formatClock(-3000)).toBe('00:00');
   });
 });
+
+describe('painel: etapas e série atual', () => {
+  const { stageCells, currentSet } = require('@/core/murph') as typeof import('@/core/murph');
+  it('mostra quanto já fez em cada etapa', () => {
+    let s = completeRun(startState(), cindy, 0);
+    for (let i = 0; i < 8; i++) s = addReps(s, cindy, s.setTarget - s.setDone); // 8 séries: 2 rodadas + pull-up e push-up
+    s = addReps(s, cindy, 3); // 3 air squats da série atual
+    const cells = stageCells(s);
+    expect(cells.map((c) => c.state)).toEqual(['done', 'next', 'next', 'now', 'next']);
+    expect(cells.map((c) => c.done)).toEqual([1, 15, 30, 33, 0]);
+  });
+  it('com quebra: série 3/5 da rodada 9/20', () => {
+    let s = completeRun(startState(), cindy, 0);
+    for (let i = 0; i < 24; i++) s = addReps(s, cindy, s.setTarget - s.setDone); // 8 rodadas completas
+    s = addReps(s, cindy, 3);
+    expect(currentSet(s, cindy)).toEqual({ move: 'pu', set: 3, of: 5, round: 9, rounds: 20 });
+    expect(currentSet(s, null)).toBeNull();
+  });
+});

@@ -109,7 +109,7 @@ export interface Strings {
     my: string; stage: (n: number, of: number) => string; now: string; doneTag: string; run: string; runDone: string;
     pu: string; ps: string; sq: string; set: string; total: (done: number, of: number) => string; left: (n: number) => string;
     undo: string; skipTo: (move: string) => string; quit: string; quitAsk: string; finished: string; timeCap: string; quitTag: string;
-    waiting: string; waitingHint: string; tvWaitingHint: string; startsIn: string; limit: (t: string) => string; reps: string; result: string; yourTime: string; yourReps: string;
+    waiting: string; waitingHint: string; tvWaitingHint: string; round: (n: number, of: number) => string; short: Record<'run1' | 'pu' | 'ps' | 'sq' | 'run2', string>; startsIn: string; limit: (t: string) => string; reps: string; result: string; yourTime: string; yourReps: string;
   };
   /** tela Coach (nome do coach e o que aparece na TV) */
   coach: { title: string; hint: string; name: string; nameHint: string; namePh: string; tv: string; onTv: (name: string) => string };
@@ -378,7 +378,8 @@ const pt: Strings = {
     pu: 'Pull-ups', ps: 'Push-ups', sq: 'Air squats', set: 'série', total: (done, of) => `${done}/${of} no total`, left: (n) => `faltam ${n}`,
     undo: 'Desfazer', skipTo: (move) => `Pular para ${move}`, quit: 'Encerrar meu treino', quitAsk: 'Encerrar agora? Fica registrado o que você fez até aqui.',
     finished: 'Treino concluído!', timeCap: 'Tempo esgotado', quitTag: 'Encerrou',
-    waiting: 'Aguardando o start', waitingHint: 'O coach dá o start. Deixe esta tela aberta.', tvWaitingHint: 'O coach dá o start pelo celular (Treinos especiais → Iniciar o Murph).', startsIn: 'Começa em',
+    waiting: 'Aguardando o start', waitingHint: 'O coach dá o start. Deixe esta tela aberta.', tvWaitingHint: 'O coach dá o start pelo celular (Treinos especiais → Iniciar o Murph).',
+    round: (n, of) => `rodada ${n}/${of}`, short: { run1: 'Corrida', pu: 'Pull-ups', ps: 'Push-ups', sq: 'Squats', run2: 'Corrida' }, startsIn: 'Começa em',
     limit: (t) => `limite ${t}`, reps: 'reps', result: 'Seu resultado', yourTime: 'Seu tempo', yourReps: 'Repetições',
   },
   coach: {
@@ -687,7 +688,8 @@ const en: Strings = {
     pu: 'Pull-ups', ps: 'Push-ups', sq: 'Air squats', set: 'set', total: (done, of) => `${done}/${of} total`, left: (n) => `${n} left`,
     undo: 'Undo', skipTo: (move) => `Skip to ${move}`, quit: 'End my workout', quitAsk: 'End now? What you did so far is recorded.',
     finished: 'Workout complete!', timeCap: 'Time cap', quitTag: 'Ended',
-    waiting: 'Waiting for the start', waitingHint: 'The coach starts it. Keep this screen on.', tvWaitingHint: 'The coach starts it from the phone (Special workouts → Start the Murph).', startsIn: 'Starts in',
+    waiting: 'Waiting for the start', waitingHint: 'The coach starts it. Keep this screen on.', tvWaitingHint: 'The coach starts it from the phone (Special workouts → Start the Murph).',
+    round: (n, of) => `round ${n}/${of}`, short: { run1: 'Run', pu: 'Pull-ups', ps: 'Push-ups', sq: 'Squats', run2: 'Run' }, startsIn: 'Starts in',
     limit: (t) => `cap ${t}`, reps: 'reps', result: 'Your result', yourTime: 'Your time', yourReps: 'Reps',
   },
   coach: {

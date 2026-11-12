@@ -6,7 +6,6 @@ import { EventRanking } from '@/components/organisms';
 import { SheetTemplate } from '@/components/templates';
 import { webBase } from '@/config/app';
 import { displayName, formatEventDate } from '@/core/event';
-import { ranked } from '@/core/murph';
 import { useEventData } from '@/hooks/useEventData';
 import { useEventText } from '@/hooks/useEventText';
 import { useStrings } from '@/hooks/useStrings';
@@ -24,7 +23,7 @@ import { UI } from '@/theme/palette';
  */
 export default function EventAdminScreen() {
   const { t, lang } = useStrings();
-  const { E, planText, statusText, progressOf } = useEventText();
+  const { E, planText, panelRows } = useEventText();
   const { id } = useLocalSearchParams<{ id?: string }>();
   const { event, entries, progress, loading } = useEventData(id, { entries: true, progress: true });
   const paired = useApp((s) => s.settings.pairedCode);
@@ -43,9 +42,8 @@ export default function EventAdminScreen() {
   };
   const capMs = event.timeCapMin * 60_000;
   const byUid = new Map(entries.map((e) => [e.uid, e]));
-  const rows = ranked(progress).map((p) => ({
-    key: p.uid, name: p.name, vest: p.vest, status: statusText(p, capMs), progress: progressOf(p), done: p.phase === 'done' && !p.quit,
-  }));
+  // painel: cada aluno com a série/rodada atual e quanto já fez em cada etapa
+  const rows = panelRows(progress, entries, capMs, true).filter((r) => progress.some((p) => p.uid === r.key));
 
   return (
     <SheetTemplate title={event.title} onBack={back} right={<Button label={t.settings.done} kind="primary" onPress={back} />}>

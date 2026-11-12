@@ -6,7 +6,7 @@ import { Row, Toggle } from '@/components/molecules';
 import { EventRanking, FormError, MurphCounter, PlanPicker, type CounterStage } from '@/components/organisms';
 import { SheetTemplate } from '@/components/templates';
 import { canRegister, countdown, displayName, formatEventDate, spotsLeft } from '@/core/event';
-import { canSkip, eventClock, finished, formatClock, MOVES, MURPH_TOTAL, nextMoveAfterSkip, ranked, setsPerMove, totalReps, type MurphPlan } from '@/core/murph';
+import { canSkip, eventClock, finished, formatClock, MOVES, MURPH_TOTAL, nextMoveAfterSkip, setsPerMove, totalReps, type MurphPlan } from '@/core/murph';
 import { useEventData, useNow } from '@/hooks/useEventData';
 import { useEventText } from '@/hooks/useEventText';
 import { useMurphRun } from '@/hooks/useMurphRun';
@@ -24,10 +24,10 @@ import { LED, UI } from '@/theme/palette';
  */
 export default function MurphScreen() {
   const { t, lang } = useStrings();
-  const { E, moveName, statusText, progressOf } = useEventText();
+  const { E, moveName, panelRows } = useEventText();
   const { id } = useLocalSearchParams<{ id?: string }>();
   const acc = useAccount();
-  const { event, mine, progress, loading } = useEventData(id, { mine: true, progress: true });
+  const { event, mine, progress, entries, loading } = useEventData(id, { mine: true, progress: true, entries: true });
   const now = useNow(250);
   const clock = event ? eventClock(event.startAt, now) : null;
   const run = useMurphRun(event, mine, clock);
@@ -72,9 +72,7 @@ export default function MurphScreen() {
     </View>
   );
 
-  const rankRows = ranked(progress).map((p) => ({
-    key: p.uid, name: p.name, vest: p.vest, status: statusText(p, event.timeCapMin * 60_000), progress: progressOf(p), done: finished(p), dim: false,
-  }));
+  const rankRows = panelRows(progress, entries, event.timeCapMin * 60_000, true).filter((r) => progress.some((p) => p.uid === r.key));
 
   // ---------- ainda não inscrito ----------
   if (!mine) {

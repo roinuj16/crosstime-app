@@ -4,12 +4,17 @@ import { LedText } from '@/components/atoms';
 import { LED, UI } from '@/theme/palette';
 import { TV } from '@/theme/tv';
 
-export interface TvEventRow { key: string; name: string; vest: boolean; status: string; progress: number; done: boolean; pos: number | null }
+export interface TvEventCell { label: string; value: string; frac: number; state: 'done' | 'now' | 'next' }
+export interface TvEventRow {
+  key: string; name: string; vest: boolean; status: string; detail: string; done: boolean; pos: number | null; cells: TvEventCell[];
+}
+
+const cellColor = (c: TvEventCell) => (c.state === 'done' ? LED.verde : LED.ambar);
 
 /**
- * TV do treino especial: todos os alunos com a etapa atual e a barra de progresso, ao vivo.
- * Até 8 alunos numa coluna, até 20 em duas, depois em três; a letra se ajusta à altura.
- * `big`: número grande no meio (contagem regressiva); `banner`: aviso no topo da lista.
+ * TV do treino especial: cada aluno com a etapa atual (e a série/rodada, se quebrou) e uma
+ * barra por etapa mostrando quanto já fez em cada uma. Até 8 alunos numa coluna, até 20 em
+ * duas, depois em três; a letra se ajusta à altura e, sem espaço, as etapas ficam só com a barra.
  */
 export function TvEventBoard({ rows, u, big, banner, vestLabel }: { rows: TvEventRow[]; u: number; big?: string | null; banner?: string | null; vestLabel: string }) {
   const [box, setBox] = useState({ w: 0, h: 0 });
@@ -17,8 +22,10 @@ export function TvEventBoard({ rows, u, big, banner, vestLabel }: { rows: TvEven
   const n = Math.max(1, rows.length);
   const cols = n <= 8 ? 1 : n <= 20 ? 2 : 3;
   const perCol = Math.ceil(n / cols);
-  const rowH = box.h ? Math.min(92 * u, box.h / perCol) : 60 * u;
-  const font = Math.max(14 * u, Math.min(38 * u, rowH * 0.42));
+  const rowH = box.h ? Math.min(110 * u, box.h / perCol) : 60 * u;
+  const roomy = rowH >= 74 * u; // espaço para o nome e o número de cada etapa
+  const font = Math.max(14 * u, Math.min(36 * u, rowH * (roomy ? 0.3 : 0.42)));
+  const small = Math.max(11 * u, font * 0.5);
   const columns = Array.from({ length: cols }, (_, c) => rows.slice(c * perCol, (c + 1) * perCol));
 
   if (big) {
@@ -35,17 +42,32 @@ export function TvEventBoard({ rows, u, big, banner, vestLabel }: { rows: TvEven
         {columns.map((col, c) => (
           <View key={c} style={s.col}>
             {col.map((r) => (
-              <View key={r.key} style={[s.row, { height: rowH, gap: 4 * u, borderBottomWidth: Math.max(1, u) }]}>
+              <View key={r.key} style={[s.row, { height: rowH, gap: 5 * u, borderBottomWidth: Math.max(1, u) }]}>
                 <View style={[s.line, { gap: 12 * u }]}>
                   <LedText size={font * 0.9} tabular trim="digits" color={r.done && r.pos != null && r.pos <= 3 ? LED.ambar : UI.muted} style={{ width: font * 1.3 }}>
                     {r.pos != null ? String(r.pos) : ''}
                   </LedText>
                   <LedText size={font} trim="label" color={UI.text} numberOfLines={1} style={s.name}>{r.name.toUpperCase()}</LedText>
                   {r.vest && <LedText size={font * 0.55} trim="label" tracking={u} color={LED.ambar}>{vestLabel.toUpperCase()}</LedText>}
-                  <LedText size={font * 0.85} tabular trim="label" color={r.done ? LED.verde : UI.text} numberOfLines={1} style={s.status}>{r.status.toUpperCase()}</LedText>
+                  <View style={[s.right, { gap: 10 * u }]}>
+                    {!!r.detail && <LedText size={font * 0.6} trim="label" tracking={u} color={LED.ambar} numberOfLines={1}>{r.detail.toUpperCase()}</LedText>}
+                    <LedText size={font * 0.85} tabular trim="label" color={r.done ? LED.verde : UI.text} numberOfLines={1}>{r.status.toUpperCase()}</LedText>
+                  </View>
                 </View>
-                <View style={[s.track, { height: Math.max(4, 8 * u), borderRadius: 4 * u, marginLeft: font * 1.3 + 12 * u }]}>
-                  <View style={{ width: `${Math.round(r.progress * 100)}%`, height: '100%', backgroundColor: r.done ? LED.verde : LED.ambar }} />
+                <View style={[s.cells, { gap: 6 * u, marginLeft: font * 1.3 + 12 * u }]}>
+                  {r.cells.map((cell, i) => (
+                    <View key={i} style={[s.cell, { gap: 2 * u }]}>
+                      {roomy && (
+                        <View style={s.cellText}>
+                          <LedText size={small} trim="label" color={cell.state === 'now' ? UI.text : UI.muted} numberOfLines={1} style={s.shrink}>{cell.label.toUpperCase()}</LedText>
+                          <LedText size={small} tabular trim="label" color={cell.state === 'done' ? LED.verde : cell.state === 'now' ? UI.text : UI.muted}>{cell.value}</LedText>
+                        </View>
+                      )}
+                      <View style={[s.track, { height: Math.max(4, (cell.state === 'now' ? 9 : 6) * u), borderRadius: 4 * u }]}>
+                        <View style={{ width: `${Math.round(cell.frac * 100)}%`, height: '100%', backgroundColor: cellColor(cell) }} />
+                      </View>
+                    </View>
+                  ))}
                 </View>
               </View>
             ))}
@@ -64,6 +86,10 @@ const s = StyleSheet.create({
   row: { justifyContent: 'center', borderBottomColor: TV.line },
   line: { flexDirection: 'row', alignItems: 'baseline' },
   name: { flexShrink: 1 },
-  status: { marginLeft: 'auto' },
-  track: { backgroundColor: TV.track, overflow: 'hidden' },
+  right: { marginLeft: 'auto', flexDirection: 'row', alignItems: 'baseline' },
+  cells: { flexDirection: 'row' },
+  cell: { flex: 1, minWidth: 0 },
+  cellText: { flexDirection: 'row', justifyContent: 'space-between', gap: 4 },
+  shrink: { flexShrink: 1 },
+  track: { backgroundColor: TV.track, overflow: 'hidden', justifyContent: 'center' },
 });

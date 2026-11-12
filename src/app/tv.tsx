@@ -9,8 +9,8 @@ import * as Engine from '@/core/engine';
 import { MODES } from '@/core/engine';
 import { formatRoomCode, newRoomCode } from '@/core/sync';
 import { tvBoard } from '@/core/tvBoard';
-import { countdown, displayName } from '@/core/event';
-import { eventClock, finished, formatClock, ranked } from '@/core/murph';
+import { countdown } from '@/core/event';
+import { eventClock, formatClock } from '@/core/murph';
 import { useEventData, useNow } from '@/hooks/useEventData';
 import { useEventText } from '@/hooks/useEventText';
 import { wodFor } from '@/core/wod';
@@ -259,7 +259,7 @@ export default function TvScreen() {
 
 /** TV do treino especial: relógio do evento e todos os alunos ao vivo. */
 function TvEventView({ id, u, logo, box, right, overlay }: { id: string; u: number; logo: string; box: string; right: ReactNode; overlay: ReactNode }) {
-  const { E, statusText, progressOf } = useEventText();
+  const { E, panelRows } = useEventText();
   const { event, entries, progress } = useEventData(id, { entries: true, progress: true });
   const now = useNow(500);
   const clock = event ? eventClock(event.startAt, now) : null;
@@ -273,13 +273,9 @@ function TvEventView({ id, u, logo, box, right, overlay }: { id: string; u: numb
     </View>
   ) : right;
 
-  // quem tem contagem aparece com o progresso; inscritos sem contagem entram zerados
-  const byUid = new Map(progress.map((p) => [p.uid, p]));
-  const waiting = entries.filter((e) => !byUid.has(e.uid)).map((e) => ({ uid: e.uid, name: displayName(e.name), vest: e.vest }));
-  const rows = [
-    ...ranked(progress).map((p, i) => ({ key: p.uid, name: p.name, vest: p.vest, status: statusText(p, capMs), progress: progressOf(p), done: finished(p), pos: event?.status === 'open' ? null : i + 1 })),
-    ...waiting.map((w) => ({ key: w.uid, name: w.name, vest: w.vest, status: event?.status === 'open' ? '' : E.run, progress: 0, done: false, pos: null })),
-  ];
+  // cada aluno com quanto já fez em cada etapa; inscritos sem contagem entram zerados
+  const started = event?.status === 'live' || event?.status === 'done';
+  const rows = panelRows(progress, entries, capMs, started).map((r, i) => ({ ...r, pos: started && i < progress.length ? i + 1 : null }));
   const big = event?.status === 'live' && clock != null && clock < 0 ? String(countdown(clock)) : null;
   const banner = !event ? E.notFound : event.status === 'open' ? `${E.waiting} · ${E.registered(event.count, event.capacity)}` : event.status === 'done' ? E.ranking : null;
 

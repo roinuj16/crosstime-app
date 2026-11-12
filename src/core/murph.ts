@@ -172,3 +172,35 @@ export const planShort = (plan: MurphPlan) => (plan ? `${plan.pu}-${plan.ps}-${p
 
 /** Ordena para o ranking (melhor primeiro). */
 export const ranked = <T extends MurphState>(list: T[]) => [...list].sort((a, b) => rankScore(a) - rankScore(b));
+
+// ---------------------------------------------------------------------------------------------
+// Painel (TV e resultado): quanto já foi feito em cada etapa e a série atual
+// ---------------------------------------------------------------------------------------------
+
+export type StageKey = 'run1' | Move | 'run2';
+export const STAGES: StageKey[] = ['run1', 'pu', 'ps', 'sq', 'run2'];
+export interface StageCell { key: StageKey; done: number; total: number; state: 'done' | 'now' | 'next' }
+
+/** As 5 etapas com o que já foi feito em cada uma (corrida: 0 ou 1). */
+export function stageCells(s: MurphState): StageCell[] {
+  const ended = s.phase === 'done' && !s.quit;
+  return STAGES.map((key) => {
+    if (key === 'run1') return { key, done: s.phase === 'run1' ? 0 : 1, total: 1, state: s.phase === 'run1' ? 'now' : 'done' };
+    if (key === 'run2') return { key, done: ended ? 1 : 0, total: 1, state: ended ? 'done' : s.phase === 'run2' ? 'now' : 'next' };
+    const total = MURPH_TOTAL[key];
+    const done = Math.max(0, Math.min(total, s.done[key]));
+    return { key, done, total, state: done >= total ? 'done' : s.phase === 'block' && s.cur === key ? 'now' : 'next' };
+  });
+}
+
+/**
+ * Com quebra, a série atual e a rodada daquele movimento. Ex.: 5 pull-ups por série,
+ * 42 feitos e 2 na série atual → série 2/5, rodada 9/20.
+ */
+export function currentSet(s: MurphState, plan: MurphPlan): { move: Move; set: number; of: number; round: number; rounds: number } | null {
+  if (!plan || s.phase !== 'block' || !s.cur) return null;
+  const size = plan[s.cur];
+  const rounds = Math.ceil(MURPH_TOTAL[s.cur] / size);
+  const round = Math.max(1, Math.min(rounds, Math.floor((s.done[s.cur] - s.setDone) / size) + 1));
+  return { move: s.cur, set: s.setDone, of: s.setTarget, round, rounds };
+}
